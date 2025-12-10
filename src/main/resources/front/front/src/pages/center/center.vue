@@ -11,15 +11,15 @@
         <div :style='{"marginBottom":"15px","cursor":"pointer"}' @click="avatarClickTip">
           <img
               v-if="sessionForm.touxiang"
-              :src="baseUrl + sessionForm.touxiang"
+              :src="sessionForm.touxiang"
               :style='{"width":"100px","height":"100px","borderRadius":"50%","border":"2px solid #fff","boxShadow":"0 2px 8px rgba(0,0,0,0.1)"}'
           />
-          <!-- 无头像时显示文字占位符 -->
+          <!-- 无头像时显示文字占位符（修复标签语法错误） -->
           <div
               v-else
               :style='{"width":"100px","height":"100px","borderRadius":"50%","background":"#e6f0ff","color":"#409eff","fontSize":"36px","lineHeight":"100px","display":"inline-block","textAlign":"center"}'
           >
-            <<i class="el-icon-user"></</i>
+            <i class="el-icon-user"></i>
           </div>
           <!-- 隐藏的上传组件：手动控制上传 -->
           <el-upload
@@ -333,10 +333,15 @@ export default {
     this.getSession();
   },
   methods: {
+    // 1. getSession方法中初始化头像
     getSession() {
       this.$http.get(this.userTableName + '/session', { emulateJSON: true }).then(res => {
         if (res.data && res.data.code === 0) {
           this.sessionForm = res.data.data;
+          // 修改：拼接getAvatar接口地址
+          if (this.sessionForm.touxiang) {
+            this.sessionForm.touxiang = this.baseUrl + 'file/getAvatar?fileName=' + this.sessionForm.touxiang;
+          }
         }
       }).catch(() => {
         this.$message.error('获取个人信息失败');
@@ -399,15 +404,19 @@ export default {
     },
     // 触发文件选择框
     triggerAvatarUpload() {
+      // 添加调试日志
+      console.log('触发上传，uploader引用：', this.$refs.avatarUploader);
       if (this.$refs.avatarUploader) {
         const uploader = this.$refs.avatarUploader;
         const fileInput = uploader.$el.querySelector('input[type="file"]');
+        console.log('找到文件输入框：', fileInput);
         if (fileInput) {
           // 清空历史文件
           fileInput.value = '';
           // 绑定change事件
           fileInput.onchange = (e) => {
             const file = e.target.files[0];
+            console.log('选择的文件：', file);
             if (file) {
               this.uploadAvatarFile(file);
             }
@@ -423,35 +432,52 @@ export default {
       }
     },
     // 手动上传头像文件
+    // 2. uploadAvatarFile方法中拼接新头像地址
     uploadAvatarFile(file) {
       const formData = new FormData();
       formData.append('file', file);
-      this.$http.post(this.uploadUrl, formData, {
+      const baseUrl = 'http://localhost:8080/study_room/';
+      const uploadUrl = baseUrl + 'file/upload';
+      console.log('准备上传文件，请求地址：', uploadUrl);
+      console.log('当前baseUrl：', baseUrl);
+      this.$http.post(uploadUrl, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Token: localStorage.getItem('Token')
         }
       }).then(res => {
+        console.log('文件上传响应：', res.data);
         if (res.data && res.data.code === 0) {
-          this.sessionForm.touxiang = 'upload/' + res.data.file;
+          const filePath = res.data.file || res.data.data || res.data.url;
+          if (!filePath) {
+            this.$message.error('后端未返回文件路径');
+            return;
+          }
+          // 修改：拼接getAvatar接口地址
+          const fullAvatarUrl = baseUrl + 'file/getAvatar?fileName=' + filePath;
+          console.log('拼接后的头像地址：', fullAvatarUrl);
+          this.sessionForm.touxiang = fullAvatarUrl;
           // 更新用户头像到数据库
-          this.$http.post(this.userTableName + '/update', {
+          this.$http.post(baseUrl + this.userTableName + '/update', {
             id: this.sessionForm.id,
-            touxiang: this.sessionForm.touxiang
+            touxiang: filePath
           }).then(updateRes => {
+            console.log('头像更新响应：', updateRes.data);
             if (updateRes.data && updateRes.data.code === 0) {
               this.$message.success('头像上传成功');
               this.switchTab('个人信息');
             } else {
-              this.$message.error('头像更新失败，请重试');
+              this.$message.error(updateRes.data?.msg || '头像更新失败，请重试');
             }
-          }).catch(() => {
+          }).catch(err => {
+            console.error('头像更新请求失败：', err);
             this.$message.error('头像更新请求失败');
           });
         } else {
           this.$message.error(res.data?.msg || '头像上传失败');
         }
-      }).catch(() => {
+      }).catch(err => {
+        console.error('文件上传失败：', err);
         this.$message.error('网络异常，上传失败');
       });
     },
@@ -493,6 +519,8 @@ export default {
           this.$message.warning(data?.msg || '暂无取消预约记录');
         }
       }).catch(() => {
+        this.cancelOrderList = [];
+        this.totalPage = 0;
         this.cancelOrderLoading = false;
         this.$message.error('获取取消预约记录失败');
       });

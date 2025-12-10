@@ -10,29 +10,38 @@ import com.interceptor.AuthorizationInterceptor;
 
 @Configuration
 public class InterceptorConfig extends WebMvcConfigurationSupport{
-	
-	@Bean
+
+    @Bean
     public AuthorizationInterceptor getAuthorizationInterceptor() {
         return new AuthorizationInterceptor();
     }
-	
-	@Override
+
+    @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(getAuthorizationInterceptor()).addPathPatterns("/**").excludePathPatterns("/static/**");
+        registry.addInterceptor(getAuthorizationInterceptor())
+                .addPathPatterns("/**")
+                // 修复：使用精确的路径匹配格式，确保拦截器识别排除规则
+                .excludePathPatterns(
+                        "/upload/**",
+                        "/file/upload/**",
+                        "/file/download/**",
+                        "/static/**",
+                        "/resources/**",
+                        "/admin/**",
+                        "/front/**",
+                        "/public/**"
+                );
         super.addInterceptors(registry);
-	}
-	
-	/**
-	 * springboot 2.0配置WebMvcConfigurationSupport之后，会导致默认配置被覆盖，要访问静态资源需要重写addResourceHandlers方法
-	 */
-	@Override
+    }
+
+    @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		registry.addResourceHandler("/**")
-        .addResourceLocations("classpath:/resources/")
-        .addResourceLocations("classpath:/static/")
-        .addResourceLocations("classpath:/admin/")
-        .addResourceLocations("classpath:/front/")
-        .addResourceLocations("classpath:/public/");
-		super.addResourceHandlers(registry);
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/resources/")
+                .addResourceLocations("classpath:/static/")
+                .addResourceLocations("classpath:/admin/")
+                .addResourceLocations("classpath:/front/")
+                .addResourceLocations("classpath:/public/");
+        super.addResourceHandlers(registry);
     }
 }
