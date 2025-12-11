@@ -8,22 +8,37 @@ const menu = {
                 {
                   appFrontIcon: "cuIcon-discover",
                   buttons: ["新增", "查看", "修改", "删除"],
-                  menu: "学生",
+                  menu: "学生信息查询及编辑",
                   menuJump: "列表",
-                  tableName: "xuesheng"
-                }
+                  tableName: "xuesheng_list"
+                },
+                {
+                  appFrontIcon: "cuIcon-discover",
+                  buttons: ["新增", "查看", "修改", "删除"],
+                  menu: "新增学生信息",
+                  menuJump: "列表",
+                  tableName: "xuesheng_add"
+                },
               ],
-              menu: "学生管理"
+              menu: "学生信息管理"
             },
             {
               child: [
                 {
                   appFrontIcon: "cuIcon-goodsnew",
                   buttons: ["新增", "查看", "修改", "删除"],
-                  menu: "自习室",
+                  menu: "自习室查询及编辑",
                   menuJump: "列表",
-                  tableName: "zixishi"
-                }
+                  tableName: "zixishi_list"
+                },
+                {
+                  appFrontIcon: "cuIcon-goodsnew",
+                  buttons: ["新增", "查看", "修改", "删除"],
+                  menu: "新增自习室",
+                  menuJump: "列表",
+                  tableName: "zixishi_add"
+                },
+
               ],
               menu: "自习室管理"
             },
@@ -35,11 +50,18 @@ const menu = {
                   menu: "预约信息",
                   menuJump: "列表",
                   tableName: "yuyuexinxi"
+                },
+                {
+                  appFrontIcon: "cuIcon-send",
+                  buttons: ["查看", "修改", "删除", "审核"],
+                  menu: "取消预约",
+                  menuJump: "列表",
+                  tableName: "quxiaoyuyue"
                 }
               ],
               menu: "预约信息管理"
             },
-            {
+            /*{
               child: [
                 {
                   appFrontIcon: "cuIcon-send",
@@ -50,18 +72,53 @@ const menu = {
                 }
               ],
               menu: "取消预约管理"
+            },*/
+            {
+              child: [
+                {
+                  appFrontIcon: "cuIcon-list",
+                  buttons: ["查看", "审批"],
+                  menu: "黑名单管理",
+                  tableName: "blacklist"
+                }
+                ],
+                menu: "黑名单管理"
+            },
+            {
+              child: [
+                {
+                  appFrontIcon: "cuIcon-list",
+                  buttons: ["查看", "审批"],
+                  menu: "申诉处理",
+                  tableName: "message_shensu"
+                },
+                {
+                  appFrontIcon: "cuIcon-news",
+                  buttons: [ "查看", "审批"],
+                  menu: "投诉处理",
+                  tableName: "message_tousu"
+                }
+              ],
+              menu: "消息处理"
             },
             {
               child: [
                 {
                   appFrontIcon: "cuIcon-qrcode",
                   buttons: ["查看", "修改", "删除", "审核", "分析"],
-                  menu: "自习时长",
+                  menu: "自习时长排行榜",
                   menuJump: "列表",
-                  tableName: "qiantuixinxi"
+                  tableName: "ranking"
+                },
+                {
+                  appFrontIcon: "cuIcon-list",
+                  buttons: ["查看", "修改", "删除", "审核", "分析"],
+                  menu: "图表展示",
+                  menuJump: "列表",
+                  tableName: "chart"
                 }
               ],
-              menu: "自习时长管理"
+              menu: "数据分析"
             },
             {
               child: [
