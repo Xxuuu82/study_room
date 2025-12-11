@@ -30,6 +30,8 @@ import Weigui from '../pages/weigui/list.vue'
 // 新增：导入取消预约组件（在yuyuexinxi文件夹下）
 import quxiaoyuyueForm from '../pages/yuyuexinxi/quxiaoyuyue.vue'
 
+
+
 const originalPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push(location) {
     return originalPush.call(this, location).catch(err => err)

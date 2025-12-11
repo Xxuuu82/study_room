@@ -1,5 +1,5 @@
 export default {
-    baseUrl: 'http://localhost:8080/study_room/',
+    baseUrl: 'http://localhost:8082/study_room/',
     indexNav: [
         {
             name: '首页',

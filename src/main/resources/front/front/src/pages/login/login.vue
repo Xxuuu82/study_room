@@ -1,82 +1,55 @@
 <template>
   <div>
     <div
-      class="container"
-      :style="{
+        class="container"
+        :style="{
         minHeight: '100vh',
         alignItems: 'center',
-        background:
-          'url(login_bg.jpg)',
+        background: '#f5f7fa',
         display: 'flex',
         width: '100%',
-        backgroundSize: '100% 100%',
-        backgroundPosition: 'center center',
-        backgroundRepeat: 'no-repeat',
         justifyContent: 'center',
+        padding: '20px'
       }"
     >
       <el-form
-        ref="loginForm"
-        :model="loginForm"
-        :style="{
+          ref="loginForm"
+          :model="loginForm"
+          :style="{
           padding: '40px 20px 20px',
           boxShadow: '0px 4px 10px 0px rgba(0,0,0,0.302)',
-          margin: '0',
           borderRadius: '10px',
-          left: '15%',
           background: '#fff',
           width: '400px',
-          position: 'absolute',
           height: 'auto',
+          margin: '0 auto'
         }"
-        :rules="rules"
+          :rules="rules"
       >
+        <!-- 标题：黑体加粗 -->
         <div
-          v-if="false"
-          :style="{
-            margin: '0 0 10px 0',
-            color: 'rgba(64, 158, 255, 1)',
-            textAlign: 'center',
+            v-if="true"
+            :style="{
             width: '100%',
+            margin: '0 0 20px 0',
             lineHeight: '44px',
             fontSize: '20px',
-            textShadow: '4px 4px 2px rgba(64, 158, 255, .5)',
-          }"
-        >
-          USER / LOGIN
-        </div>
-        <div
-          v-if="true"
-          :style="{
-            width: '100%',
-            margin: '0 0 10px 0',
-            lineHeight: '44px',
-            fontSize: '20px',
-            color: '#174AD7',
+            color: '#000',
             textAlign: 'center',
+            fontFamily: 'SimHei, sans-serif',
+            fontWeight: 'bold'
           }"
         >
           智慧自习室预约系统 登录
         </div>
         <el-form-item
-          v-if="loginType == 1"
-          class="list-item"
-          :style="{ width: '80%', margin: '0 auto 10px' }"
-          prop="username"
+            v-if="loginType == 1"
+            class="list-item"
+            :style="{ width: '80%', margin: '0 auto 10px' }"
+            prop="username"
         >
-          <div
-            v-if="false"
-            :style="{
-              width: '64px',
-              lineHeight: '44px',
-              fontSize: '14px',
-              color: 'rgba(64, 158, 255, 1)',
-            }"
-          >
-            账号：
-          </div>
           <input
-            :style="{
+              :style="{
               border: '0px solid rgba(64, 158, 255, 1)',
               padding: '0 10px',
               color: '#000',
@@ -86,29 +59,18 @@
               fontSize: '14px',
               height: '44px',
             }"
-            v-model="loginForm.username"
-            placeholder="请输入账户"
+              v-model="loginForm.username"
+              placeholder="请输入账户"
           />
         </el-form-item>
         <el-form-item
-          v-if="loginType == 1"
-          class="list-item"
-          :style="{ width: '80%', margin: '0 auto 10px' }"
-          prop="password"
+            v-if="loginType == 1"
+            class="list-item"
+            :style="{ width: '80%', margin: '0 auto 10px' }"
+            prop="password"
         >
-          <div
-            v-if="false"
-            :style="{
-              width: '64px',
-              lineHeight: '44px',
-              fontSize: '14px',
-              color: 'rgba(64, 158, 255, 1)',
-            }"
-          >
-            密码：
-          </div>
           <input
-            :style="{
+              :style="{
               border: '0px solid rgba(64, 158, 255, 1)',
               padding: '0 10px',
               color: '#000',
@@ -118,48 +80,100 @@
               fontSize: '14px',
               height: '44px',
             }"
-            v-model="loginForm.password"
-            placeholder="请输入密码"
-            type="password"
+              v-model="loginForm.password"
+              placeholder="请输入密码"
+              type="password"
           />
         </el-form-item>
         <el-form-item
-          v-if="roles.length > 1"
-          class="list-type"
-          :style="{ width: '90%', textAlign: 'center', margin: '20px auto' }"
-          prop="role"
+            v-if="loginType == 1"
+            class="list-item"
+            :style="{ width: '80%', margin: '0 auto 10px' }"
+            prop="code"
+        >
+          <div
+              :style="{ display: 'flex', width: '100%', alignItems: 'center' }"
+          >
+            <input
+                :style="{
+                border: '0px solid #ddd',
+                padding: '0 10px',
+                color: '#000',
+                outlineOffset: '4px',
+                background: '#F9F9F9',
+                width: '60%',
+                fontSize: '14px',
+                height: '44px',
+              }"
+                v-model="loginForm.code"
+                placeholder="请输入验证码"
+            />
+            <div
+                @click="randomString"
+                :style="{
+                width: '35%',
+                cursor: 'pointer',
+                marginLeft: '5%',
+                display: 'flex',
+                justifyContent: 'space-around',
+                alignItems: 'center',
+                height: '44px',
+              }"
+            >
+              <span
+                  v-for="(code, index) in codes"
+                  :key="index"
+                  :style="{
+                  color: code.color,
+                  transform: code.rotate,
+                  fontSize: code.size,
+                  fontWeight: 'bold',
+                }"
+              >
+                {{ code.num }}
+              </span>
+            </div>
+          </div>
+        </el-form-item>
+        <el-form-item
+            v-if="roles.length > 1"
+            class="list-type"
+            :style="{ width: '90%', textAlign: 'center', margin: '20px auto' }"
+            prop="role"
         >
           <el-radio
-            v-model="loginForm.tableName"
-            :label="item.tableName"
-            v-for="(item, index) in roles"
-            :key="index"
-            @change.native="getCurrentRow(item)"
-            >{{ item.roleName }}</el-radio
+              v-model="loginForm.tableName"
+              :label="item.tableName"
+              v-for="(item, index) in roles"
+              :key="index"
+              @change.native="getCurrentRow(item)"
+          >{{ item.roleName }}</el-radio
           >
         </el-form-item>
-        <el-form-item :style="{ width: '100%', margin: '20px auto' }">
+        <el-form-item :style="{ width: '80%', margin: '20px auto' }">
+          <!-- 登录按钮：改为图片中的浅蓝色 -->
           <el-button
-            v-if="loginType == 1"
-            :style="{
+              v-if="loginType == 1"
+              :style="{
               border: '0',
               cursor: 'pointer',
               padding: '0 24px',
               margin: '0 5px',
               outline: 'none',
               color: '#fff',
-              borderRadius: '4px',
-              background: '#1746D4',
+              borderRadius: '8px',
+              background: '#78ABC3', /* 图片中的浅蓝色 */
               width: '100%',
-              fontSize: '14px',
-              height: '44px',
+              fontSize: '16px',
+              height: '48px',
+              fontWeight: '500'
             }"
-            @click="submitForm('loginForm')"
-            >登录</el-button
+              @click="submitForm('loginForm')"
+          >登录</el-button
           >
           <el-button
-            v-if="loginType == 1"
-            :style="{
+              v-if="loginType == 1"
+              :style="{
               border: '0',
               cursor: 'pointer',
               padding: '0 24px',
@@ -173,17 +187,17 @@
               fontSize: '14px',
               height: '44px',
             }"
-            @click="resetForm('loginForm')"
-            >重置</el-button
+              @click="resetForm('loginForm')"
+          >重置</el-button
           >
           <el-upload
-            v-if="loginType == 2"
-            :action="baseUrl + 'file/upload'"
-            :show-file-list="false"
-            :on-success="faceLogin"
+              v-if="loginType == 2"
+              :action="baseUrl + 'file/upload'"
+              :show-file-list="false"
+              :on-success="faceLogin"
           >
             <el-button
-              :style="{
+                :style="{
                 border: '0',
                 cursor: 'pointer',
                 padding: '0 24px',
@@ -196,90 +210,42 @@
                 fontSize: '14px',
                 height: '44px',
               }"
-              >人脸识别登录</el-button
+            >人脸识别登录</el-button
             >
           </el-upload>
         </el-form-item>
-        <el-form-item
-          v-if="loginType == 1"
-          class="list-item"
-          :style="{ width: '80%', margin: '0 auto 10px' }"
-          prop="code"
-        >
-          <div v-if="false">验证码：</div>
-          <div
-            :style="{ display: 'flex', width: '100%', alignItems: 'center' }"
-          >
-            <input
-              :style="{
-                border: '0px solid #ddd',
-                padding: '0 10px',
-                color: '#000',
-                outlineOffset: '4px',
-                background: '#F9F9F9',
-                width: '60%',
-                fontSize: '14px',
-                height: '44px',
-              }"
-              v-model="loginForm.code"
-              placeholder="请输入验证码"
-            />
-            <div
-              @click="randomString"
-              :style="{
-                width: '35%',
-                cursor: 'pointer',
-                marginLeft: '5%',
-                display: 'flex',
-                justifyContent: 'space-around',
-                alignItems: 'center',
-                height: '44px',
-              }"
-            >
-              <span
-                v-for="(code, index) in codes"
-                :key="index"
-                :style="{
-                  color: code.color,
-                  transform: code.rotate,
-                  fontSize: code.size,
-                  fontWeight: 'bold',
-                }"
-              >
-                {{ code.num }}
-              </span>
-            </div>
-          </div>
-        </el-form-item>
+        <!-- 注册学生按钮：美化 -->
         <div
-          :style="{
+            :style="{
             width: '100%',
             margin: '20px auto',
-            flexWrap: 'wrap',
-            justifyContent: 'space-around',
             display: 'flex',
+            justifyContent: 'center'
           }"
         >
           <router-link
-            :style="{
+              :style="{
               cursor: 'pointer',
-              margin: '5px 0',
-              color: '#000',
+              color: '#78ABC3',
               textAlign: 'center',
-              background: '#EFECEC',
-              width: '32%',
+              background: 'rgba(120, 171, 195, 0.1)',
+              padding: '12px 24px',
+              borderRadius: '8px',
               fontSize: '14px',
               textDecoration: 'none',
-              order: '2',
+              fontWeight: '500',
+              transition: 'all 0.2s'
             }"
-            :to="{
+              :to="{
               path: '/register',
               query: { role: item.tableName, pageFlag: 'register' },
             }"
-            v-if="item.hasFrontRegister == '是'"
-            v-for="(item, index) in roles"
-            :key="index"
-            >注册{{ item.roleName.replace("注册", "") }}</router-link
+              v-if="item.hasFrontRegister == '是'"
+              v-for="(item, index) in roles"
+              :key="index"
+              @mouseenter="style={background: 'rgba(120, 171, 195, 0.2)'}"
+              @mouseleave="style={background: 'rgba(120, 171, 195, 0.1)'}"
+          >注册{{ item.roleName.replace("注册", "") }}</router-link
           >
         </div>
       </el-form>
@@ -321,7 +287,6 @@ export default {
               ],
               menu: "自习室管理",
             },
-            
             {
               child: [
                 {
@@ -389,11 +354,10 @@ export default {
               ],
               menu: "自习室模块",
             },
-            
           ],
           hasBackLogin: "是",
           hasBackRegister: "否",
-          hasFrontLogin: "否",
+          hasFrontLogin: "是", // 关键修改：管理员显示在登录角色列表
           hasFrontRegister: "否",
           roleName: "管理员",
           tableName: "users",
@@ -450,7 +414,6 @@ export default {
               ],
               menu: "自习室模块",
             },
-            
           ],
           hasBackLogin: "是",
           hasBackRegister: "否",
@@ -499,10 +462,11 @@ export default {
           size: "16px",
         },
       ],
+      generatedCode: ""
     };
   },
   created() {
-	this.randomString();
+    this.randomString();
     for (let item in this.roleMenus) {
       if (this.roleMenus[item].hasFrontLogin == "是") {
         this.roles.push(this.roleMenus[item]);
@@ -513,50 +477,50 @@ export default {
   //方法集合
   methods: {
     randomString() {
-    const len = 4;
-    const chars = [
-      'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-      'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-      'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
-      'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
-      'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2',
-      '3', '4', '5', '6', '7', '8', '9'
-    ];
-    const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#800080'];
-    const sizes = ['18px', '20px', '22px'];
-    
-    let newCodes = [];
-    let codeStr = '';
-    
-    for (let i = 0; i < len; i++) {
-      const charIndex = Math.floor(Math.random() * chars.length);
-      const colorIndex = Math.floor(Math.random() * colors.length);
-      const sizeIndex = Math.floor(Math.random() * sizes.length);
-      const rotate = `${Math.floor(Math.random() * 30 - 15)}deg`;
-      
-      newCodes.push({
-        num: chars[charIndex],
-        color: colors[colorIndex],
-        rotate: rotate,
-        size: sizes[sizeIndex]
-      });
-      
-      codeStr += chars[charIndex];
-    }
-    
-    this.codes = newCodes;
-    this.generatedCode = codeStr.toLowerCase(); // 存储生成的验证码（小写）
-  },
+      const len = 4;
+      const chars = [
+        'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
+        'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
+        'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G',
+        'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
+        'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2',
+        '3', '4', '5', '6', '7', '8', '9'
+      ];
+      const colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#800080'];
+      const sizes = ['18px', '20px', '22px'];
+
+      let newCodes = [];
+      let codeStr = '';
+
+      for (let i = 0; i < len; i++) {
+        const charIndex = Math.floor(Math.random() * chars.length);
+        const colorIndex = Math.floor(Math.random() * colors.length);
+        const sizeIndex = Math.floor(Math.random() * sizes.length);
+        const rotate = `${Math.floor(Math.random() * 30 - 15)}deg`;
+
+        newCodes.push({
+          num: chars[charIndex],
+          color: colors[colorIndex],
+          rotate: rotate,
+          size: sizes[sizeIndex]
+        });
+
+        codeStr += chars[charIndex];
+      }
+
+      this.codes = newCodes;
+      this.generatedCode = codeStr.toLowerCase();
+    },
     getCurrentRow(row) {
       this.role = row.roleName;
     },
     submitForm(formName) {
-		const inputCode = this.loginForm.code.toLowerCase();
-  if (inputCode !== this.generatedCode) {
-    this.$message.error('验证码输入错误');
-    this.randomString(); // 重新生成验证码
-    return;
-  }
+      const inputCode = this.loginForm.code.toLowerCase();
+      if (inputCode !== this.generatedCode) {
+        this.$message.error('验证码输入错误');
+        this.randomString();
+        return;
+      }
       if (this.roles.length != 1) {
         if (!this.role) {
           this.$message.error("请选择登录用户类型");
@@ -569,31 +533,40 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           this.$http
-            .get(`${this.loginForm.tableName}/login`, {
-              params: this.loginForm,
-            })
-            .then((res) => {
-              if (res.data.code === 0) {
-                localStorage.setItem("Token", res.data.token);
-                localStorage.setItem("UserTableName", this.loginForm.tableName);
-                localStorage.setItem("username", this.loginForm.username);
-                localStorage.setItem("adminName", this.loginForm.username);
-                localStorage.setItem("sessionTable", this.loginForm.tableName);
-                localStorage.setItem("role", this.role);
-                localStorage.setItem(
-                  "keyPath",
-                  this.$config.indexNav.length + 2
-                );
-                this.$router.push("/index/center");
-                this.$message({
-                  message: "登录成功",
-                  type: "success",
-                  duration: 1500,
-                });
-              } else {
-                this.$message.error(res.data.msg);
-              }
-            });
+              .get(`${this.loginForm.tableName}/login`, {
+                params: this.loginForm,
+              })
+              .then((res) => {
+                if (res.data.code === 0) {
+                  localStorage.setItem("Token", res.data.token);
+                  localStorage.setItem("UserTableName", this.loginForm.tableName);
+                  localStorage.setItem("username", this.loginForm.username);
+                  localStorage.setItem("adminName", this.loginForm.username);
+                  localStorage.setItem("sessionTable", this.loginForm.tableName);
+                  localStorage.setItem("role", this.role);
+                  localStorage.setItem(
+                      "keyPath",
+                      this.$config.indexNav.length + 2
+                  );
+
+                  // 核心修改：按角色跳转不同前端
+                  if (this.role === "管理员") {
+                    // 管理员跳转到admin项目首页（根据实际部署路径调整）
+                    window.location.href = "/admin/index/";
+                  } else {
+                    // 学生跳转到front原首页
+                    this.$router.push("/index/center");
+                  }
+
+                  this.$message({
+                    message: "登录成功",
+                    type: "success",
+                    duration: 1500,
+                  });
+                } else {
+                  this.$message.error(res.data.msg);
+                }
+              });
         } else {
           return false;
         }
@@ -609,7 +582,6 @@ export default {
 <style rel="stylesheet/scss" lang="scss" scoped>
 .container {
   position: relative;
-  background: url(http://codegen.caihongy.cn/20221017/0d970ac476e8407a92e0eee7a8e88625.png);
 
   .el-form-item {
     & >>> .el-form-item__content {
@@ -620,8 +592,8 @@ export default {
   .list-item >>> .el-input .el-input__inner {
     border: 0px solid rgba(64, 158, 255, 1);
     padding: 0 10px;
-    color: #000;
-    background: #f9f9f9;
+    color: '#000';
+    background: '#f9f9f9';
     width: 100%;
     font-size: 14px;
     outline-offset: 4px;
@@ -632,8 +604,8 @@ export default {
     border: 0px solid rgba(64, 158, 255, 1);
     padding: 0 10px;
     outline: none;
-    color: #000;
-    background: #f9f9f9;
+    color: '#000';
+    background: '#f9f9f9';
     display: inline-block;
     vertical-align: middle;
     width: calc(100% - 80px);
