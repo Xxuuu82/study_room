@@ -357,7 +357,7 @@ export default {
           ],
           hasBackLogin: "是",
           hasBackRegister: "否",
-          hasFrontLogin: "否",
+          hasFrontLogin: "是", // 关键修改：管理员显示在登录角色列表
           hasFrontRegister: "否",
           roleName: "管理员",
           tableName: "users",
@@ -548,7 +548,16 @@ export default {
                       "keyPath",
                       this.$config.indexNav.length + 2
                   );
-                  this.$router.push("/index/center");
+
+                  // 核心修改：按角色跳转不同前端
+                  if (this.role === "管理员") {
+                    // 管理员跳转到admin项目首页（根据实际部署路径调整）
+                    window.location.href = "/admin/index/";
+                  } else {
+                    // 学生跳转到front原首页
+                    this.$router.push("/index/center");
+                  }
+
                   this.$message({
                     message: "登录成功",
                     type: "success",
