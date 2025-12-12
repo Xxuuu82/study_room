@@ -237,16 +237,30 @@
             </el-tag>
           </template>
         </el-table-column>
+        <!-- 新增：预约开始时间列 -->
         <el-table-column
             :resizable="true"
             :sortable="false"
-            prop="yuyueshijian"
-            label="预约时间"
+            prop="yuyue_start"
+            label="预约开始时间"
             min-width="160"
             align="center"
         >
           <template slot-scope="scope">
-            {{ scope.row.yuyueshijian }}
+            {{ scope.row.yuyue_start }}
+          </template>
+        </el-table-column>
+        <!-- 新增：预约结束时间列 -->
+        <el-table-column
+            :resizable="true"
+            :sortable="false"
+            prop="yuyue_end"
+            label="预约结束时间"
+            min-width="160"
+            align="center"
+        >
+          <template slot-scope="scope">
+            {{ scope.row.yuyue_end }}
           </template>
         </el-table-column>
         <el-table-column

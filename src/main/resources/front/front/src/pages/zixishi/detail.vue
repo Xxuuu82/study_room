@@ -150,32 +150,16 @@
               <div :style="{ color: '#999', fontSize: '13px', marginBottom: '4px' }">位置</div>
               <div :style="{ color: '#333', fontSize: '14px', fontWeight: '400' }">{{ detail.weizhi || '暂无' }}</div>
             </div>
-            <div class="info-item" :style="{
-              padding: '12px',
-              background: '#f8f9fa',
-              borderRadius: '6px'
-            }">
-              <div :style="{ color: '#999', fontSize: '13px', marginBottom: '4px' }">设施</div>
-              <div :style="{ color: '#333', fontSize: '14px', fontWeight: '400' }">{{ detail.sheshi || '暂无' }}</div>
-            </div>
+            <!-- 删除了“设施”模块 -->
             <div class="info-item" :style="{
               padding: '12px',
               background: '#f8f9fa',
               borderRadius: '6px'
             }">
               <div :style="{ color: '#999', fontSize: '13px', marginBottom: '4px' }">可约时间</div>
-              <div :style="{ color: '#333', fontSize: '14px', fontWeight: '400' }">{{ detail.keyueshijian || '暂无' }}</div>
+              <div :style="{ color: '#333', fontSize: '14px', fontWeight: '400' }">8:00-22:00</div>
             </div>
-            <div class="info-item" :style="{
-              padding: '12px',
-              background: '#f8f9fa',
-              borderRadius: '6px'
-            }">
-              <div :style="{ color: '#999', fontSize: '13px', marginBottom: '4px' }">是否有课</div>
-              <el-tag :type="detail.shifouyouke === '是' ? 'warning' : 'success'" size="mini">
-                {{ detail.shifouyouke || '暂无' }}
-              </el-tag>
-            </div>
+            <!-- 删除了“是否有课”模块 -->
           </div>
 
           <!-- 在线预约按钮 -->

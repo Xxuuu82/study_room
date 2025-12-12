@@ -96,34 +96,6 @@
                 style="width: 100%;"
             ></el-input>
           </div>
-          <div
-              :style="{ margin: '0', flexDirection: 'column', display: 'flex', minWidth: '200px', flex: '1 1 200px' }"
-              class="select"
-          >
-            <label
-                :style="{
-                margin: '0',
-                color: '#000',
-                textAlign: 'left',
-                display: 'inline-block',
-                width: '100%',
-                lineHeight: '40px',
-                fontSize: '14px',
-                fontWeight: '500',
-                height: '40px',
-              }"
-                class="item-label"
-            >是否有课</label
-            >
-            <el-select
-                v-model="formSearch.shifouyouke"
-                placeholder="请选择是否有课"
-                clearable
-                style="width: 100%;"
-            >
-              <el-option v-for="(item, index) in shifouyoukeOptions" :key="index" :label="item" :value="item"></el-option>
-            </el-select>
-          </div>
           <div :style="{ margin: 'auto 0 0', minWidth: '120px' }">
             <el-button
                 :style="{
@@ -178,11 +150,6 @@
                 <span>规模：{{item.guimo || '无'}}</span>
                 <span style="marginLeft: 15px;">位置：{{item.weizhi || '无'}}</span>
               </div>
-              <div :style='{"lineHeight":"24px","fontSize":"13px","color":"#666","marginTop":"4px"}'>
-                <el-tag :type="item.shifouyouke === '是' ? 'warning' : 'success'" size="mini">
-                  {{item.shifouyouke === '是' ? '当前有课' : '当前空闲'}}
-                </el-tag>
-              </div>
             </div>
           </div>
         </div>
@@ -226,7 +193,6 @@ export default {
         mingcheng: '',
         guimo: '',
         weizhi: '',
-        shifouyouke: '',
       },
       dataList: [],
       pageIndex: 1,
@@ -234,14 +200,12 @@ export default {
       total: 1,
       curFenlei: '全部',
       guimoOptions: [],
-      shifouyoukeOptions: [],
       layouts: ["total", "prev", "pager", "next", "sizes", "jumper"]
     }
   },
   created() {
     this.baseUrl = this.$config.baseUrl;
     this.guimoOptions = '大型,中型,小型'.split(',');
-    this.shifouyoukeOptions = '是,否'.split(',');
     this.getList(1, '全部');
   },
   methods: {
@@ -253,7 +217,6 @@ export default {
       if (this.formSearch.mingcheng) searchWhere.mingcheng = '%' + this.formSearch.mingcheng + '%';
       if (this.formSearch.guimo) searchWhere.guimo = this.formSearch.guimo;
       if (this.formSearch.weizhi) searchWhere.weizhi = '%' + this.formSearch.weizhi + '%';
-      if (this.formSearch.shifouyouke) searchWhere.shifouyouke = this.formSearch.shifouyouke;
 
       this.$http.get('zixishi/list', {params: Object.assign(params, searchWhere)}).then(res => {
         if (res.data.code == 0) {

@@ -133,6 +133,7 @@
         </el-select>
       </el-form-item>
 
+      <!-- 新增：预约开始时间 -->
       <el-form-item
           :style="{
           width: '100%',
@@ -142,15 +143,40 @@
           display: 'block',
           boxSizing: 'border-box'
         }"
-          label="预约时间"
-          prop="yuyueshijian"
+          label="预约开始时间"
+          prop="yuyue_start"
       >
         <el-date-picker
             value-format="yyyy-MM-dd HH:mm:ss"
-            v-model="ruleForm.yuyueshijian"
+            v-model="ruleForm.yuyue_start"
             type="datetime"
-            placeholder="预约时间"
+            placeholder="选择开始时间"
             style="width: 100%;"
+            @change="checkTime"
+        >
+        </el-date-picker>
+      </el-form-item>
+
+      <!-- 新增：预约结束时间 -->
+      <el-form-item
+          :style="{
+          width: '100%',
+          maxWidth: '800px',
+          padding: '10px',
+          margin: '0 auto 10px',
+          display: 'block',
+          boxSizing: 'border-box'
+        }"
+          label="预约结束时间"
+          prop="yuyue_end"
+      >
+        <el-date-picker
+            value-format="yyyy-MM-dd HH:mm:ss"
+            v-model="ruleForm.yuyue_end"
+            type="datetime"
+            placeholder="选择结束时间"
+            style="width: 100%;"
+            @change="checkTime"
         >
         </el-date-picker>
       </el-form-item>
@@ -284,11 +310,11 @@ export default {
         zixishiid: false,
         yuyuedanhao: false,
         mingcheng: false,
-        // 移除图片相关属性
         zuowei: false,
         qiandaozhuangtai: false,
         qiantuizhuangtai: false,
-        yuyueshijian: false,
+        yuyue_start: false,
+        yuyue_end: false,
         beizhu: false,
         xuehao: false,
         xingming: false,
@@ -302,11 +328,11 @@ export default {
         zixishiid:"",
         yuyuedanhao: this.getUUID(),
         mingcheng: "",
-        // 移除图片字段
         zuowei: "",
         qiandaozhuangtai: "未签到",
         qiantuizhuangtai: "未签退",
-        yuyueshijian: "",
+        yuyue_start: "",
+        yuyue_end: "",
         beizhu: "",
         xuehao: "",
         xingming: "",
@@ -317,14 +343,14 @@ export default {
       rules: {
         yuyuedanhao: [],
         mingcheng: [],
-        // 移除图片校验规则
-        zuowei: [
-          // { validator: this.$validate.isIntNumer, trigger: 'blur' },
-        ],
+        zuowei: [],
         qiandaozhuangtai: [],
         qiantuizhuangtai: [],
-        yuyueshijian: [
-          { required: true, message: "预约时间不能为空", trigger: "blur" },
+        yuyue_start: [
+          { required: true, message: "预约开始时间不能为空", trigger: "blur" },
+        ],
+        yuyue_end: [
+          { required: true, message: "预约结束时间不能为空", trigger: "blur" },
         ],
         beizhu: [],
         xuehao: [],
@@ -337,7 +363,6 @@ export default {
   },
   computed: {},
   created() {
-    //this.bg();
     let type = this.$route.query.type ? this.$route.query.type : "";
     this.init(type);
     this.baseUrl = this.$config.baseUrl;
@@ -346,21 +371,28 @@ export default {
     getMakeZero(s) {
       return s < 10 ? "0" + s : s;
     },
-    // 下载
     download(file) {
       window.open(`${file}`);
     },
-    // 初始化
+    // 新增：时间校验（结束时间不早于开始时间）
+    checkTime() {
+      if (this.ruleForm.yuyue_start && this.ruleForm.yuyue_end) {
+        const start = new Date(this.ruleForm.yuyue_start).getTime();
+        const end = new Date(this.ruleForm.yuyue_end).getTime();
+        if (end < start) {
+          this.$message.error("结束时间不能早于开始时间");
+          this.ruleForm.yuyue_end = "";
+        }
+      }
+    },
     init(type) {
       this.type = type;
       if (type == "cross") {
         var obj = JSON.parse(localStorage.getItem("crossObj"));
-        // console.log(obj);
         for (var o in obj) {
           if (o == 'id'){
             this.ruleForm.zixishiid = obj[o];
             this.ro.zixishiid = true;
-            // console.log(obj[o]);
             continue;
           }
           if (o == "yuyuedanhao") {
@@ -373,9 +405,7 @@ export default {
             this.ro.mingcheng = true;
             continue;
           }
-          // 移除图片相关初始化逻辑
           if (o == "zuowei") {
-            // console.log(obj[o]);
             this.ruleForm.zuowei = obj[o];
             this.ro.zuowei = true;
             continue;
@@ -388,11 +418,6 @@ export default {
           if (o == "qiantuizhuangtai") {
             this.ruleForm.qiantuizhuangtai = obj[o];
             this.ro.qiantuizhuangtai = true;
-            continue;
-          }
-          if (o == "yuyueshijian") {
-            this.ruleForm.yuyueshijian = obj[o];
-            this.ro.yuyueshijian = true;
             continue;
           }
           if (o == "beizhu") {
@@ -416,9 +441,7 @@ export default {
             continue;
           }
         }
-        // this.ruleForm.zuowei = 0
       }
-      // 获取用户信息
       this.$http
           .get(this.userTableName + "/session", { emulateJSON: true })
           .then((res) => {
@@ -438,9 +461,6 @@ export default {
       this.qiandaozhuangtaiOptions = "已签到,未签到".split(",");
       this.qiantuizhuangtaiOptions = "已签退,未签退".split(",");
     },
-
-    // 多级联动参数
-    // 多级联动参数
     info(id) {
       this.$http
           .get("yuyuexinxi/detail/${id}", { emulateJSON: true })
@@ -450,21 +470,14 @@ export default {
             }
           });
     },
-    // 提交
     onSubmit() {
       var obj = JSON.parse(localStorage.getItem("crossObj"));
       var table = localStorage.getItem("crossTable");
-      // obj.zuowei = obj.zuowei - this.ruleForm.zuowei
-      // if(obj.zuowei<0){
-      //   this.$message.error("座位不足");
-      //   return
-      // }
+      // 关键修复：提前声明变量，避免未定义报错
+      let crossuserid = null;
+      let crossrefid = null;
+      let crossoptnum = null;
 
-      //this.$http.post(table+`/update`, obj).then(res => {});
-      //更新跨表属性
-      var crossuserid;
-      var crossrefid;
-      var crossoptnum;
       this.$refs["ruleForm"].validate((valid) => {
         if (valid) {
           if (this.type == "cross") {
@@ -472,18 +485,15 @@ export default {
             var statusColumnValue = localStorage.getItem("statusColumnValue");
             if (statusColumnName && statusColumnName != "") {
               var obj = JSON.parse(localStorage.getItem("crossObj"));
-              //  console.log(obj);
               if (!statusColumnName.startsWith("[")) {
                 for (var o in obj) {
                   if (o == statusColumnName) {
                     obj[o] = statusColumnValue;
-                    //  console.log(obj[o]);
                   }
                 }
                 var table = localStorage.getItem("crossTable");
-                //  console.log(table)
-                //  this.$http.post(table+'/update', obj).then(res => {});
               } else {
+                // 赋值到提前声明的变量中
                 crossuserid = Number(localStorage.getItem("userid"));
                 crossrefid = obj["id"];
                 crossoptnum = localStorage.getItem("statusColumnName");
@@ -513,14 +523,8 @@ export default {
                     });
                     return false;
                   } else {
-                    // 跨表计算
                     var obj = JSON.parse(localStorage.getItem("crossObj"));
                     var table = localStorage.getItem("crossTable");
-
-                    // obj.zuowei = parseFloat(obj.zuowei) - parseFloat(this.ruleForm.zuowei)
-                    // console.log('ss')
-                    console.log(obj);
-                    // this.$http.post(table+`/update`,obj).then(res => {});
                     this.$http
                         .post("yuyuexinxi/add", this.ruleForm)
                         .then((res) => {
@@ -540,17 +544,20 @@ export default {
                               duration: 1500,
                             });
                           }
+                        })
+                        // 新增：捕获请求异常
+                        .catch(err => {
+                          this.$message.error("提交失败：" + err.message);
                         });
                   }
+                })
+                // 新增：捕获列表请求异常
+                .catch(err => {
+                  this.$message.error("查询数据失败：" + err.message);
                 });
           } else {
             var obj = JSON.parse(localStorage.getItem("crossObj"));
             var table = localStorage.getItem("crossTable");
-
-            // obj.zuowei = parseFloat(obj.zuowei) - parseFloat(this.ruleForm.zuowei)
-            // console.log('sssss' + table)
-            // console.log(obj);
-            // this.$http.post(table+`/update`,obj).then(res => {});
             this.$http.post("yuyuexinxi/add", this.ruleForm).then((res) => {
               if (res.data.code == 0) {
                 this.$message({
@@ -568,20 +575,21 @@ export default {
                   duration: 1500,
                 });
               }
-            });
+            })
+                // 新增：捕获提交请求异常
+                .catch(err => {
+                  this.$message.error("提交失败：" + err.message);
+                });
           }
         }
       });
     },
-    // 获取uuid
     getUUID() {
       return new Date().getTime();
     },
-    // 返回
     back() {
       this.$router.go(-1);
     },
-    // 移除图片上传方法
   },
 };
 </script>
