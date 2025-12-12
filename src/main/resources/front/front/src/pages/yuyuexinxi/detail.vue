@@ -52,22 +52,12 @@
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>手机</div>
             <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.shouji}}</div>
           </div>
-          <div class="btn" :style='{"padding":"20px 0","flexWrap":"wrap","justifyContent":"center","display":"flex","gap":"12px"}'>
-            <el-button v-if="isAuth('yuyuexinxi','取消预约')" @click="onAcross('quxiaoyuyue','是','[1]','请勿重复操作！')"
-                       :style='{"border":"0","cursor":"pointer","padding":"0 20px","outline":"none","color":"#fff","borderRadius":"4px","background":"#2E61E1","width":"auto","lineHeight":"40px","fontSize":"14px","height":"40px","transition":"all 0.2s ease"}'
-                       type="primary">取消预约</el-button>
-            <el-button v-if="isAuth('yuyuexinxi','签到')" @click="onAcross('qiandaoxinxi','是','qiandaozhuangtai','请勿重复签到！','已签到,未签到'.split(',')[0])"
-                       :style='{"border":"0","cursor":"pointer","padding":"0 20px","outline":"none","color":"#fff","borderRadius":"4px","background":"#2E61E1","width":"auto","lineHeight":"40px","fontSize":"14px","height":"40px","transition":"all 0.2s ease"}'
-                       type="primary">签到</el-button>
-            <el-button v-if="isAuth('yuyuexinxi','审核')" @click="onSH"
-                       :style='{"border":"0","cursor":"pointer","padding":"0 20px","outline":"none","color":"#fff","borderRadius":"4px","background":"#6c757d","width":"auto","lineHeight":"40px","fontSize":"14px","height":"40px","transition":"all 0.2s ease"}'
-                       type="default">审核</el-button>
-          </div>
+          <!-- 已删除“取消预约”“签到”“审核”按钮 -->
         </div>
 
       </div>
 
-      <!-- 新增：返回按钮区域 -->
+      <!-- 返回按钮区域 -->
       <div style="width: 100%; display: flex; justify-content: center; margin: 30px 0 20px;">
         <el-button
             :style="{
@@ -153,7 +143,7 @@ export default {
   },
   //方法集合
   methods: {
-    // 新增：返回列表页方法
+    // 返回列表页方法
     goBack() {
       this.$router.push('/index/yuyuexinxi');
     },
@@ -275,7 +265,7 @@ export default {
   transform: translateY(-1px);
 }
 
-// 新增：返回按钮hover效果
+// 返回按钮hover效果
 ::v-deep .el-button:hover {
   opacity: 0.9;
   transform: translateY(-1px);

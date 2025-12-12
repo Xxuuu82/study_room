@@ -200,34 +200,6 @@
         <el-table-column
             :resizable="true"
             :sortable="false"
-            prop="tupian"
-            label="图片"
-            min-width="150"
-            align="center"
-        >
-          <template slot-scope="scope">
-            <div v-if="scope.row.tupian" style="display: inline-block;">
-              <img
-                  v-if="scope.row.tupian.substring(0, 4) == 'http'"
-                  :src="scope.row.tupian.split(',')[0]"
-                  width="80"
-                  height="80"
-                  style="object-fit: cover; border-radius: 4px;"
-              />
-              <img
-                  v-else
-                  :src="baseUrl + scope.row.tupian.split(',')[0]"
-                  width="80"
-                  height="80"
-                  style="object-fit: cover; border-radius: 4px;"
-              />
-            </div>
-            <div v-else>无图片</div>
-          </template>
-        </el-table-column>
-        <el-table-column
-            :resizable="true"
-            :sortable="false"
             prop="zuowei"
             label="座位"
             min-width="100"
@@ -587,7 +559,6 @@ export default {
     }
   }
 };
-
 </script>
 
 <style lang="scss" scoped>
