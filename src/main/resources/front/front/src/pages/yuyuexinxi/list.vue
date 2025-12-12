@@ -197,7 +197,6 @@
             </div>
           </template>
         </el-table-column>
-        <!-- 已删除图片列 -->
         <el-table-column
             :resizable="true"
             :sortable="false"
