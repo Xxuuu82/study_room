@@ -47,17 +47,16 @@
           display: 'block',
           boxSizing: 'border-box'
         }"
-          label="名称"
+          label="自习室名称"
           prop="mingcheng"
       >
         <el-input
             v-model="ruleForm.mingcheng"
-            placeholder="名称"
+            placeholder="请输入自习室名称"
             clearable
+            :readonly="ro.mingcheng"
         ></el-input>
       </el-form-item>
-
-      <!-- 移除图片相关表单元素 -->
 
       <el-form-item
           :style="{
@@ -79,61 +78,60 @@
         ></el-input>
       </el-form-item>
 
-      <el-form-item
-          :style="{
-          width: '100%',
-          maxWidth: '800px',
-          padding: '10px',
-          margin: '0 auto 10px',
-          display: 'block',
-          boxSizing: 'border-box'
-        }"
-          label="签到状态"
-          prop="qiandaozhuangtai"
-      >
-        <el-select
-            v-model="ruleForm.qiandaozhuangtai"
-            placeholder="请选择签到状态"
-            disabled
-        >
-          <el-option
-              v-for="(item, index) in qiandaozhuangtaiOptions"
-              :key="index"
-              :label="item"
-              :value="item"
-          >
-          </el-option>
-        </el-select>
-      </el-form-item>
+<!--      <el-form-item-->
+<!--          :style="{-->
+<!--          width: '100%',-->
+<!--          maxWidth: '800px',-->
+<!--          padding: '10px',-->
+<!--          margin: '0 auto 10px',-->
+<!--          display: 'block',-->
+<!--          boxSizing: 'border-box'-->
+<!--        }"-->
+<!--          label="签到状态"-->
+<!--          prop="qiandaozhuangtai"-->
+<!--      >-->
+<!--        <el-select-->
+<!--            v-model="ruleForm.qiandaozhuangtai"-->
+<!--            placeholder="请选择签到状态"-->
+<!--            disabled-->
+<!--        >-->
+<!--          <el-option-->
+<!--              v-for="(item, index) in qiandaozhuangtaiOptions"-->
+<!--              :key="index"-->
+<!--              :label="item"-->
+<!--              :value="item"-->
+<!--          >-->
+<!--          </el-option>-->
+<!--        </el-select>-->
+<!--      </el-form-item>-->
 
-      <el-form-item
-          :style="{
-          width: '100%',
-          maxWidth: '800px',
-          padding: '10px',
-          margin: '0 auto 10px',
-          display: 'block',
-          boxSizing: 'border-box'
-        }"
-          label="签退状态"
-          prop="qiantuizhuangtai"
-      >
-        <el-select
-            v-model="ruleForm.qiantuizhuangtai"
-            placeholder="请选择签退状态"
-            disabled
-        >
-          <el-option
-              v-for="(item, index) in qiantuizhuangtaiOptions"
-              :key="index"
-              :label="item"
-              :value="item"
-          >
-          </el-option>
-        </el-select>
-      </el-form-item>
+<!--      <el-form-item-->
+<!--          :style="{-->
+<!--          width: '100%',-->
+<!--          maxWidth: '800px',-->
+<!--          padding: '10px',-->
+<!--          margin: '0 auto 10px',-->
+<!--          display: 'block',-->
+<!--          boxSizing: 'border-box'-->
+<!--        }"-->
+<!--          label="签退状态"-->
+<!--          prop="qiantuizhuangtai"-->
+<!--      >-->
+<!--        <el-select-->
+<!--            v-model="ruleForm.qiantuizhuangtai"-->
+<!--            placeholder="请选择签退状态"-->
+<!--            disabled-->
+<!--        >-->
+<!--          <el-option-->
+<!--              v-for="(item, index) in qiantuizhuangtaiOptions"-->
+<!--              :key="index"-->
+<!--              :label="item"-->
+<!--              :value="item"-->
+<!--          >-->
+<!--          </el-option>-->
+<!--        </el-select>-->
+<!--      </el-form-item>-->
 
-      <!-- 新增：预约开始时间 -->
       <el-form-item
           :style="{
           width: '100%',
@@ -157,7 +155,6 @@
         </el-date-picker>
       </el-form-item>
 
-      <!-- 新增：预约结束时间 -->
       <el-form-item
           :style="{
           width: '100%',
@@ -257,7 +254,6 @@
         ></el-input>
       </el-form-item>
 
-      <!-- 简化风格的按钮区域 -->
       <el-form-item :style="{
         padding: '20px 0 0',
         margin: '0',
@@ -311,8 +307,8 @@ export default {
         yuyuedanhao: false,
         mingcheng: false,
         zuowei: false,
-        qiandaozhuangtai: false,
-        qiantuizhuangtai: false,
+        // qiandaozhuangtai: false,
+        // qiantuizhuangtai: false,
         yuyue_start: false,
         yuyue_end: false,
         beizhu: false,
@@ -325,12 +321,12 @@ export default {
       type: "",
       userTableName: localStorage.getItem("UserTableName"),
       ruleForm: {
-        zixishiid:"",
+        zixishiid: "",
         yuyuedanhao: this.getUUID(),
         mingcheng: "",
         zuowei: "",
-        qiandaozhuangtai: "未签到",
-        qiantuizhuangtai: "未签退",
+        // qiandaozhuangtai: "未签到",
+        // qiantuizhuangtai: "未签退",
         yuyue_start: "",
         yuyue_end: "",
         beizhu: "",
@@ -342,19 +338,26 @@ export default {
       qiantuizhuangtaiOptions: [],
       rules: {
         yuyuedanhao: [],
-        mingcheng: [],
+        // 修复1：添加名称必填校验
+        mingcheng: [
+          { required: true, message: "图书馆/自习室名称不能为空", trigger: "blur" }
+        ],
         zuowei: [],
         qiandaozhuangtai: [],
         qiantuizhuangtai: [],
         yuyue_start: [
-          { required: true, message: "预约开始时间不能为空", trigger: "blur" },
+          { required: true, message: "预约开始时间不能为空", trigger: "change" },
         ],
         yuyue_end: [
-          { required: true, message: "预约结束时间不能为空", trigger: "blur" },
+          { required: true, message: "预约结束时间不能为空", trigger: "change" },
         ],
         beizhu: [],
-        xuehao: [],
-        xingming: [],
+        xuehao: [
+          { required: true, message: "学号不能为空", trigger: "blur" }
+        ],
+        xingming: [
+          { required: true, message: "姓名不能为空", trigger: "blur" }
+        ],
         shouji: [{ validator: this.$validate.isMobile, trigger: "blur" }],
         sfsh: [],
         shhf: [],
@@ -374,8 +377,10 @@ export default {
     download(file) {
       window.open(`${file}`);
     },
-    // 新增：时间校验（结束时间不早于开始时间）
     checkTime() {
+      console.log("当前选择的开始时间：", this.ruleForm.yuyue_start);
+      console.log("当前选择的结束时间：", this.ruleForm.yuyue_end);
+
       if (this.ruleForm.yuyue_start && this.ruleForm.yuyue_end) {
         const start = new Date(this.ruleForm.yuyue_start).getTime();
         const end = new Date(this.ruleForm.yuyue_end).getTime();
@@ -383,16 +388,30 @@ export default {
           this.$message.error("结束时间不能早于开始时间");
           this.ruleForm.yuyue_end = "";
         }
+      } else if (!this.ruleForm.yuyue_start) {
+        this.$message.warning("请选择预约开始时间");
+      } else if (!this.ruleForm.yuyue_end) {
+        this.$message.warning("请选择预约结束时间");
       }
     },
     init(type) {
       this.type = type;
       if (type == "cross") {
-        var obj = JSON.parse(localStorage.getItem("crossObj"));
+        var obj = JSON.parse(localStorage.getItem("crossObj") || "{}");
         for (var o in obj) {
           if (o == 'id'){
             this.ruleForm.zixishiid = obj[o];
             this.ro.zixishiid = true;
+            // 修复2：根据自习室ID查询名称并自动赋值
+            this.$http.get('zixishi/detail/' + obj[o]).then(res => {
+              if (res.data.code == 0) {
+                this.ruleForm.mingcheng = res.data.data.mingcheng;
+                this.ro.mingcheng = true; // 赋值后设为只读
+              }
+            }).catch(err => {
+              console.error("查询自习室名称失败：", err);
+              this.$message.warning("无法自动获取自习室名称，请手动输入");
+            });
             continue;
           }
           if (o == "yuyuedanhao") {
@@ -410,16 +429,16 @@ export default {
             this.ro.zuowei = true;
             continue;
           }
-          if (o == "qiandaozhuangtai") {
-            this.ruleForm.qiandaozhuangtai = obj[o];
-            this.ro.qiandaozhuangtai = true;
-            continue;
-          }
-          if (o == "qiantuizhuangtai") {
-            this.ruleForm.qiantuizhuangtai = obj[o];
-            this.ro.qiantuizhuangtai = true;
-            continue;
-          }
+          // if (o == "qiandaozhuangtai") {
+          //   this.ruleForm.qiandaozhuangtai = obj[o];
+          //   this.ro.qiandaozhuangtai = true;
+          //   continue;
+          // }
+          // if (o == "qiantuizhuangtai") {
+          //   this.ruleForm.qiantuizhuangtai = obj[o];
+          //   this.ro.qiantuizhuangtai = true;
+          //   continue;
+          // }
           if (o == "beizhu") {
             this.ruleForm.beizhu = obj[o];
             this.ro.beizhu = true;
@@ -442,145 +461,96 @@ export default {
           }
         }
       }
+      // 初始化用户信息
       this.$http
           .get(this.userTableName + "/session", { emulateJSON: true })
           .then((res) => {
             if (res.data.code == 0) {
-              var json = res.data.data;
-              if ((json.xuehao != "" && json.xuehao) || json.xuehao == 0) {
+              var json = res.data.data || {};
+              if (json.xuehao || json.xuehao === 0) {
                 this.ruleForm.xuehao = json.xuehao;
               }
-              if ((json.xingming != "" && json.xingming) || json.xingming == 0) {
+              if (json.xingming || json.xingming === 0) {
                 this.ruleForm.xingming = json.xingming;
               }
-              if ((json.shouji != "" && json.shouji) || json.shouji == 0) {
+              if (json.shouji || json.shouji === 0) {
                 this.ruleForm.shouji = json.shouji;
               }
             }
+          })
+          .catch(err => {
+            console.error("获取用户信息失败：", err);
           });
-      this.qiandaozhuangtaiOptions = "已签到,未签到".split(",");
-      this.qiantuizhuangtaiOptions = "已签退,未签退".split(",");
+      // 初始化状态选项
+      // this.qiandaozhuangtaiOptions = "已签到,未签到".split(",");
+      // this.qiantuizhuangtaiOptions = "已签退,未签退".split(",");
     },
-    info(id) {
-      this.$http
-          .get("yuyuexinxi/detail/${id}", { emulateJSON: true })
-          .then((res) => {
-            if (res.data.code == 0) {
-              this.ruleForm = res.data.data;
-            }
-          });
-    },
+    // 修复3：完整的提交逻辑（含名称字段正确传递）
     onSubmit() {
-      var obj = JSON.parse(localStorage.getItem("crossObj"));
-      var table = localStorage.getItem("crossTable");
-      // 关键修复：提前声明变量，避免未定义报错
-      let crossuserid = null;
-      let crossrefid = null;
-      let crossoptnum = null;
+      // 1. 前端基础校验
+      if (!this.ruleForm.yuyue_start) {
+        this.$message.error("请选择预约开始时间");
+        return;
+      }
+      if (!this.ruleForm.yuyue_end) {
+        this.$message.error("请选择预约结束时间");
+        return;
+      }
+      if (!this.ruleForm.xuehao) {
+        this.$message.error("学号不能为空");
+        return;
+      }
+      if (!this.ruleForm.xingming) {
+        this.$message.error("姓名不能为空");
+        return;
+      }
+      if (!this.ruleForm.mingcheng) {
+        this.$message.error("图书馆/自习室名称不能为空");
+        return;
+      }
 
       this.$refs["ruleForm"].validate((valid) => {
         if (valid) {
-          if (this.type == "cross") {
-            var statusColumnName = localStorage.getItem("statusColumnName");
-            var statusColumnValue = localStorage.getItem("statusColumnValue");
-            if (statusColumnName && statusColumnName != "") {
-              var obj = JSON.parse(localStorage.getItem("crossObj"));
-              if (!statusColumnName.startsWith("[")) {
-                for (var o in obj) {
-                  if (o == statusColumnName) {
-                    obj[o] = statusColumnValue;
-                  }
+          // 2. 构造参数：保留名称字段，兼容后端字段格式
+          const submitData = {
+            ...this.ruleForm,
+            // 兼容后端驼峰字段
+            yuyueStart: this.ruleForm.yuyue_start,
+            yuyueEnd: this.ruleForm.yuyue_end,
+            // 保留原下划线字段（避免后端兼容问题）
+            yuyue_start: this.ruleForm.yuyue_start,
+            yuyue_end: this.ruleForm.yuyue_end
+          };
+
+          // 3. 打印最终提交参数（调试用）
+          console.log("最终提交的参数：", submitData);
+
+          // 4. 发送请求：强制设置JSON请求头
+          this.$http.post("yuyuexinxi/submit", submitData, {
+            headers: {
+              'Content-Type': 'application/json;charset=UTF-8'
+            },
+            emulateJSON: false // 关键：关闭表单模拟，发送纯JSON
+          })
+              .then((res) => {
+                console.log("后端返回结果：", res.data);
+                if (res.data.code === 0 || res.data.msg === "预约成功") {
+                  this.$message({
+                    message: "预约提交成功",
+                    type: "success",
+                    duration: 1500,
+                    onClose: () => {
+                      this.$router.go(-1);
+                    },
+                  });
+                } else {
+                  this.$message.error(res.data.msg || "提交失败");
                 }
-                var table = localStorage.getItem("crossTable");
-              } else {
-                // 赋值到提前声明的变量中
-                crossuserid = Number(localStorage.getItem("userid"));
-                crossrefid = obj["id"];
-                crossoptnum = localStorage.getItem("statusColumnName");
-                crossoptnum = crossoptnum.replace(/\[/, "").replace(/\]/, "");
-              }
-            }
-          }
-          if (crossrefid && crossuserid) {
-            this.ruleForm.crossuserid = crossuserid;
-            this.ruleForm.crossrefid = crossrefid;
-            var params = {
-              page: 1,
-              limit: 10,
-              crossuserid: crossuserid,
-              crossrefid: crossrefid,
-            };
-            this.$http
-                .get("yuyuexinxi/list", {
-                  params: params,
-                })
-                .then((res) => {
-                  if (res.data.data.total >= crossoptnum) {
-                    this.$message({
-                      message: localStorage.getItem("tips"),
-                      type: "success",
-                      duration: 1500,
-                    });
-                    return false;
-                  } else {
-                    var obj = JSON.parse(localStorage.getItem("crossObj"));
-                    var table = localStorage.getItem("crossTable");
-                    this.$http
-                        .post("yuyuexinxi/add", this.ruleForm)
-                        .then((res) => {
-                          if (res.data.code == 0) {
-                            this.$message({
-                              message: "操作成功",
-                              type: "success",
-                              duration: 1500,
-                              onClose: () => {
-                                this.$router.go(-1);
-                              },
-                            });
-                          } else {
-                            this.$message({
-                              message: res.data.msg,
-                              type: "error",
-                              duration: 1500,
-                            });
-                          }
-                        })
-                        // 新增：捕获请求异常
-                        .catch(err => {
-                          this.$message.error("提交失败：" + err.message);
-                        });
-                  }
-                })
-                // 新增：捕获列表请求异常
-                .catch(err => {
-                  this.$message.error("查询数据失败：" + err.message);
-                });
-          } else {
-            var obj = JSON.parse(localStorage.getItem("crossObj"));
-            var table = localStorage.getItem("crossTable");
-            this.$http.post("yuyuexinxi/add", this.ruleForm).then((res) => {
-              if (res.data.code == 0) {
-                this.$message({
-                  message: "操作成功",
-                  type: "success",
-                  duration: 1500,
-                  onClose: () => {
-                    this.$router.go(-1);
-                  },
-                });
-              } else {
-                this.$message({
-                  message: res.data.msg,
-                  type: "error",
-                  duration: 1500,
-                });
-              }
-            })
-                // 新增：捕获提交请求异常
-                .catch(err => {
-                  this.$message.error("提交失败：" + err.message);
-                });
-          }
+              })
+              .catch(err => {
+                console.error("请求失败：", err);
+                this.$message.error("网络异常：" + (err.message || "提交失败"));
+              });
         }
       });
     },
@@ -595,7 +565,6 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
-// 响应式基础样式
 @media (max-width: 768px) {
   .add-update-preview .el-form-item >>> .el-form-item__label {
     width: 100% !important;
@@ -627,7 +596,6 @@ export default {
   margin-left: 120px;
 }
 
-// 统一输入框样式
 .add-update-preview .el-input >>> .el-input__inner,
 .add-update-preview .el-select >>> .el-input__inner,
 .add-update-preview .el-date-editor >>> .el-input__inner {
@@ -643,12 +611,10 @@ export default {
   box-sizing: border-box;
 }
 
-// 按钮hover效果
 ::v-deep .el-button:hover {
   opacity: 0.9;
 }
 
-// 移除图片相关样式
 .add-update-preview .el-textarea >>> .el-textarea__inner {
   border: 2px solid #2e61e1;
   border-radius: 4px;

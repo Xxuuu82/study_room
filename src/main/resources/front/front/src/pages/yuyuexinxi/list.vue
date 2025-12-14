@@ -237,30 +237,30 @@
             </el-tag>
           </template>
         </el-table-column>
-        <!-- 新增：预约开始时间列 -->
+        <!-- 修复：预约开始时间列 - prop改为驼峰yuyueStart，匹配后端返回字段 -->
         <el-table-column
             :resizable="true"
             :sortable="false"
-            prop="yuyue_start"
+            prop="yuyueStart"
             label="预约开始时间"
             min-width="160"
             align="center"
         >
           <template slot-scope="scope">
-            {{ scope.row.yuyue_start }}
+            {{ scope.row.yuyueStart || "-" }}
           </template>
         </el-table-column>
-        <!-- 新增：预约结束时间列 -->
+        <!-- 修复：预约结束时间列 - prop改为驼峰yuyueEnd，匹配后端返回字段 -->
         <el-table-column
             :resizable="true"
             :sortable="false"
-            prop="yuyue_end"
+            prop="yuyueEnd"
             label="预约结束时间"
             min-width="160"
             align="center"
         >
           <template slot-scope="scope">
-            {{ scope.row.yuyue_end }}
+            {{ scope.row.yuyueEnd || "-" }}
           </template>
         </el-table-column>
         <el-table-column
@@ -273,7 +273,8 @@
         >
           <template #default="{ row }">
             <div class="remark-box">
-              {{ row.qiantuibeizhu || "无备注" }}
+              <!-- 修复：备注字段名错误，从qiantuibeizhu改为beizhu -->
+              {{ row.beizhu || "无备注" }}
             </div>
           </template>
         </el-table-column>
@@ -475,7 +476,6 @@ export default {
         cancelButtonText: '取消',
         type: 'success'
       }).then(() => {
-        // 新增：日期格式化函数
         const formatDate = (date) => {
           const y = date.getFullYear();
           const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -486,20 +486,19 @@ export default {
           return `${y}-${m}-${d} ${h}:${min}:${s}`;
         };
 
-        // 步骤1：先写入签到信息到qiandaoxinxi表（日期用格式化后的字符串）
+        // 关键修改：新增yuyuedanhao字段，传递当前预约的单号
         const signInData = {
           mingcheng: row.mingcheng || '',
-          qiandaoshijian: formatDate(new Date()), // 转为后端支持的格式
+          qiandaoshijian: formatDate(new Date()),
           qiandaobeizhu: '正常签到',
           xuehao: localStorage.getItem('username') || '',
           shouji: localStorage.getItem('phone') || '',
           banji: localStorage.getItem('banji') || '',
-          addtime: formatDate(new Date()) // 转为后端支持的格式
+          addtime: formatDate(new Date()),
+          yuyuedanhao: row.yuyuedanhao // 新增：传递预约单号到签到表
         };
 
-        // 调用签到添加接口
         this.$http.post('qiandaoxinxi/add', signInData).then(() => {
-          // 步骤2：更新预约状态（原有逻辑保留）
           return this.$http.post('yuyuexinxi/update', {
             id: row.id,
             qiandaozhuangtai: '已签到'
@@ -526,7 +525,6 @@ export default {
         cancelButtonText: '取消',
         type: 'info'
       }).then(() => {
-        // 复用日期格式化函数
         const formatDate = (date) => {
           const y = date.getFullYear();
           const m = String(date.getMonth() + 1).padStart(2, '0');
@@ -537,22 +535,35 @@ export default {
           return `${y}-${m}-${d} ${h}:${min}:${s}`;
         };
 
-        // 步骤1：先写入签退信息到qiantuixinxi表（日期格式化+字段类型修正）
-        const signOutData = {
-          zixishiid: Number(row.zixishiid) || 0, // 确保是数字类型
-          zuowei: Number(row.zuowei) || 0, // 确保是数字类型
-          mingcheng: row.mingcheng || '',
-          qiantuishijian: formatDate(new Date()), // 日期格式化
-          qiantuibeizhu: '正常签退',
-          xuehao: localStorage.getItem('username') || '',
-          shouji: localStorage.getItem('phone') || '',
-          banji: localStorage.getItem('banji') || '',
-          addtime: formatDate(new Date()) // 日期格式化
-        };
+        // 关键修改1：新增yuyuedanhao字段
+        // 关键修改2：先查询签到时间，计算自习时长
+        this.$http.get(`qiandaoxinxi/getByYuyueDanHao/${row.yuyuedanhao}`).then(res => {
+          if (res.data.code === 0 && res.data.data) {
+            const qiandaoTime = new Date(res.data.data.qiandaoshijian);
+            const qiantuiTime = new Date();
+            // 计算自习时长（分钟）
+            const zixishichang = Math.floor((qiantuiTime - qiandaoTime) / 60000);
 
-        // 调用签退保存接口
-        this.$http.post('qiantuixinxi/save', signOutData).then(() => {
-          // 步骤2：更新预约状态
+            const signOutData = {
+              zixishiid: Number(row.zixishiid) || 0,
+              zuowei: Number(row.zuowei) || 0,
+              mingcheng: row.mingcheng || '',
+              qiantuishijian: formatDate(qiantuiTime),
+              qiantuibeizhu: '正常签退',
+              xuehao: localStorage.getItem('username') || '',
+              shouji: localStorage.getItem('phone') || '',
+              banji: localStorage.getItem('banji') || '',
+              addtime: formatDate(qiantuiTime),
+              yuyuedanhao: row.yuyuedanhao, // 新增：传递预约单号到签退表
+              zixishichang: zixishichang // 新增：自习时长
+            };
+
+            return this.$http.post('qiantuixinxi/save', signOutData);
+          } else {
+            this.$message.error('未查询到签到记录，无法签退！');
+            return Promise.reject();
+          }
+        }).then(() => {
           return this.$http.post('yuyuexinxi/update', {
             id: row.id,
             qiantuizhuangtai: '已签退'

@@ -19,7 +19,7 @@
               v-else
               :style='{"width":"100px","height":"100px","borderRadius":"50%","background":"#e6f0ff","color":"#409eff","fontSize":"36px","lineHeight":"100px","display":"inline-block","textAlign":"center"}'
           >
-            <i class="el-icon-user"></i>
+            <<i class="el-icon-user"></</i>
           </div>
           <!-- 隐藏的上传组件：手动控制上传 -->
           <el-upload
@@ -222,7 +222,7 @@
             </el-form>
           </div>
 
-          <!-- 取消预约列表：修复样式 -->
+          <!-- 取消预约列表：修复样式 + 替换预约时间为开始/结束时间 -->
           <div :style='{"background":"#fff","borderRadius":"8px","boxShadow":"0 2px 8px rgba(0,0,0,0.05)","overflow":"hidden"}'>
             <el-table
                 class="custom-table"
@@ -236,7 +236,9 @@
               <el-table-column type="index" label="索引" width="80" align="center"></el-table-column>
               <el-table-column prop="yuyuedanhao" label="预约单号" min-width="150" align="center"></el-table-column>
               <el-table-column prop="mingcheng" label="名称" min-width="120" align="center"></el-table-column>
-              <el-table-column prop="yuyueshijian" label="预约时间" min-width="180" align="center"></el-table-column>
+              <!-- 修改为驼峰命名（与后端返回的字段名一致） -->
+              <el-table-column prop="yuyueStart" label="预约开始时间" min-width="180" align="center"></el-table-column>
+              <el-table-column prop="yuyueEnd" label="预约结束时间" min-width="180" align="center"></el-table-column>
               <el-table-column prop="quxiaoshijian" label="取消时间" min-width="180" align="center"></el-table-column>
               <el-table-column prop="xuehao" label="学号" min-width="120" align="center"></el-table-column>
               <el-table-column prop="xingming" label="姓名" min-width="120" align="center"></el-table-column>

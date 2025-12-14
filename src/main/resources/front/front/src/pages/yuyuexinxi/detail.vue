@@ -10,8 +10,6 @@
     <div class="detail-preview" :style='{"minHeight":"600px","width":"1000px","margin":"10px auto","position":"relative","height":"auto"}'>
       <div class="attr" :style='{"minHeight":"400px","padding":"20px","position":"relative","background":"#fff","display":"flex","borderRadius":"8px","boxShadow":"0 1px 6px rgba(0, 0, 0, .08)"}'>
         <div class="info" :style='{"width":"100%","padding":"20px","background":"#f8f9fa","borderRadius":"8px"}'>
-          <!-- 删除了“已签到”方框 -->
-
           <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>预约单号</div>
             <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.yuyuedanhao}}</div>
@@ -24,28 +22,56 @@
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>座位</div>
             <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.zuowei}}</div>
           </div>
-          <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
-            <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>签到状态</div>
-            <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.qiandaozhuangtai}}</div>
+
+
+          <!-- 签到状态区域 -->
+          <div class="item">
+            <div class="lable">签到状态</div>
+            <div>
+              {{ detail.qiandaozhuangtai }}
+              <!-- 显示签到表的qiandaoshijian -->
+              <span v-if="detail.qiandaozhuangtai === '已签到'">（{{ detail.qiandaoshijian || '-' }}）</span>
+            </div>
           </div>
-          <!-- 原“预约时间”改为“预约开始时间” -->
+
+          <!-- 签退状态区域 -->
+          <div class="item">
+            <div class="lable">签退状态</div>
+            <div>
+              {{ detail.qiantuizhuangtai }}
+              <!-- 显示签退表的qiantuishijian -->
+              <span v-if="detail.qiantuizhuangtai === '已签退'">（{{ detail.qiantuishijian || '-' }}）</span>
+            </div>
+          </div>
+
+          <!-- 自习时长区域 -->
+          <div class="item">
+            <div class="lable">自习时长</div>
+            <div>
+              <!-- 显示签退表的zixishichang -->
+              {{ detail.zixishichang || 0 }}
+            </div>
+          </div>
+
+
+          <!-- 预约开始时间 -->
           <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>预约开始时间</div>
-            <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.yuyue_start}}</div>
+            <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.yuyueStart || '-'}}</div>
           </div>
-          <!-- 新增“预约结束时间” -->
+          <!-- 预约结束时间 -->
           <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>预约结束时间</div>
-            <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.yuyue_end}}</div>
+            <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.yuyueEnd || '-'}}</div>
           </div>
-          <!-- 新增“是否违规” -->
+          <!-- 是否违规 -->
           <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>是否违规</div>
             <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.shifouweigui || '否'}}</div>
           </div>
           <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>备注</div>
-            <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.beizhu}}</div>
+            <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.beizhu || '无备注'}}</div>
           </div>
           <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>学号</div>
@@ -153,6 +179,7 @@ export default {
       if(this.$route.query.detailObj) {
         this.detail = JSON.parse(this.$route.query.detailObj);
       }
+      // 调用后端接口时，需要同时获取签到/签退表的数据
       this.$http.get(this.tablename + '/detail/'  + this.detail.id, {}).then(res => {
         if (res.data.code == 0) {
           this.detail = res.data.data;
@@ -236,6 +263,7 @@ export default {
 </script>
 
 <style rel="stylesheet/scss" lang="scss" scoped>
+/* 样式部分保持不变 */
 .detail-preview {
   .attr {
   }

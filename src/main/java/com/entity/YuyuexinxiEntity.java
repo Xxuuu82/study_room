@@ -1,5 +1,6 @@
 package com.entity;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -10,14 +11,12 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 
-
 /**
  * 预约信息
  */
 @TableName("yuyuexinxi")
 public class YuyuexinxiEntity<T> implements Serializable {
     private static final long serialVersionUID = 1L;
-
 
     public YuyuexinxiEntity() {
 
@@ -27,7 +26,6 @@ public class YuyuexinxiEntity<T> implements Serializable {
         try {
             BeanUtils.copyProperties(this, t);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -37,23 +35,18 @@ public class YuyuexinxiEntity<T> implements Serializable {
      */
     @TableId
     private Long id;
+
     /**
      * 预约单号
      */
-
     private String yuyuedanhao;
 
     /**
      * 名称
      */
-
     private String mingcheng;
 
-    /**
-     * 图片
-     */
 
-    private String tupian;
 
     /**
      * 自习室序号
@@ -63,64 +56,74 @@ public class YuyuexinxiEntity<T> implements Serializable {
     /**
      * 座位
      */
-
     private Integer zuowei;
 
     /**
      * 签到状态
      */
-
     private String qiandaozhuangtai;
 
     /**
      * 签退状态
      */
-
     private String qiantuizhuangtai;
-    /**
-     * 预约时间
-     */
 
+    /**
+     * 预约开始时间（替换原单一预约时间）
+     * 关键修复：加@TableField指定数据库字段名yuyue_start
+     */
+    @TableField("yuyue_start") // 映射数据库下划线字段
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat
-    private Date yuyueshijian;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date yuyueStart;
+
+    /**
+     * 预约结束时间
+     * 关键修复：加@TableField指定数据库字段名yuyue_end
+     */
+    @TableField("yuyue_end") // 映射数据库下划线字段
+    @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date yuyueEnd;
 
     /**
      * 备注
      */
-
     private String beizhu;
 
     /**
      * 学号
      */
-
     private String xuehao;
 
     /**
      * 姓名
      */
-
     private String xingming;
 
     /**
      * 手机
      */
-
     private String shouji;
-
 
     /**
      * 审核回复
      */
-
     private String shhf;
 
 
+    private Date qiandaoshijian; // 签到时间（从签到表关联）
+    private Date qiantuishijian; // 签退时间（从签退表关联）
+    private Double zixishichang; // 自习时长（从签退表关联）
+
+// 需生成对应的get/set方法
+
+
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date addtime;
 
+    // ========== getter/setter 方法 ==========
     public Date getAddtime() {
         return addtime;
     }
@@ -137,187 +140,141 @@ public class YuyuexinxiEntity<T> implements Serializable {
         this.id = id;
     }
 
-    /**
-     * 设置：预约单号
-     */
-    public void setYuyuedanhao(String yuyuedanhao) {
-        this.yuyuedanhao = yuyuedanhao;
-    }
-
-    /**
-     * 获取：预约单号
-     */
     public String getYuyuedanhao() {
         return yuyuedanhao;
     }
 
-    /**
-     * 设置：名称
-     */
-    public void setMingcheng(String mingcheng) {
-        this.mingcheng = mingcheng;
+    public void setYuyuedanhao(String yuyuedanhao) {
+        this.yuyuedanhao = yuyuedanhao;
     }
 
-    /**
-     * 获取：名称
-     */
     public String getMingcheng() {
         return mingcheng;
     }
 
-    /**
-     * 设置：图片
-     */
-    public void setTupian(String tupian) {
-        this.tupian = tupian;
+    public void setMingcheng(String mingcheng) {
+        this.mingcheng = mingcheng;
     }
 
-    /**
-     * 获取：图片
-     */
-    public String getTupian() {
-        return tupian;
-    }
+//    public String getTupian() {
+//        return tupian;
+//    }
+//
+//    public void setTupian(String tupian) {
+//        this.tupian = tupian;
+//    }
 
-    /**
-     * 设置：座位
-     */
-    public void setZuowei(Integer zuowei) {
-        this.zuowei = zuowei;
-    }
-
-    /**
-     * 获取：座位
-     */
     public Integer getZuowei() {
         return zuowei;
     }
 
-    /**
-     * 设置：自习室序号
-     */
+    public void setZuowei(Integer zuowei) {
+        this.zuowei = zuowei;
+    }
+
+    public Integer getZixishiid() {
+        return zixishiid;
+    }
+
     public void setZixishiid(Integer zixishiid) {
         this.zixishiid = zixishiid;
     }
 
-    /**
-     * 获取：自习室序号
-     */
-    public Integer getZixishiid() {
-        return zixishiid;
-    }
-    /**
-     * 设置：签到状态
-     */
-    public void setQiandaozhuangtai(String qiandaozhuangtai) {
-        this.qiandaozhuangtai = qiandaozhuangtai;
-    }
-
-    /**
-     * 获取：签到状态
-     */
-    public String getQiantuizhuangtai() {
-        return qiantuizhuangtai;
-    }
-
-    /**
-     * 设置：签退状态
-     */
-    public void setQiantuizhuangtai(String qiantuizhuangtai) {
-        this.qiantuizhuangtai = qiantuizhuangtai;
-    }
-
-    /**
-     * 获取：签退状态
-     */
     public String getQiandaozhuangtai() {
         return qiandaozhuangtai;
     }
 
-    /**
-     * 设置：预约时间
-     */
-    public void setYuyueshijian(Date yuyueshijian) {
-        this.yuyueshijian = yuyueshijian;
+    public void setQiandaozhuangtai(String qiandaozhuangtai) {
+        this.qiandaozhuangtai = qiandaozhuangtai;
     }
 
-    /**
-     * 获取：预约时间
-     */
-    public Date getYuyueshijian() {
-        return yuyueshijian;
+    public String getQiantuizhuangtai() {
+        return qiantuizhuangtai;
     }
 
-    /**
-     * 设置：备注
-     */
-    public void setBeizhu(String beizhu) {
-        this.beizhu = beizhu;
+    public void setQiantuizhuangtai(String qiantuizhuangtai) {
+        this.qiantuizhuangtai = qiantuizhuangtai;
     }
 
-    /**
-     * 获取：备注
-     */
+    // 预约开始时间 getter/setter
+    public Date getYuyueStart() {
+        return yuyueStart;
+    }
+
+    public void setYuyueStart(Date yuyueStart) {
+        this.yuyueStart = yuyueStart;
+    }
+
+    // 预约结束时间 getter/setter
+    public Date getYuyueEnd() {
+        return yuyueEnd;
+    }
+
+    public void setYuyueEnd(Date yuyueEnd) {
+        this.yuyueEnd = yuyueEnd;
+    }
+
     public String getBeizhu() {
         return beizhu;
     }
 
-    /**
-     * 设置：学号
-     */
-    public void setXuehao(String xuehao) {
-        this.xuehao = xuehao;
+    public void setBeizhu(String beizhu) {
+        this.beizhu = beizhu;
     }
 
-    /**
-     * 获取：学号
-     */
     public String getXuehao() {
         return xuehao;
     }
 
-    /**
-     * 设置：姓名
-     */
-    public void setXingming(String xingming) {
-        this.xingming = xingming;
+    public void setXuehao(String xuehao) {
+        this.xuehao = xuehao;
     }
 
-    /**
-     * 获取：姓名
-     */
     public String getXingming() {
         return xingming;
     }
 
-    /**
-     * 设置：手机
-     */
-    public void setShouji(String shouji) {
-        this.shouji = shouji;
+    public void setXingming(String xingming) {
+        this.xingming = xingming;
     }
 
-    /**
-     * 获取：手机
-     */
     public String getShouji() {
         return shouji;
     }
 
-
-
-    /**
-     * 设置：回复
-     */
-    public void setShhf(String shhf) {
-        this.shhf = shhf;
+    public void setShouji(String shouji) {
+        this.shouji = shouji;
     }
 
-    /**
-     * 获取：回复
-     */
     public String getShhf() {
         return shhf;
     }
 
+    public void setShhf(String shhf) {
+        this.shhf = shhf;
+    }
+
+    public Double getZixishichang() {
+        return zixishichang;
+    }
+
+    public void setZixishichang(Double zixishichang) {
+        this.zixishichang = zixishichang;
+    }
+
+    public Date getQiandaoshijian() {
+        return qiandaoshijian;
+    }
+
+    public void setQiandaoshijian(Date qiandaoshijian) {
+        this.qiandaoshijian = qiandaoshijian;
+    }
+
+    public Date getQiantuishijian() {
+        return qiantuishijian;
+    }
+
+    public void setQiantuishijian(Date qiantuishijian) {
+        this.qiantuishijian = qiantuishijian;
+    }
 }

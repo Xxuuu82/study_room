@@ -56,30 +56,6 @@
           ></el-input>
         </el-form-item>
 
-        <!-- 图片 -->
-        <el-form-item
-            :style="{ width: '50%', margin: '0 0 20px 0' }"
-            class="upload"
-            label="图片"
-            prop="tupian"
-        >
-          <img
-              v-if="ruleForm.tupian && ruleForm.tupian.substring(0, 4) == 'http'"
-              :src="ruleForm.tupian.split(',')[0]"
-              width="100"
-              height="100"
-              style="objectFit: cover; borderRadius: 4px;"
-          />
-          <img
-              v-else-if="ruleForm.tupian"
-              :src="baseUrl + ruleForm.tupian.split(',')[0]"
-              width="100"
-              height="100"
-              style="objectFit: cover; borderRadius: 4px;"
-          />
-          <span v-else>无图片</span>
-        </el-form-item>
-
         <!-- 座位号 -->
         <el-form-item
             :style="{ width: '50%', margin: '0 0 20px 0' }"
@@ -90,20 +66,6 @@
           <el-input
               v-model="ruleForm.zuowei"
               placeholder="座位号"
-              readonly
-          ></el-input>
-        </el-form-item>
-
-        <!-- 预约时间 -->
-        <el-form-item
-            :style="{ width: '50%', margin: '0 0 20px 0' }"
-            class="input"
-            label="预约时间"
-            prop="yuyueshijian"
-        >
-          <el-input
-              v-model="ruleForm.yuyueshijian"
-              placeholder="预约时间"
               readonly
           ></el-input>
         </el-form-item>
@@ -120,6 +82,37 @@
               v-model="ruleForm.quxiaoshijian"
               type="datetime"
               placeholder="取消时间"
+              readonly
+          ></el-date-picker>
+        </el-form-item>
+
+        <!-- 预约开始+结束时间（同排） -->
+        <el-form-item
+            :style="{ width: '50%', margin: '0 0 20px 0' }"
+            class="date"
+            label="预约开始时间"
+            prop="yuyue_start"
+        >
+          <el-date-picker
+              value-format="yyyy-MM-dd HH:mm:ss"
+              v-model="ruleForm.yuyue_start"
+              type="datetime"
+              placeholder="预约开始时间"
+              readonly
+          ></el-date-picker>
+        </el-form-item>
+
+        <el-form-item
+            :style="{ width: '50%', margin: '0 0 20px 0' }"
+            class="date"
+            label="预约结束时间"
+            prop="yuyue_end"
+        >
+          <el-date-picker
+              value-format="yyyy-MM-dd HH:mm:ss"
+              v-model="ruleForm.yuyue_end"
+              type="datetime"
+              placeholder="预约结束时间"
               readonly
           ></el-date-picker>
         </el-form-item>
@@ -252,9 +245,9 @@ export default {
       ruleForm: {
         yuyuedanhao: "",
         mingcheng: "",
-        tupian: "",
         zuowei: "",
-        yuyueshijian: "",
+        yuyue_start: "", // 新增：预约开始时间
+        yuyue_end: "",   // 新增：预约结束时间
         quxiaoshijian: "",
         quxiaoyuanyin: "",
         xuehao: "",
@@ -292,7 +285,7 @@ export default {
       return `${y}-${m}-${d} ${h}:${min}:${s}`;
     },
 
-    // 初始化预约单数据
+    // 初始化预约单数据（强化校验）
     initOrderData() {
       console.log('路由参数:', this.$route.query);
 
@@ -305,12 +298,32 @@ export default {
           console.log('解析到的订单数据:', order);
         } catch (e) {
           console.error('解析orderData失败:', e);
+          this.$message.error('预约数据解析失败，请返回重试');
+          this.back();
+          return;
         }
       }
 
       // 如果没有获取到数据，显示错误并返回
       if (!order) {
-        this.$message.error('未获取到预约单信息');
+        this.$message.error('未获取到预约单信息，请返回重试');
+        this.back();
+        return;
+      }
+
+      // 核心字段非空校验
+      if (!order.id) {
+        this.$message.error('预约单ID缺失，无法取消');
+        this.back();
+        return;
+      }
+      if (!order.zixishiid) {
+        this.$message.error('自习室ID缺失，无法取消');
+        this.back();
+        return;
+      }
+      if (!order.zuowei) {
+        this.$message.error('座位号缺失，无法取消');
         this.back();
         return;
       }
@@ -318,37 +331,37 @@ export default {
       // 赋值预约单信息
       this.ruleForm.yuyuedanhao = order.yuyuedanhao || '';
       this.ruleForm.mingcheng = order.mingcheng || '';
-      this.ruleForm.tupian = order.tupian || '';
       this.ruleForm.zuowei = order.zuowei || '';
-      this.ruleForm.yuyueshijian = order.yuyueshijian || '';
+      this.ruleForm.yuyue_start = order.yuyueStart || order.yuyue_start || ''; // 新增：预约开始时间
+      this.ruleForm.yuyue_end = order.yuyueEnd || order.yuyue_end || '';       // 新增：预约结束时间
       this.ruleForm.xuehao = order.xuehao || '';
       this.ruleForm.xingming = order.xingming || '';
       this.ruleForm.shouji = order.shouji || '';
       this.ruleForm.yuyueId = order.id || '';
-      // 新增：赋值自习室ID，解决非法表名问题
       this.ruleForm.zixishiid = order.zixishiid || '';
 
       console.log('初始化后的表单数据:', this.ruleForm);
     },
 
-    // 提交取消预约（仅修改这部分：补充yuyueshijian参数）
+    // 提交取消预约（优化错误提示）
     onSubmit() {
       this.$refs["ruleForm"].validate((valid) => {
         if (valid) {
-          // 构造提交数据（关键修改：添加yuyueshijian字段）
+          // 构造提交数据
           const submitData = {
-            crossrefid: this.ruleForm.yuyueId, // 核心：传递原预约ID给后端crossrefid
+            crossrefid: this.ruleForm.yuyueId,
             yuyueId: this.ruleForm.yuyueId,
             yuyuedanhao: this.ruleForm.yuyuedanhao,
             mingcheng: this.ruleForm.mingcheng,
             zuowei: this.ruleForm.zuowei,
-            yuyueshijian: this.ruleForm.yuyueshijian, // 新增：传递预约时间
+            yuyue_start: this.ruleForm.yuyue_start,
+            yuyue_end: this.ruleForm.yuyue_end,
             quxiaoshijian: this.ruleForm.quxiaoshijian,
             quxiaoyuanyin: this.ruleForm.quxiaoyuanyin,
             xuehao: this.ruleForm.xuehao,
             xingming: this.ruleForm.xingming,
             shouji: this.ruleForm.shouji,
-            zixishiid: this.ruleForm.zixishiid // 传递自习室ID到后端
+            zixishiid: this.ruleForm.zixishiid
           };
 
           console.log('提交取消预约数据:', submitData);
@@ -360,19 +373,26 @@ export default {
                 type: "success",
                 duration: 1500,
                 onClose: () => {
-                  // 返回预约信息列表页
                   this.$router.push('/index/yuyuexinxi');
                 }
               });
             } else {
+              // 显示后端返回的具体错误信息
               this.$message.error(data.msg || '取消预约提交失败！');
             }
           }).catch((error) => {
-            console.error('请求失败:', error);
-            this.$message.error('网络请求失败，请重试');
+            console.error('请求失败详情:', error);
+            // 区分网络错误和后端错误
+            if (error.status === 500) {
+              this.$message.error('服务器处理失败，请联系管理员或稍后重试');
+            } else if (error.status === 404) {
+              this.$message.error('接口不存在，请检查后端服务');
+            } else {
+              this.$message.error('网络请求失败，请检查网络连接');
+            }
           });
         } else {
-          this.$message.error('请完善表单信息');
+          this.$message.error('请完善表单信息（取消原因长度5-200字）');
         }
       });
     },
@@ -447,52 +467,6 @@ export default {
   width: 200px;
   font-size: 14px;
   height: 40px;
-}
-
-.add-update-preview >>> .el-upload--picture-card {
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  width: auto;
-  height: auto;
-  line-height: initial;
-  vertical-align: middle;
-}
-
-.add-update-preview >>> .upload .upload-img {
-  border: 1px dashed #797979;
-  cursor: pointer;
-  border-radius: 6px;
-  color: #797979;
-  width: 90px;
-  font-size: 32px;
-  line-height: 90px;
-  text-align: center;
-  height: 90px;
-}
-
-.add-update-preview >>> .el-upload-list .el-upload-list__item {
-  border: 1px dashed #797979;
-  cursor: pointer;
-  border-radius: 6px;
-  color: #797979;
-  width: 90px;
-  font-size: 32px;
-  line-height: 90px;
-  text-align: center;
-  height: 90px;
-}
-
-.add-update-preview >>> .el-upload .el-icon-plus {
-  border: 1px dashed #797979;
-  cursor: pointer;
-  border-radius: 6px;
-  color: #797979;
-  width: 90px;
-  font-size: 32px;
-  line-height: 90px;
-  text-align: center;
-  height: 90px;
 }
 
 .add-update-preview .el-textarea >>> .el-textarea__inner {

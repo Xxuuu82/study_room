@@ -18,7 +18,6 @@ import java.util.Map;
 @Service("qiantuixinxiService")
 public class QiantuixinxiServiceImpl extends ServiceImpl<QiantuixinxiDao, QiantuixinxiEntity> implements QiantuixinxiService {
 
-
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         Page<QiantuixinxiEntity> page = this.selectPage(
@@ -36,7 +35,6 @@ public class QiantuixinxiServiceImpl extends ServiceImpl<QiantuixinxiDao, Qiantu
         return pageUtil;
     }
 
-
     @Override
     public List<QiantuixinxiView> selectListView(Wrapper<QiantuixinxiEntity> wrapper) {
         return baseMapper.selectListView(wrapper);
@@ -47,5 +45,10 @@ public class QiantuixinxiServiceImpl extends ServiceImpl<QiantuixinxiDao, Qiantu
         return baseMapper.selectView(wrapper);
     }
 
-
+    // ========== 新增：根据预约单号查询签退记录 ==========
+    @Override
+    public QiantuixinxiEntity getByYuyueDanHao(String yuyuedanhao) {
+        return this.selectOne(new EntityWrapper<QiantuixinxiEntity>()
+                .eq("yuyuedanhao", yuyuedanhao));
+    }
 }

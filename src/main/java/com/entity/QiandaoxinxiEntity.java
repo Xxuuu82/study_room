@@ -76,6 +76,8 @@ public class QiandaoxinxiEntity<T> implements Serializable {
 
     private String banji;
 
+    private String yuyuedanhao;   //关联预约单号
+
     /**
      * 回复内容
      */
@@ -187,6 +189,16 @@ public class QiandaoxinxiEntity<T> implements Serializable {
     public String getBanji() {
         return banji;
     }
+
+
+    // 新增 get/set 方法
+    public String getYuyuedanhao() {
+        return yuyuedanhao;
+    }
+    public void setYuyuedanhao(String yuyuedanhao) {
+        this.yuyuedanhao = yuyuedanhao;
+    }
+
 
     /**
      * 设置：回复内容

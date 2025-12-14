@@ -116,6 +116,13 @@ public class QiantuixinxiController {
         return R.ok().put("data", qiantuixinxi);
     }
 
+    // ========== 新增：根据预约单号查询签退记录 ==========
+    @IgnoreAuth
+    @GetMapping("/getByYuyueDanHao/{yuyuedanhao}")
+    public R getByYuyueDanHao(@PathVariable("yuyuedanhao") String yuyuedanhao) {
+        QiantuixinxiEntity qiantuixinxi = qiantuixinxiService.getByYuyueDanHao(yuyuedanhao);
+        return R.ok().put("data", qiantuixinxi);
+    }
 
     /**
      * 后端保存
@@ -218,8 +225,6 @@ public class QiantuixinxiController {
         //ValidatorUtils.validateEntity(qiantuixinxi);
         qiantuixinxiService.updateById(qiantuixinxi);//全部更新
         return R.ok();
-
-
     }
 
 
@@ -278,6 +283,4 @@ public class QiantuixinxiController {
         int count = qiantuixinxiService.selectCount(wrapper);
         return R.ok().put("count", count);
     }
-
-
 }

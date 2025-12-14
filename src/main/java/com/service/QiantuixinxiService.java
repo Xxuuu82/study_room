@@ -10,7 +10,6 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 import java.util.Map;
 
-
 /**
  * 签退信息
  */
@@ -18,13 +17,12 @@ public interface QiantuixinxiService extends IService<QiantuixinxiEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
 
-
     List<QiantuixinxiView> selectListView(Wrapper<QiantuixinxiEntity> wrapper);
 
     QiantuixinxiView selectView(@Param("ew") Wrapper<QiantuixinxiEntity> wrapper);
 
     PageUtils queryPage(Map<String, Object> params, Wrapper<QiantuixinxiEntity> wrapper);
 
-
+    // ========== 新增：根据预约单号查询签退记录 ==========
+    QiantuixinxiEntity getByYuyueDanHao(String yuyuedanhao);
 }
-

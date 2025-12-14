@@ -47,5 +47,12 @@ public class QiandaoxinxiServiceImpl extends ServiceImpl<QiandaoxinxiDao, Qianda
         return baseMapper.selectView(wrapper);
     }
 
+    // ========== 仅新增该方法，其余逻辑不变 ==========
+    @Override
+    public QiandaoxinxiEntity getByYuyueDanHao(String yuyuedanhao) {
+        // 通过预约单号查询唯一的签到记录
+        return this.selectOne(new EntityWrapper<QiandaoxinxiEntity>()
+                .eq("yuyuedanhao", yuyuedanhao));
+    }
 
 }

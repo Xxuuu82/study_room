@@ -7,9 +7,9 @@ import com.entity.view.YuyuexinxiView;
 import com.utils.PageUtils;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
 
 /**
  * 预约信息
@@ -18,13 +18,25 @@ public interface YuyuexinxiService extends IService<YuyuexinxiEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
 
-
     List<YuyuexinxiView> selectListView(Wrapper<YuyuexinxiEntity> wrapper);
 
     YuyuexinxiView selectView(@Param("ew") Wrapper<YuyuexinxiEntity> wrapper);
 
     PageUtils queryPage(Map<String, Object> params, Wrapper<YuyuexinxiEntity> wrapper);
 
+    // 新增：提交预约（核心业务方法，适配你的数据库和预约逻辑）
+    boolean submitYuyue(
+            Integer zixishiid,  // 自习室序号
+            Integer zuowei,     // 座位号
+            String xuehao,      // 学号
+            String xingming,    // 姓名
+            String shouji,      // 手机
+            Date yuyueStart,    // 预约开始时间（对应数据库yuyue_start）
+            Date yuyueEnd,      // 预约结束时间（对应数据库yuyue_end）
+            String mingcheng    // 新增：自习室名称
+    );
+
+    // 新增：查询指定座位的所有已预约时段（供前端展示空闲/占用时段）
+    List<YuyuexinxiEntity> getSeatYuyueList(Integer zixishiid, Integer zuowei);
 
 }
-

@@ -50,14 +50,15 @@
         >
           <input
               :style="{
-              border: '0px solid rgba(64, 158, 255, 1)',
+              border: '1px solid #ddd',
               padding: '0 10px',
               color: '#000',
-              outlineOffset: '4px',
               background: '#F9F9F9',
               width: '100%',
               fontSize: '14px',
               height: '44px',
+              borderRadius: '4px',
+              outline: 'none'
             }"
               v-model="loginForm.username"
               placeholder="请输入账户"
@@ -71,14 +72,15 @@
         >
           <input
               :style="{
-              border: '0px solid rgba(64, 158, 255, 1)',
+              border: '1px solid #ddd',
               padding: '0 10px',
               color: '#000',
-              outlineOffset: '4px',
               background: '#F9F9F9',
               width: '100%',
               fontSize: '14px',
               height: '44px',
+              borderRadius: '4px',
+              outline: 'none'
             }"
               v-model="loginForm.password"
               placeholder="请输入密码"
@@ -96,14 +98,15 @@
           >
             <input
                 :style="{
-                border: '0px solid #ddd',
+                border: '1px solid #ddd',
                 padding: '0 10px',
                 color: '#000',
-                outlineOffset: '4px',
                 background: '#F9F9F9',
                 width: '60%',
                 fontSize: '14px',
                 height: '44px',
+                borderRadius: '4px',
+                outline: 'none'
               }"
                 v-model="loginForm.code"
                 placeholder="请输入验证码"
@@ -118,6 +121,9 @@
                 justifyContent: 'space-around',
                 alignItems: 'center',
                 height: '44px',
+                background: '#f9f9f9',
+                borderRadius: '4px',
+                border: '1px solid #ddd'
               }"
             >
               <span
@@ -238,14 +244,11 @@
             }"
               :to="{
               path: '/register',
-              query: { role: item.tableName, pageFlag: 'register' },
+              query: { role: 'xuesheng', pageFlag: 'register' },
             }"
-              v-if="item.hasFrontRegister == '是'"
-              v-for="(item, index) in roles"
-              :key="index"
               @mouseenter="style={background: 'rgba(120, 171, 195, 0.2)'}"
               @mouseleave="style={background: 'rgba(120, 171, 195, 0.1)'}"
-          >注册{{ item.roleName.replace("注册", "") }}</router-link
+          >注册学生</router-link
           >
         </div>
       </el-form>
@@ -258,7 +261,7 @@ export default {
   //数据集合
   data() {
     return {
-      baseUrl: this.$config.baseUrl,
+      baseUrl: this.$config.baseUrl || '/study_room/',
       loginType: 1,
       roleMenus: [
         {
@@ -426,7 +429,7 @@ export default {
       loginForm: {
         username: "",
         password: "",
-        tableName: "",
+        tableName: "xuesheng", // 默认选择学生
         code: "",
       },
       role: "",
@@ -472,6 +475,16 @@ export default {
         this.roles.push(this.roleMenus[item]);
       }
     }
+    // 设置默认角色
+    if (this.roles.length > 0) {
+      this.loginForm.tableName = this.roles[0].tableName;
+      this.role = this.roles[0].roleName;
+    }
+
+    // 调试日志
+    console.log('登录页面初始化完成');
+    console.log('baseUrl配置:', this.$config?.baseUrl);
+    console.log('$http对象是否存在:', !!this.$http);
   },
   mounted() {},
   //方法集合
@@ -515,12 +528,17 @@ export default {
       this.role = row.roleName;
     },
     submitForm(formName) {
+      console.log('开始登录提交...');
+
+      // 验证码校验
       const inputCode = this.loginForm.code.toLowerCase();
       if (inputCode !== this.generatedCode) {
         this.$message.error('验证码输入错误');
         this.randomString();
         return;
       }
+
+      // 角色选择校验
       if (this.roles.length != 1) {
         if (!this.role) {
           this.$message.error("请选择登录用户类型");
@@ -530,44 +548,72 @@ export default {
         this.role = this.roles[0].roleName;
         this.loginForm.tableName = this.roles[0].tableName;
       }
+
+      // 表单验证
       this.$refs[formName].validate((valid) => {
         if (valid) {
+          console.log('表单验证通过，开始发送登录请求');
+          console.log('登录参数:', this.loginForm);
+
+          // 关键修复：移除有问题的代码行
+          // 注释掉或删除导致错误的代码：
+          // console.log('完整请求地址:', this.$http.defaults.baseURL ? this.$http.defaults.baseURL + requestUrl : requestUrl);
+
+          // 构建安全的请求URL
+          const baseUrl = this.$config?.baseUrl || '/study_room/';
+          const requestUrl = `${baseUrl}${this.loginForm.tableName}/login`;
+
+          console.log('登录请求URL:', requestUrl);
+          console.log('请求方法: POST');
+
+          // 发送登录请求
           this.$http
-              .get(`${this.loginForm.tableName}/login`, {
-                params: this.loginForm,
+              .post(requestUrl, null, {
+                params: {
+                  username: this.loginForm.username,
+                  password: this.loginForm.password,
+                  tableName: this.loginForm.tableName
+                },
               })
               .then((res) => {
-                if (res.data.code === 0) {
+                console.log('登录响应:', res.data);
+                if (res.data && res.data.code === 0) {
+                  // 存储登录信息
                   localStorage.setItem("Token", res.data.token);
                   localStorage.setItem("UserTableName", this.loginForm.tableName);
                   localStorage.setItem("username", this.loginForm.username);
                   localStorage.setItem("adminName", this.loginForm.username);
                   localStorage.setItem("sessionTable", this.loginForm.tableName);
                   localStorage.setItem("role", this.role);
-                  localStorage.setItem(
-                      "keyPath",
-                      this.$config.indexNav.length + 2
-                  );
-
-                  // 核心修改：按角色跳转不同前端
-                  if (this.role === "管理员") {
-                    // 管理员跳转到admin项目首页（根据实际部署路径调整）
-                    window.location.href = "/admin/index/";
-                  } else {
-                    // 学生跳转到front原首页
-                    this.$router.push("/index/center");
-                  }
 
                   this.$message({
                     message: "登录成功",
                     type: "success",
                     duration: 1500,
                   });
+
+                  // 登录成功后跳转
+                  setTimeout(() => {
+                    this.$router.push("/index/center");
+                  }, 1000);
                 } else {
-                  this.$message.error(res.data.msg);
+                  this.$message.error(res.data.msg || "登录失败");
+                }
+              })
+              .catch((error) => {
+                console.error('登录请求失败:', error);
+
+                // 更详细的错误提示
+                if (error.response) {
+                  this.$message.error(`服务器错误: ${error.response.status}`);
+                } else if (error.request) {
+                  this.$message.error("无法连接到服务器，请检查后端是否运行");
+                } else {
+                  this.$message.error("请求配置错误");
                 }
               });
         } else {
+          console.log('表单验证失败');
           return false;
         }
       });
@@ -590,27 +636,27 @@ export default {
   }
 
   .list-item >>> .el-input .el-input__inner {
-    border: 0px solid rgba(64, 158, 255, 1);
+    border: 1px solid #ddd;
     padding: 0 10px;
-    color: '#000';
-    background: '#f9f9f9';
+    color: #000;
+    background: #f9f9f9;
     width: 100%;
     font-size: 14px;
-    outline-offset: 4px;
     height: 44px;
+    border-radius: 4px;
   }
 
   .list-code >>> .el-input .el-input__inner {
-    border: 0px solid rgba(64, 158, 255, 1);
+    border: 1px solid #ddd;
     padding: 0 10px;
-    outline: none;
-    color: '#000';
-    background: '#f9f9f9';
+    color: #000;
+    background: #f9f9f9;
     display: inline-block;
     vertical-align: middle;
     width: calc(100% - 80px);
     font-size: 14px;
     height: 44px;
+    border-radius: 4px;
   }
 
   .list-type >>> .el-radio__input .el-radio__inner {
@@ -618,15 +664,15 @@ export default {
     border-color: #666666;
   }
   .list-type >>> .el-radio__input.is-checked .el-radio__inner {
-    background: #174ad7;
-    border-color: #174ad7;
+    background: #78ABC3;
+    border-color: #78ABC3;
   }
   .list-type >>> .el-radio__label {
     color: #666666;
     font-size: 14px;
   }
   .list-type >>> .el-radio__input.is-checked + .el-radio__label {
-    color: #174ad7;
+    color: #78ABC3;
     font-size: 14px;
   }
 }
