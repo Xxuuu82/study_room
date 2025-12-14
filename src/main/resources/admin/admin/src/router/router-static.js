@@ -17,15 +17,15 @@ import xuesheng_add from '@/views/modules/xuesheng/add-or-update'
 import zixishi_list from '@/views/modules/zixishi/list'
 import zixishi_add from '@/views/modules/zixishi/add-or-update'
 import qiandaoxinxi from '@/views/modules/qiandaoxinxi/list'
-//import qiantuixinxi from '@/views/modules/qiantuixinxi/list'
-import blacklist from '@/views/modules/blacklist/list'
+// 删掉重复的旧引入：import blacklist from '@/views/modules/blacklist/list'
 import message_shensu from '@/views/modules/message/shensu/list'
 import message_tousu from '@/views/modules/message/tousu/list'
 import ranking from '@/views/modules/ranking/ranking'
 import chart from '@/views/modules/chart/chart'
 import config from '@/views/modules/config/list'
 import news from '@/views/modules/news/list'
-
+// 只保留你新建的blacklist.vue的引入（统一命名为blacklist，避免大小写冲突）
+import blacklist from '@/views/blacklist.vue';
 
 //2.配置路由   注意：名字
 const routes = [{
@@ -82,7 +82,8 @@ const routes = [{
     , {
     path: '/blacklist',
     name: '黑名单管理',
-    component: blacklist
+    component: blacklist, // 现在指向你新建的blacklist.vue文件
+    meta: { icon: '', title: 'blacklist' } // 补充meta，确保菜单匹配
   }
     , {
     path: '/message_shensu',
