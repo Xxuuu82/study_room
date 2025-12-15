@@ -181,7 +181,9 @@ public class QiantuixinxiController {
             if (durationInMillis < 0) {
                 return R.error("签退时间不能早于签到时间");
             }
-            double durationMinutes = Math.round(durationInMillis / 600.0) / 10.0;
+            // 修正自习时长计算：先把毫秒转换为分钟，再保留一位小数（例如 83.8167 分钟 -> 83.8）
+            double minutes = durationInMillis / 60000.0;
+            double durationMinutes = Math.round(minutes * 10.0) / 10.0;
             qiantuixinxi.setZixishichang(durationMinutes);
 
             // ========== 修复4：座位状态更新（放宽条件，失败不阻断签退） ==========
