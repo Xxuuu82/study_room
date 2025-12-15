@@ -24,13 +24,15 @@ import quxiaoyuyueAdd from '../pages/quxiaoyuyue/add'
 import qiandaoxinxiList from '../pages/qiandaoxinxi/list'
 import qiandaoxinxiDetail from '../pages/qiandaoxinxi/detail'
 import qiandaoxinxiAdd from '../pages/qiandaoxinxi/add'
-// 引入投诉中心和黑名单详情组件
-import Tousu from '../pages/tousu/list.vue'
-import Weigui from '../pages/weigui/list.vue'
+// 引入投诉中心和违规相关组件（新增：补充add/detail/shensu组件）
+import TousuList from '../pages/tousu/list.vue'
+import TousuAdd from '../pages/tousu/add.vue'
+import TousuDetail from '../pages/tousu/detail.vue'
+import WeiguiList from '../pages/weigui/list.vue'
+import WeiguiDetail from '../pages/weigui/detail.vue'
+import Shensu from '../pages/weigui/shensu.vue'
 // 新增：导入取消预约组件（在yuyuexinxi文件夹下）
 import quxiaoyuyueForm from '../pages/yuyuexinxi/quxiaoyuyue.vue'
-
-
 
 const originalPush = VueRouter.prototype.push
 VueRouter.prototype.push = function push(location) {
@@ -153,17 +155,37 @@ const router = new VueRouter({
                     component: qiandaoxinxiAdd,
                     meta: { requiresAuth: true }
                 },
-                // 投诉中心路由
+                // 投诉相关路由（新增：list/add/detail）
                 {
                     path: 'tousu',
-                    component: Tousu,
-                    meta: { requiresAuth: true } // 投诉中心需要登录
+                    component: TousuList,
+                    meta: { requiresAuth: true } // 投诉列表需要登录
                 },
-                // 黑名单详情路由
+                {
+                    path: 'tousuAdd',
+                    component: TousuAdd,
+                    meta: { requiresAuth: true } // 新增投诉需要登录
+                },
+                {
+                    path: 'tousuDetail',
+                    component: TousuDetail,
+                    meta: { requiresAuth: true } // 投诉详情需要登录
+                },
+                // 违规相关路由（新增：detail/shensu，保留原list）
                 {
                     path: 'weigui',
-                    component: Weigui,
-                    meta: { requiresAuth: true } // 违规记录需要登录
+                    component: WeiguiList,
+                    meta: { requiresAuth: true } // 违规记录列表需要登录
+                },
+                {
+                    path: 'weiguiDetail',
+                    component: WeiguiDetail,
+                    meta: { requiresAuth: true } // 违规详情需要登录
+                },
+                {
+                    path: 'weiguiShensu',
+                    component: Shensu,
+                    meta: { requiresAuth: true } // 违规申诉需要登录
                 },
                 // 修正：取消预约表单路由（规范路径，避免斜杠导致的问题）
                 {
@@ -189,7 +211,7 @@ const router = new VueRouter({
 
 // 新增：全局路由守卫（核心！控制登录权限）
 router.beforeEach((to, from, next) => {
-    // ✅ 关键修改：读取大写的Token（和Local Storage一致）
+    // 关键修改：读取大写的Token（和Local Storage一致）
     const token = localStorage.getItem('Token')
     const isLogin = !!token // 转为布尔值，有token则为已登录
 

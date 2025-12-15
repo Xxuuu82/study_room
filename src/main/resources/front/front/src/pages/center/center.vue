@@ -19,7 +19,7 @@
               v-else
               :style='{"width":"100px","height":"100px","borderRadius":"50%","background":"#e6f0ff","color":"#409eff","fontSize":"36px","lineHeight":"100px","display":"inline-block","textAlign":"center"}'
           >
-            <<i class="el-icon-user"></</i>
+            <i class="el-icon-user"></i>
           </div>
           <!-- 隐藏的上传组件：手动控制上传 -->
           <el-upload
