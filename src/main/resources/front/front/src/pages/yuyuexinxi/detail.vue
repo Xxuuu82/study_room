@@ -23,36 +23,7 @@
             <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.zuowei}}</div>
           </div>
 
-
-          <!-- 签到状态区域 -->
-          <div class="item">
-            <div class="lable">签到状态</div>
-            <div>
-              {{ detail.qiandaozhuangtai }}
-              <!-- 显示签到表的qiandaoshijian -->
-              <span v-if="detail.qiandaozhuangtai === '已签到'">（{{ detail.qiandaoshijian || '-' }}）</span>
-            </div>
-          </div>
-
-          <!-- 签退状态区域 -->
-          <div class="item">
-            <div class="lable">签退状态</div>
-            <div>
-              {{ detail.qiantuizhuangtai }}
-              <!-- 显示签退表的qiantuishijian -->
-              <span v-if="detail.qiantuizhuangtai === '已签退'">（{{ detail.qiantuishijian || '-' }}）</span>
-            </div>
-          </div>
-
-          <!-- 自习时长区域 -->
-          <div class="item">
-            <div class="lable">自习时长</div>
-            <div>
-              <!-- 显示签退表的zixishichang -->
-              {{ detail.zixishichang || 0 }}
-            </div>
-          </div>
-
+          <!-- 已删除：签到状态、签退状态、自习时长区域 -->
 
           <!-- 预约开始时间 -->
           <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
@@ -171,6 +142,7 @@ export default {
     this.init();
   },
   methods: {
+    // 已删除：formatDate时间格式化方法
     goBack() {
       this.$router.push('/index/yuyuexinxi');
     },
@@ -179,11 +151,11 @@ export default {
       if(this.$route.query.detailObj) {
         this.detail = JSON.parse(this.$route.query.detailObj);
       }
-      // 调用后端接口时，需要同时获取签到/签退表的数据
+      // 已删除：关联查询签到/签退表的逻辑，仅保留基础detail查询
       this.$http.get(this.tablename + '/detail/'  + this.detail.id, {}).then(res => {
         if (res.data.code == 0) {
           this.detail = res.data.data;
-          this.title = this.detail.qiandaozhuangtai;
+          this.title = this.detail.mingcheng; // 替换原qiandaozhuangtai，避免空值报错
           this.$forceUpdate();
         }
       });

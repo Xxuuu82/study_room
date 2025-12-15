@@ -39,3 +39,5 @@ SET qt.yuyuedanhao = yy.yuyuedanhao;
 ALTER TABLE yuyuexinxi
     DROP COLUMN qiandao_time,
     DROP COLUMN qiantui_time;
+
+DESCRIBE yuyuexinxi;

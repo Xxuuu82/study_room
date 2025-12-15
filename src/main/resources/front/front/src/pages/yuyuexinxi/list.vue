@@ -237,7 +237,6 @@
             </el-tag>
           </template>
         </el-table-column>
-        <!-- 修复：预约开始时间列 - prop改为驼峰yuyueStart，匹配后端返回字段 -->
         <el-table-column
             :resizable="true"
             :sortable="false"
@@ -250,7 +249,6 @@
             {{ scope.row.yuyueStart || "-" }}
           </template>
         </el-table-column>
-        <!-- 修复：预约结束时间列 - prop改为驼峰yuyueEnd，匹配后端返回字段 -->
         <el-table-column
             :resizable="true"
             :sortable="false"
@@ -273,7 +271,6 @@
         >
           <template #default="{ row }">
             <div class="remark-box">
-              <!-- 修复：备注字段名错误，从qiantuibeizhu改为beizhu -->
               {{ row.beizhu || "无备注" }}
             </div>
           </template>
@@ -286,7 +283,6 @@
         >
           <template slot-scope="scope">
             <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
-              <!-- 详情按钮 -->
               <el-button
                   type="primary"
                   size="mini"
@@ -295,7 +291,6 @@
                   style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #409EFF; background: #409EFF; color: #fff;"
               >详情</el-button
               >
-              <!-- 取消预约按钮 -->
               <el-button
                   type="danger"
                   size="mini"
@@ -304,7 +299,6 @@
                   style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #F56C6C; background: #F56C6C; color: #fff;"
               >取消预约</el-button
               >
-              <!-- 签到按钮（未签到显示） -->
               <el-button
                   size="mini"
                   icon="el-icon-check"
@@ -313,7 +307,6 @@
                   style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #67C23A; background: #67C23A; color: #fff;"
               >签到</el-button
               >
-              <!-- 签退按钮（未签退显示） -->
               <el-button
                   size="mini"
                   icon="el-icon-arrow-right"
@@ -369,7 +362,7 @@ export default {
       dataList: [],
       pageIndex: 1,
       pageSize: 10,
-      total: 0, // 修正：分页总数字段名
+      total: 0,
       totalPage: 0,
       dataListLoading: false,
       layouts: ["total", "prev", "pager", "next", "sizes", "jumper"],
@@ -392,10 +385,9 @@ export default {
       this.getDataList();
     },
     qiandaozhuangtaiChange() {},
-    qiantuizhuangtaiChange() {},
+    qiantuixinxiChange() {},
     getDataList() {
       this.dataListLoading = true;
-      // ✅ 关键修改：替换登录校验逻辑（用已存储的Token/用户名替代不存在的userid）
       const token = localStorage.getItem('Token');
       const username = localStorage.getItem('username');
       if (!token || !username) {
@@ -411,7 +403,6 @@ export default {
         sfsh: '是'
       };
 
-      // 移除多余的排序参数，保持和原代码一致
       if (this.searchForm.yuyuedanhao) {
         params["yuyuedanhao"] = "%" + this.searchForm.yuyuedanhao + "%";
       }
@@ -422,14 +413,12 @@ export default {
         params["qiantuizhuangtai"] = this.searchForm.qiantuizhuangtai;
       }
 
-      // 修正：使用和原代码一致的get请求方式
       this.$http.get('yuyuexinxi/list', {params: params}).then(res => {
         if (res.data.code == 0) {
           this.dataList = res.data.data.list;
-          this.total = res.data.data.total; // 修正：分页总数赋值
+          this.total = res.data.data.total;
           this.pageSize = res.data.data.pageSize;
           this.totalPage = res.data.data.totalPage;
-          console.log('预约列表数据:', this.dataList);
         } else {
           this.dataList = [];
           this.total = 0;
@@ -456,7 +445,6 @@ export default {
         query: { detailObj: JSON.stringify(row) }
       });
     },
-    // 取消预约（直接跳转，不再有确认对话框）
     cancelOrder(row) {
       if (!row.zixishiid) {
         console.warn('当前预约单缺少自习室ID(zixishiid)，请检查后端接口返回数据！');
@@ -469,42 +457,25 @@ export default {
       });
     },
 
-    // ========== 仅修改这部分：签到方法（新增写入数据库逻辑） ==========
+    // 修复：调用新的签到事务接口
     signIn(row) {
       this.$confirm('确定签到吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'success'
       }).then(() => {
-        const formatDate = (date) => {
-          const y = date.getFullYear();
-          const m = String(date.getMonth() + 1).padStart(2, '0');
-          const d = String(date.getDate()).padStart(2, '0');
-          const h = String(date.getHours()).padStart(2, '0');
-          const min = String(date.getMinutes()).padStart(2, '0');
-          const s = String(date.getSeconds()).padStart(2, '0');
-          return `${y}-${m}-${d} ${h}:${min}:${s}`;
-        };
-
-        // 关键修改：新增yuyuedanhao字段，传递当前预约的单号
         const signInData = {
           mingcheng: row.mingcheng || '',
-          qiandaoshijian: formatDate(new Date()),
-          qiandaobeizhu: '正常签到',
           xuehao: localStorage.getItem('username') || '',
           shouji: localStorage.getItem('phone') || '',
           banji: localStorage.getItem('banji') || '',
-          addtime: formatDate(new Date()),
-          yuyuedanhao: row.yuyuedanhao // 新增：传递预约单号到签到表
+          yuyuedanhao: row.yuyuedanhao,
+          yuyueId: row.id // 传递预约ID
         };
 
-        this.$http.post('qiandaoxinxi/add', signInData).then(() => {
-          return this.$http.post('yuyuexinxi/update', {
-            id: row.id,
-            qiandaozhuangtai: '已签到'
-          });
-        }).then(({ data }) => {
-          if (data && data.code === 0) {
+        // 调用新的事务接口
+        this.$http.post('yuyuexinxi/signIn', signInData).then(({ data }) => {
+          if (data.code === 0) {
             this.$message.success('签到成功！');
             this.getDataList();
           } else {
@@ -518,65 +489,70 @@ export default {
       });
     },
 
-    // ========== 仅修改这部分：签退方法（新增写入数据库逻辑） ==========
     signOut(row) {
       this.$confirm('确定签退吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'info'
       }).then(() => {
-        const formatDate = (date) => {
-          const y = date.getFullYear();
-          const m = String(date.getMonth() + 1).padStart(2, '0');
-          const d = String(date.getDate()).padStart(2, '0');
-          const h = String(date.getHours()).padStart(2, '0');
-          const min = String(date.getMinutes()).padStart(2, '0');
-          const s = String(date.getSeconds()).padStart(2, '0');
-          return `${y}-${m}-${d} ${h}:${min}:${s}`;
+        // 1. 构造签退数据（核心：时间转字符串，避免400）
+        const now = new Date();
+        // 转为后端能解析的时间字符串（yyyy-MM-dd HH:mm:ss）
+        const qiantuishijianStr = now.getFullYear() + "-" +
+            String(now.getMonth() + 1).padStart(2, '0') + "-" +
+            String(now.getDate()).padStart(2, '0') + " " +
+            String(now.getHours()).padStart(2, '0') + ":" +
+            String(now.getMinutes()).padStart(2, '0') + ":" +
+            String(now.getSeconds()).padStart(2, '0');
+
+        const signOutData = {
+          zixishiid: Number(row.zixishiid) || 0,
+          zuowei: Number(row.zuowei) || 0,
+          mingcheng: row.mingcheng || '',
+          // 关键：传递字符串格式的时间，后端可直接解析
+          qiantuishijian: qiantuishijianStr,
+          qiantuibeizhu: '正常签退',
+          xuehao: localStorage.getItem('username') || '',
+          shouji: localStorage.getItem('phone') || '',
+          banji: localStorage.getItem('banji') || '',
+          yuyuedanhao: row.yuyuedanhao || '',
+          zixishichang: 0.0
         };
 
-        // 关键修改1：新增yuyuedanhao字段
-        // 关键修改2：先查询签到时间，计算自习时长
-        this.$http.get(`qiandaoxinxi/getByYuyueDanHao/${row.yuyuedanhao}`).then(res => {
-          if (res.data.code === 0 && res.data.data) {
-            const qiandaoTime = new Date(res.data.data.qiandaoshijian);
-            const qiantuiTime = new Date();
-            // 计算自习时长（分钟）
-            const zixishichang = Math.floor((qiantuiTime - qiandaoTime) / 60000);
-
-            const signOutData = {
-              zixishiid: Number(row.zixishiid) || 0,
-              zuowei: Number(row.zuowei) || 0,
-              mingcheng: row.mingcheng || '',
-              qiantuishijian: formatDate(qiantuiTime),
-              qiantuibeizhu: '正常签退',
-              xuehao: localStorage.getItem('username') || '',
-              shouji: localStorage.getItem('phone') || '',
-              banji: localStorage.getItem('banji') || '',
-              addtime: formatDate(qiantuiTime),
-              yuyuedanhao: row.yuyuedanhao, // 新增：传递预约单号到签退表
-              zixishichang: zixishichang // 新增：自习时长
-            };
-
-            return this.$http.post('qiantuixinxi/save', signOutData);
-          } else {
-            this.$message.error('未查询到签到记录，无法签退！');
-            return Promise.reject();
+        // 2. 调用签退保存接口（原有逻辑完全不变）
+        this.$http.post('qiantuixinxi/save', signOutData).then((response) => {
+          if (!response || !response.data) {
+            this.$message.error('签退接口返回异常！');
+            return Promise.reject(new Error('接口返回空数据'));
           }
-        }).then(() => {
-          return this.$http.post('yuyuexinxi/update', {
-            id: row.id,
-            qiantuizhuangtai: '已签退'
-          });
-        }).then(({ data }) => {
-          if (data && data.code === 0) {
+          const data = response.data;
+          if (data.code === 0) {
+            return this.$http.post('yuyuexinxi/update', {
+              id: row.id,
+              qiantuizhuangtai: '已签退'
+            });
+          } else {
+            this.$message.error(data.msg || '签退失败！');
+            return Promise.reject(new Error(data.msg || '签退失败'));
+          }
+        }).then((updateResponse) => {
+          if (!updateResponse || !updateResponse.data) {
+            this.$message.error('更新签退状态接口返回异常！');
+            return;
+          }
+          const updateData = updateResponse.data;
+          if (updateData.code === 0) {
             this.$message.success('签退成功！');
             this.getDataList();
           } else {
-            this.$message.error(data.msg || '签退失败！');
+            this.$message.error(updateData.msg || '更新签退状态失败！');
           }
-        }).catch(() => {
-          this.$message.error('签退请求失败，请重试！');
+        }).catch((err) => {
+          console.error('签退失败详情：', err);
+          const errorMsg = err && err.response && err.response.data && err.response.data.msg
+              ? err.response.data.msg
+              : (err.message || '签退请求失败，请重试！');
+          this.$message.error(errorMsg);
         });
       }).catch(() => {
         this.$message.info('已取消签退');
@@ -709,13 +685,11 @@ export default {
   }
 }
 
-/* 按钮悬停效果 */
 .el-button:hover {
   transform: translateY(-1px);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* 修正样式拼写错误 */
 .justifyContent {
   justify-content: center;
 }
@@ -723,7 +697,6 @@ export default {
   object-fit: cover;
 }
 
-/* 小屏幕适配 */
 @media (max-width: 768px) {
   .el-table-column--label {
     min-width: 80px !important;

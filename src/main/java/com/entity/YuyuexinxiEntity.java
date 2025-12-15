@@ -112,8 +112,11 @@ public class YuyuexinxiEntity<T> implements Serializable {
     private String shhf;
 
 
+    @TableField(exist = false)
     private Date qiandaoshijian; // 签到时间（从签到表关联）
+    @TableField(exist = false)
     private Date qiantuishijian; // 签退时间（从签退表关联）
+    @TableField(exist = false)
     private Double zixishichang; // 自习时长（从签退表关联）
 
 // 需生成对应的get/set方法
