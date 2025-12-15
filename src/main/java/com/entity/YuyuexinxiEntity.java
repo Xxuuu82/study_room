@@ -113,9 +113,15 @@ public class YuyuexinxiEntity<T> implements Serializable {
 
 
     @TableField(exist = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date qiandaoshijian; // 签到时间（从签到表关联）
+
     @TableField(exist = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date qiantuishijian; // 签退时间（从签退表关联）
+
     @TableField(exist = false)
     private Double zixishichang; // 自习时长（从签退表关联）
 

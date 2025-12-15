@@ -166,6 +166,7 @@ public class YuyuexinxiController {
     /**
      * 前端详情
      */
+    // --- 仅展示修改后的 detail 方法体，替换原文件中对应方法 ---
     @RequestMapping("/detail/{id}")
     public R detail(@PathVariable Long id, HttpServletRequest request) {
         try {
@@ -183,9 +184,35 @@ public class YuyuexinxiController {
                 return R.error("无权限查看该预约记录");
             }
 
-            yuyue.setQiandaoshijian(null);
-            yuyue.setQiantuishijian(null);
-            yuyue.setZixishichang(null);
+            // ===== 新增：从签到表取最新签到时间 =====
+            try {
+                QiandaoxinxiEntity qiandao = qiandaoxinxiService.selectOne(
+                        new EntityWrapper<QiandaoxinxiEntity>()
+                                .eq("yuyuedanhao", yuyue.getYuyuedanhao())
+                                .orderBy("id", false) // 按 id 降序取最新
+                );
+                if (qiandao != null) {
+                    yuyue.setQiandaoshijian(qiandao.getQiandaoshijian());
+                }
+            } catch (Exception ex) {
+                // 日志记录但不影响详情展示
+                logger.warn("获取签到信息失败，预约单号：{}，原因：{}", yuyue.getYuyuedanhao(), ex.getMessage());
+            }
+
+            // ===== 新增：从签退表取最新签退时间与自习时长 =====
+            try {
+                QiantuixinxiEntity qiantui = qiantuixinxiService.selectOne(
+                        new EntityWrapper<QiantuixinxiEntity>()
+                                .eq("yuyuedanhao", yuyue.getYuyuedanhao())
+                                .orderBy("id", false)
+                );
+                if (qiantui != null) {
+                    yuyue.setQiantuishijian(qiantui.getQiantuishijian());
+                    yuyue.setZixishichang(qiantui.getZixishichang());
+                }
+            } catch (Exception ex) {
+                logger.warn("获取签退信息失败，预约单号：{}，原因：{}", yuyue.getYuyuedanhao(), ex.getMessage());
+            }
 
             return R.ok().put("data", yuyue);
         } catch (Exception e) {
@@ -193,7 +220,6 @@ public class YuyuexinxiController {
             return R.error("查询失败：" + e.getMessage());
         }
     }
-
     /**
      * 后端保存（恢复原有逻辑）
      */

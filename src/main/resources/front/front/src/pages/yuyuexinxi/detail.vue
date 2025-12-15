@@ -23,8 +23,6 @@
             <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.zuowei}}</div>
           </div>
 
-          <!-- 已删除：签到状态、签退状态、自习时长区域 -->
-
           <!-- 预约开始时间 -->
           <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>预约开始时间</div>
@@ -35,6 +33,25 @@
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>预约结束时间</div>
             <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.yuyueEnd || '-'}}</div>
           </div>
+
+          <!-- 新增显示：签到时间 -->
+          <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
+            <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>签到时间</div>
+            <div :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{ detail.qiandaoshijian || '-' }}</div>
+          </div>
+
+          <!-- 新增显示：签退时间 -->
+          <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
+            <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>签退时间</div>
+            <div :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{ detail.qiantuishijian || '-' }}</div>
+          </div>
+
+          <!-- 新增显示：自习时长（分钟） -->
+          <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
+            <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>自习时长min</div>
+            <div :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{ detail.zixishichang != null ? detail.zixishichang : '-' }}</div>
+          </div>
+
           <!-- 是否违规 -->
           <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>是否违规</div>
