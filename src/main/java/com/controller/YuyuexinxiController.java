@@ -279,7 +279,7 @@ public class YuyuexinxiController {
 
             logger.info("更新预约签退状态：ID={}, 签退状态={}", id, qiantuizhuangtai);
 
-            YuyuexinxiEntity yuyuexinxi = new YuyuexinxiEntity<>();
+            YuyuexinxiEntity yuyuexinxi = new YuyuexinxiEntity();
             yuyuexinxi.setId(id);
             if (!qiantuizhuangtai.isEmpty()) {
                 yuyuexinxi.setQiantuizhuangtai(qiantuizhuangtai);
@@ -331,7 +331,7 @@ public class YuyuexinxiController {
             qiandao.setYuyuedanhao((String) signInData.get("yuyuedanhao"));
             qiandaoxinxiService.insert(qiandao);
 
-            YuyuexinxiEntity yuyue = new YuyuexinxiEntity<>();
+            YuyuexinxiEntity yuyue = new YuyuexinxiEntity();
             yuyue.setId(Long.parseLong(signInData.get("yuyueId").toString()));
             yuyue.setQiandaozhuangtai("已签到");
             yuyuexinxiService.updateById(yuyue);
@@ -429,13 +429,17 @@ public class YuyuexinxiController {
     /**
      * 提交分时预约
      */
+    /**
+     * 提交分时预约
+     */
     @PostMapping("/submit")
     public R submitYuyue(
             @RequestBody YuyuexinxiEntity yuyuexinxi,
             HttpServletRequest request
     ) {
         try {
-            String tableName = request.getSession().getAttribute("tableName") == null ? "" : request.getSession().getAttribute("tableName").toString();
+            String tableName = request.getSession().getAttribute("tableName") == null ?
+                    "" : request.getSession().getAttribute("tableName").toString();
             if (!tableName.equals("xuesheng")) {
                 logger.warn("非学生身份尝试提交预约，身份：{}", tableName);
                 return R.error("仅学生可提交座位预约");
@@ -459,6 +463,78 @@ public class YuyuexinxiController {
                 return R.error("自习室名称不能为空");
             }
 
+            // **************************** 校验预约日期范围（仅允许今天和明天） ****************************
+            Calendar todayCal = Calendar.getInstance();
+            // 清除时间信息，获取今天的 00:00:00
+            todayCal.set(Calendar.HOUR_OF_DAY, 0);
+            todayCal.set(Calendar.MINUTE, 0);
+            todayCal.set(Calendar.SECOND, 0);
+            todayCal.set(Calendar.MILLISECOND, 0);
+            Date todayStart = todayCal.getTime();
+
+            // 获取后天的 00:00:00 (预约时段不能包含或超过后天)
+            Calendar dayAfterTomorrowCal = Calendar.getInstance();
+            dayAfterTomorrowCal.add(Calendar.DAY_OF_YEAR, 2);
+            dayAfterTomorrowCal.set(Calendar.HOUR_OF_DAY, 0);
+            dayAfterTomorrowCal.set(Calendar.MINUTE, 0);
+            dayAfterTomorrowCal.set(Calendar.SECOND, 0);
+            dayAfterTomorrowCal.set(Calendar.MILLISECOND, 0);
+            Date dayAfterTomorrowStart = dayAfterTomorrowCal.getTime();
+
+            // 校验预约开始时间是否在 [今天 00:00:00, 后天 00:00:00) 范围内
+            if (yuyueStart.before(todayStart) || yuyueStart.compareTo(dayAfterTomorrowStart) >= 0) {
+                logger.warn("提交预约失败：预约日期超出范围，开始时间：{}", yuyueStart);
+                return R.error("预约日期仅允许今天和明天");
+            }
+            // 确保结束时间也在允许的日期范围内
+            if (yuyueEnd.compareTo(dayAfterTomorrowStart) >= 0) {
+                logger.warn("提交预约失败：预约结束时间超出允许范围（后天），结束时间：{}", yuyueEnd);
+                return R.error("预约结束时间不能在后天或之后");
+            }
+            // *************************************************************************************************
+
+            // **************************** 校验预约时间范围（8:00 到 22:00） ****************************
+            Calendar startCal = Calendar.getInstance();
+            startCal.setTime(yuyueStart);
+
+            Calendar endCal = Calendar.getInstance();
+            endCal.setTime(yuyueEnd);
+
+            // 1. 校验预约是否跨天
+            if (startCal.get(Calendar.YEAR) != endCal.get(Calendar.YEAR) ||
+                    startCal.get(Calendar.DAY_OF_YEAR) != endCal.get(Calendar.DAY_OF_YEAR)) {
+                logger.warn("提交预约失败：预约跨天，开始时间：{}，结束时间：{}", yuyueStart, yuyueEnd);
+                return R.error("预约不能跨越日期");
+            }
+
+            // 2. 校验开始时间不能早于 8:00:00
+            int startHour = startCal.get(Calendar.HOUR_OF_DAY);
+            int startMinute = startCal.get(Calendar.MINUTE);
+            int startSecond = startCal.get(Calendar.SECOND);
+
+            if (startHour < 8) {
+                logger.warn("提交预约失败：开始时间早于8点，开始时间：{}", yuyueStart);
+                return R.error("预约开始时间不能早于08:00");
+            }
+
+            // 3. 校验结束时间不能晚于 22:00:00
+            int endHour = endCal.get(Calendar.HOUR_OF_DAY);
+            int endMinute = endCal.get(Calendar.MINUTE);
+            int endSecond = endCal.get(Calendar.SECOND);
+
+            // 22:00:00 是允许的。22:00:01 或更晚是不允许的。
+            if (endHour > 22 || (endHour == 22 && (endMinute > 0 || endSecond > 0))) {
+                logger.warn("提交预约失败：结束时间晚于22点，结束时间：{}", yuyueEnd);
+                return R.error("预约结束时间不能晚于22:00");
+            }
+
+            // 4. 额外校验：开始时间不能晚于 22:00:00
+            if (startHour >= 22) {
+                logger.warn("提交预约失败：开始时间晚于22点，开始时间：{}", yuyueStart);
+                return R.error("预约开始时间必须在08:00到22:00之间");
+            }
+            // *************************************************************************************
+
             if (yuyueEnd.before(yuyueStart) || yuyueEnd.equals(yuyueStart)) {
                 logger.warn("提交预约失败：时间不合法，开始时间：{}，结束时间：{}", yuyueStart, yuyueEnd);
                 return R.error("预约结束时间必须晚于开始时间");
@@ -477,22 +553,5 @@ public class YuyuexinxiController {
             return R.error("预约失败：" + e.getMessage());
         }
     }
-
-    /**
-     * 查询指定座位的已预约时段
-     */
-    @GetMapping("/seat/list")
-    public R getSeatYuyueList(
-            @RequestParam Integer zixishiid,
-            @RequestParam Integer zuowei
-    ) {
-        try {
-            java.util.List<YuyuexinxiEntity> list = yuyuexinxiService.getSeatYuyueList(zixishiid, zuowei);
-            return R.ok().put("data", list);
-        } catch (Exception e) {
-            logger.error("查询座位预约时段失败，自习室ID：{}，座位ID：{}", zixishiid, zuowei, e);
-            return R.error("查询失败：" + e.getMessage());
-        }
-    }
-
 }
+
