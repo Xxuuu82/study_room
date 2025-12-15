@@ -336,13 +336,27 @@ export default {
   },
   methods: {
     // 1. getSession方法中初始化头像
+    // 1) 修改 getSession：取后端返回的头像字段，提取文件名（最后一段），用 this.baseUrl 拼接 getAvatar 接口，避免直接把带路径的值当作 fileName 造成 404
     getSession() {
       this.$http.get(this.userTableName + '/session', { emulateJSON: true }).then(res => {
         if (res.data && res.data.code === 0) {
           this.sessionForm = res.data.data;
-          // 修改：拼接getAvatar接口地址
+          // 如果后端返回的是相对文件路径（如 "upload/xxx.jpg" 或 "xxx.jpg"），取最后一段作为 fileName
           if (this.sessionForm.touxiang) {
-            this.sessionForm.touxiang = this.baseUrl + 'file/getAvatar?fileName=' + this.sessionForm.touxiang;
+            try {
+              // 例如后端可能存的是 "upload/xxx.jpg"，我们只传最后文件名给 getAvatar
+              const raw = this.sessionForm.touxiang.toString();
+              const fileName = raw.split('/').pop();
+              if (fileName) {
+                // 使用配置的 baseUrl（不要硬编码），并 encodeURIComponent 文件名
+                this.sessionForm.touxiang = this.baseUrl + 'file/getAvatar?fileName=' + encodeURIComponent(fileName);
+              } else {
+                this.sessionForm.touxiang = '';
+              }
+            } catch (e) {
+              console.error('处理头像路径失败：', e);
+              this.sessionForm.touxiang = this.baseUrl + 'file/getAvatar?fileName=' + encodeURIComponent(this.sessionForm.touxiang);
+            }
           }
         }
       }).catch(() => {
@@ -435,36 +449,34 @@ export default {
     },
     // 手动上传头像文件
     // 2. uploadAvatarFile方法中拼接新头像地址
+    // 2) 修改 uploadAvatarFile：使用 this.baseUrl、处理后端返回的 file/path，并在更新用户头像时使用 this.baseUrl + this.userTableName + '/update'
     uploadAvatarFile(file) {
       const formData = new FormData();
       formData.append('file', file);
-      const baseUrl = 'http://localhost:8080/study_room/';
-      const uploadUrl = baseUrl + 'file/upload';
-      console.log('准备上传文件，请求地址：', uploadUrl);
-      console.log('当前baseUrl：', baseUrl);
+      const uploadUrl = this.baseUrl + 'file/upload';
       this.$http.post(uploadUrl, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Token: localStorage.getItem('Token')
         }
       }).then(res => {
-        console.log('文件上传响应：', res.data);
         if (res.data && res.data.code === 0) {
-          const filePath = res.data.file || res.data.data || res.data.url;
+          // 兼容不同后端返回字段：file / data / url
+          const filePath = res.data.file || (res.data.data && (res.data.data.file || res.data.data)) || res.data.url;
           if (!filePath) {
             this.$message.error('后端未返回文件路径');
             return;
           }
-          // 修改：拼接getAvatar接口地址
-          const fullAvatarUrl = baseUrl + 'file/getAvatar?fileName=' + filePath;
-          console.log('拼接后的头像地址：', fullAvatarUrl);
+          // 取最后一段文件名用于 getAvatar
+          const filenameOnly = filePath.toString().split('/').pop();
+          const fullAvatarUrl = this.baseUrl + 'file/getAvatar?fileName=' + encodeURIComponent(filenameOnly);
           this.sessionForm.touxiang = fullAvatarUrl;
-          // 更新用户头像到数据库
-          this.$http.post(baseUrl + this.userTableName + '/update', {
+
+          // 更新用户头像到数据库（把后端存储的 filePath 写回到用户表）
+          this.$http.post(this.baseUrl + this.userTableName + '/update', {
             id: this.sessionForm.id,
             touxiang: filePath
           }).then(updateRes => {
-            console.log('头像更新响应：', updateRes.data);
             if (updateRes.data && updateRes.data.code === 0) {
               this.$message.success('头像上传成功');
               this.switchTab('个人信息');

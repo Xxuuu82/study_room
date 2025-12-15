@@ -14,16 +14,14 @@ import java.util.Date;
 /**
  * 取消预约
  */
-@TableName("quxiaoyuyue") // 确保与数据库表名完全一致
-public class QuxiaoyuyueEntity implements Serializable { // 移除多余的泛型<T>
+@TableName("quxiaoyuyue")
+public class QuxiaoyuyueEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public QuxiaoyuyueEntity() {
-
     }
 
-    // 保留拷贝构造方法，但移除泛型依赖
-    public QuxiaoyuyueEntity(Object t) { // 参数改为Object，兼容原有逻辑
+    public QuxiaoyuyueEntity(Object t) {
         try {
             BeanUtils.copyProperties(this, t);
         } catch (IllegalAccessException | InvocationTargetException e) {
@@ -31,246 +29,94 @@ public class QuxiaoyuyueEntity implements Serializable { // 移除多余的泛�
         }
     }
 
-    /**
-     * 主键id
-     */
     @TableId
     private Long id;
 
-    /**
-     * 自习室序号
-     */
     private Integer zixishiid;
-
-    /**
-     * 座位
-     */
     private Integer zuowei;
-
-    /**
-     * 预约单号
-     */
     private String yuyuedanhao;
-
-    /**
-     * 名称
-     */
     private String mingcheng;
 
-//    /**
-//     * 图片（数据库无此字段的话，需添加@TableField(exist = false)）
-//     */
-//    @TableField(exist = false) // 关键：如果数据库quxiaoyuyue表没有tupian列，必须加这个注解！
-//    private String tupian;
-
-    /**
-     * 预约开始时间
-     */
+    // 映射到数据库列 yuyue_start
+    @TableField("yuyue_start")
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 补充时间格式，避免解析异常
-    private Date yuyue_start;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date yuyueStart;
 
-    /**
-     * 预约结束时间
-     */
+    // 映射到数据库列 yuyue_end
+    @TableField("yuyue_end")
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 补充时间格式
-    private Date yuyue_end;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date yuyueEnd;
 
-    /**
-     * 取消时间
-     */
+    // 映射到数据库列 quxiaoshijian
+    @TableField("quxiaoshijian")
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 补充时间格式
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date quxiaoshijian;
 
-    /**
-     * 取消原因
-     */
     private String quxiaoyuanyin;
-
-    /**
-     * 学号
-     */
     private String xuehao;
-
-    /**
-     * 姓名
-     */
     private String xingming;
-
-    /**
-     * 手机
-     */
     private String shouji;
-
-    /**
-     * 跨表用户id
-     */
     private Long crossuserid;
-
-    /**
-     * 跨表主键id
-     */
     private Long crossrefid;
-
-    /**
-     * 审核回复
-     */
     private String shhf;
-
-    /**
-     * 用户id
-     */
     private Long userid;
 
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
-    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") // 补充时间格式
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date addtime;
 
-    // ========== 所有get/set方法保持不变 ==========
-    public Date getAddtime() {
-        return addtime;
-    }
+    // ========== Getter / Setter ==========
+    public Date getAddtime() { return addtime; }
+    public void setAddtime(Date addtime) { this.addtime = addtime; }
 
-    public void setAddtime(Date addtime) {
-        this.addtime = addtime;
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public Integer getZixishiid() { return zixishiid; }
+    public void setZixishiid(Integer zixishiid) { this.zixishiid = zixishiid; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public Integer getZuowei() { return zuowei; }
+    public void setZuowei(Integer zuowei) { this.zuowei = zuowei; }
 
-    public void setZixishiid(Integer zixishiid) {
-        this.zixishiid = zixishiid;
-    }
+    public String getYuyuedanhao() { return yuyuedanhao; }
+    public void setYuyuedanhao(String yuyuedanhao) { this.yuyuedanhao = yuyuedanhao; }
 
-    public Integer getZixishiid() {
-        return zixishiid;
-    }
+    public String getMingcheng() { return mingcheng; }
+    public void setMingcheng(String mingcheng) { this.mingcheng = mingcheng; }
 
-    public void setZuowei(Integer zuowei) {
-        this.zuowei = zuowei;
-    }
+    public Date getYuyueStart() { return yuyueStart; }
+    public void setYuyueStart(Date yuyueStart) { this.yuyueStart = yuyueStart; }
 
-    public Integer getZuowei() {
-        return zuowei;
-    }
+    public Date getYuyueEnd() { return yuyueEnd; }
+    public void setYuyueEnd(Date yuyueEnd) { this.yuyueEnd = yuyueEnd; }
 
-    public void setYuyuedanhao(String yuyuedanhao) {
-        this.yuyuedanhao = yuyuedanhao;
-    }
+    public Date getQuxiaoshijian() { return quxiaoshijian; }
+    public void setQuxiaoshijian(Date quxiaoshijian) { this.quxiaoshijian = quxiaoshijian; }
 
-    public String getYuyuedanhao() {
-        return yuyuedanhao;
-    }
+    public String getQuxiaoyuanyin() { return quxiaoyuanyin; }
+    public void setQuxiaoyuanyin(String quxiaoyuanyin) { this.quxiaoyuanyin = quxiaoyuanyin; }
 
-    public void setMingcheng(String mingcheng) {
-        this.mingcheng = mingcheng;
-    }
+    public String getXuehao() { return xuehao; }
+    public void setXuehao(String xuehao) { this.xuehao = xuehao; }
 
-    public String getMingcheng() {
-        return mingcheng;
-    }
+    public String getXingming() { return xingming; }
+    public void setXingming(String xingming) { this.xingming = xingming; }
 
-//    public void setTupian(String tupian) {
-//        this.tupian = tupian;
-//    }
-//
-//    public String getTupian() {
-//        return tupian;
-//    }
+    public String getShouji() { return shouji; }
+    public void setShouji(String shouji) { this.shouji = shouji; }
 
-    public void setYuyue_start(Date yuyue_start) {
-        this.yuyue_start = yuyue_start;
-    }
+    public Long getCrossuserid() { return crossuserid; }
+    public void setCrossuserid(Long crossuserid) { this.crossuserid = crossuserid; }
 
-    public Date getYuyue_start() {
-        return yuyue_start;
-    }
+    public Long getCrossrefid() { return crossrefid; }
+    public void setCrossrefid(Long crossrefid) { this.crossrefid = crossrefid; }
 
-    public void setYuyue_end(Date yuyue_end) {
-        this.yuyue_end = yuyue_end;
-    }
+    public String getShhf() { return shhf; }
+    public void setShhf(String shhf) { this.shhf = shhf; }
 
-    public Date getYuyue_end() {
-        return yuyue_end;
-    }
-
-    public void setQuxiaoshijian(Date quxiaoshijian) {
-        this.quxiaoshijian = quxiaoshijian;
-    }
-
-    public Date getQuxiaoshijian() {
-        return quxiaoshijian;
-    }
-
-    public void setQuxiaoyuanyin(String quxiaoyuanyin) {
-        this.quxiaoyuanyin = quxiaoyuanyin;
-    }
-
-    public String getQuxiaoyuanyin() {
-        return quxiaoyuanyin;
-    }
-
-    public void setXuehao(String xuehao) {
-        this.xuehao = xuehao;
-    }
-
-    public String getXuehao() {
-        return xuehao;
-    }
-
-    public void setXingming(String xingming) {
-        this.xingming = xingming;
-    }
-
-    public String getXingming() {
-        return xingming;
-    }
-
-    public void setShouji(String shouji) {
-        this.shouji = shouji;
-    }
-
-    public String getShouji() {
-        return shouji;
-    }
-
-    public void setCrossuserid(Long crossuserid) {
-        this.crossuserid = crossuserid;
-    }
-
-    public Long getCrossuserid() {
-        return crossuserid;
-    }
-
-    public void setCrossrefid(Long crossrefid) {
-        this.crossrefid = crossrefid;
-    }
-
-    public Long getCrossrefid() {
-        return crossrefid;
-    }
-
-    public void setShhf(String shhf) {
-        this.shhf = shhf;
-    }
-
-    public String getShhf() {
-        return shhf;
-    }
-
-    public void setUserid(Long userid) {
-        this.userid = userid;
-    }
-
-    public Long getUserid() {
-        return userid;
-    }
-
+    public Long getUserid() { return userid; }
+    public void setUserid(Long userid) { this.userid = userid; }
 }

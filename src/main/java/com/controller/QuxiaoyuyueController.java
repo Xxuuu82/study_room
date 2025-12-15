@@ -186,8 +186,8 @@ public class QuxiaoyuyueController {
             }
 
             // 同步原预约时间（空值防护）
-            quxiaoyuyue.setYuyue_start(oldYuyue.getYuyueStart() != null ? oldYuyue.getYuyueStart() : new Date());
-            quxiaoyuyue.setYuyue_end(oldYuyue.getYuyueEnd() != null ? oldYuyue.getYuyueEnd() : new Date());
+            quxiaoyuyue.setYuyueStart(oldYuyue.getYuyueStart() != null ? oldYuyue.getYuyueStart() : new Date());
+            quxiaoyuyue.setYuyueEnd(oldYuyue.getYuyueEnd() != null ? oldYuyue.getYuyueEnd() : new Date());
 
             // ========== 5. 删除原预约 + 保存取消记录（核心逻辑，不受座位状态影响） ==========
             yuyuexinxiService.deleteById(crossrefid);
@@ -243,8 +243,8 @@ public class QuxiaoyuyueController {
             }
 
             // 同步时间（空值防护）
-            quxiaoyuyue.setYuyue_start(oldYuyue.getYuyueStart() != null ? oldYuyue.getYuyueStart() : new Date());
-            quxiaoyuyue.setYuyue_end(oldYuyue.getYuyueEnd() != null ? oldYuyue.getYuyueEnd() : new Date());
+            quxiaoyuyue.setYuyueStart(oldYuyue.getYuyueStart() != null ? oldYuyue.getYuyueStart() : new Date());
+            quxiaoyuyue.setYuyueEnd(oldYuyue.getYuyueEnd() != null ? oldYuyue.getYuyueEnd() : new Date());
 
             // 删除原预约 + 保存取消记录
             yuyuexinxiService.deleteById(crossrefid);
