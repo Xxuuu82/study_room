@@ -282,6 +282,7 @@
             align="center"
         >
           <template slot-scope="scope">
+
             <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
               <el-button
                   type="primary"
@@ -289,32 +290,29 @@
                   icon="el-icon-view"
                   @click="toDetail(scope.row)"
                   style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #409EFF; background: #409EFF; color: #fff;"
-              >详情</el-button
-              >
+              >详情</el-button>
               <el-button
                   type="danger"
                   size="mini"
                   icon="el-icon-circle-close"
                   @click="cancelOrder(scope.row)"
                   style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #F56C6C; background: #F56C6C; color: #fff;"
-              >取消预约</el-button
-              >
+              >取消预约</el-button>
               <el-button
                   size="mini"
                   icon="el-icon-check"
                   v-if="scope.row.qiandaozhuangtai === '未签到'"
                   @click="signIn(scope.row)"
                   style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #67C23A; background: #67C23A; color: #fff;"
-              >签到</el-button
-              >
+              >签到</el-button>
               <el-button
                   size="mini"
                   icon="el-icon-arrow-right"
-                  v-if="scope.row.qiantuizhuangtai === '未签退'"
+
+                  v-if="scope.row.qiantuizhuangtai === '未签退' && scope.row.qiandaozhuangtai === '已签到'"
                   @click="signOut(scope.row)"
                   style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #909399; background: #909399; color: #fff;"
-              >签退</el-button
-              >
+              >签退</el-button>
             </div>
           </template>
         </el-table-column>
@@ -490,6 +488,12 @@ export default {
     },
 
     signOut(row) {
+      // 新增校验：只有在已签到 的情况下才允许签退
+      if (!row || row.qiandaozhuangtai !== '已签到') {
+        this.$message.warning('请先签到后再签退！');
+        return;
+      }
+
       this.$confirm('确定签退吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
