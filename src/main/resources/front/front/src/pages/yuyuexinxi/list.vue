@@ -101,7 +101,7 @@
             >签退状态</label
             >
             <el-select
-                @change="qiantuizhuangtaiChange"
+                @change="qiantuixinxiChange"
                 clearable
                 v-model="searchForm.qiantuizhuangtai"
                 placeholder="请选择签退状态"
@@ -278,7 +278,7 @@
         <!-- 操作列 -->
         <el-table-column
             label="操作"
-            min-width="280"
+            min-width="320"
             align="center"
         >
           <template slot-scope="scope">
@@ -291,28 +291,55 @@
                   @click="toDetail(scope.row)"
                   style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #409EFF; background: #409EFF; color: #fff;"
               >详情</el-button>
+
+              <!-- 取消预约：只有 canCancel(row) 返回 true 才显示按钮 -->
               <el-button
+                  v-if="canCancel(scope.row)"
                   type="danger"
                   size="mini"
                   icon="el-icon-circle-close"
                   @click="cancelOrder(scope.row)"
                   style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #F56C6C; background: #F56C6C; color: #fff;"
               >取消预约</el-button>
+
+              <!-- 不可取消时显示原因文案 -->
+              <span v-else style="color:#999;font-size:13px;padding:0 8px;">
+                {{ cancelReason(scope.row) }}
+              </span>
+
+              <!-- 签到 / 未到 / 已过期 状态显示 -->
               <el-button
                   size="mini"
                   icon="el-icon-check"
-                  v-if="scope.row.qiandaozhuangtai === '未签到'"
+                  v-if="scope.row.qiandaozhuangtai === '未签到' && isWithinSignInWindow(scope.row)"
                   @click="signIn(scope.row)"
                   style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #67C23A; background: #67C23A; color: #fff;"
               >签到</el-button>
+
+              <span
+                  v-else-if="scope.row.qiandaozhuangtai === '未签到' && isSignInBefore(scope.row)"
+                  style="color: #999; font-size: 13px; padding: 0 8px;"
+              >未到可签到时间</span>
+
+              <span
+                  v-else-if="scope.row.qiandaozhuangtai === '未签到' && isSignInExpired(scope.row)"
+                  style="color: #f56c6c; font-size: 13px; padding: 0 8px;"
+              >签到已过期</span>
+
+              <!-- 签退按钮 / 签退已过期 -->
               <el-button
                   size="mini"
                   icon="el-icon-arrow-right"
-
-                  v-if="scope.row.qiantuizhuangtai === '未签退' && scope.row.qiandaozhuangtai === '已签到'"
+                  v-if="scope.row.qiantuizhuangtai === '未签退' && scope.row.qiandaozhuangtai === '已签到' && isWithinSignOutWindow(scope.row)"
                   @click="signOut(scope.row)"
                   style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #909399; background: #909399; color: #fff;"
               >签退</el-button>
+
+              <span
+                  v-else-if="scope.row.qiantuizhuangtai === '未签退' && scope.row.qiandaozhuangtai === '已签到' && isSignOutExpired(scope.row)"
+                  style="color: #f56c6c; font-size: 13px; padding: 0 8px;"
+              >签退已过期</span>
+
             </div>
           </template>
         </el-table-column>
@@ -443,9 +470,12 @@ export default {
         query: { detailObj: JSON.stringify(row) }
       });
     },
+
+    // 取消预约：前端再兜底校验一次
     cancelOrder(row) {
-      if (!row.zixishiid) {
-        console.warn('当前预约单缺少自习室ID(zixishiid)，请检查后端接口返回数据！');
+      if (!this.canCancel(row)) {
+        this.$message.warning(this.cancelReason(row));
+        return;
       }
       this.$router.push({
         path: '/index/yuyuexinxi-quxiaoyuyue',
@@ -455,8 +485,122 @@ export default {
       });
     },
 
-    // 修复：调用新的签到事务接口
+    // 解析后端时间字符串 "yyyy-MM-dd HH:mm:ss" 为 Date
+    parseDateTimeString(dateTimeStr) {
+      if (!dateTimeStr || typeof dateTimeStr !== 'string') return null;
+      const parts = dateTimeStr.trim().split(' ');
+      if (parts.length < 2) return null;
+      const datePart = parts[0];
+      const timePart = parts[1];
+      const [y, m, d] = datePart.split('-').map(Number);
+      const [hh, mm, ss] = (timePart || '00:00:00').split(':').map(Number);
+      if (![y, m, d].every(n => !isNaN(n))) return null;
+      return new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0, ss || 0);
+    },
+
+    // 是否可以取消：仅在“未到可签到时间”且未签到且未违规时允许取消
+    canCancel(row) {
+      if (!row) return false;
+      // 获取 weigui flag（兼容两种命名）
+      const wf = row.weiguiFlag != null ? row.weiguiFlag : row.weigui_flag;
+      if (wf === 1 || String(wf) === '1') return false; // 已违规不可取消
+
+      // 若已经签到 且 未签退 -> 不可取消
+      if (row.qiandaozhuangtai === '已签到' && row.qiantuizhuangtai !== '已签退') return false;
+
+      // 仅当当前时间 < 预约开始时间才允许取消（未到可签到时间）
+      const start = row.yuyueStart || row.yuyue_start;
+      if (!start) return false;
+      const startDate = this.parseDateTimeString(start);
+      if (!startDate) return false;
+
+      return new Date().getTime() < startDate.getTime();
+    },
+
+    // 返回禁止取消的原因文本（用于展示）
+    cancelReason(row) {
+      if (!row) return '不可取消';
+      const wf = row.weiguiFlag != null ? row.weiguiFlag : row.weigui_flag;
+      if (wf === 1 || String(wf) === '1') return '不可取消（已违规）';
+      if (row.qiandaozhuangtai === '已签到' && row.qiantuizhuangtai !== '已签退') return '不可取消（已签到）';
+      const start = row.yuyueStart || row.yuyue_start;
+      if (start) {
+        const startDate = this.parseDateTimeString(start);
+        if (startDate && new Date().getTime() >= startDate.getTime()) return '（预约已开始）';
+      }
+      return '不可取消';
+    },
+
+    // 判断当前时间是否在预约开始和结束之间（含边界）
+    isNowBetween(startStr, endStr) {
+      const start = this.parseDateTimeString(startStr);
+      const end = this.parseDateTimeString(endStr);
+      if (!start || !end) return false;
+      const now = new Date();
+      return now.getTime() >= start.getTime() && now.getTime() <= end.getTime();
+    },
+
+    // 用在模板上：是否可以签到（未签到且当前时间在预约区间内）
+    isWithinSignInWindow(row) {
+      const start = row.yuyueStart || row.yuyue_start;
+      const end = row.yuyueEnd || row.yuyue_end;
+      if (!start || !end) return false;
+      return this.isNowBetween(start, end);
+    },
+
+    // 是否在签到开始前（用于显示“未到可签到时间”）
+    isSignInBefore(row) {
+      const start = row.yuyueStart || row.yuyue_start;
+      if (!start) return false;
+      const startDate = this.parseDateTimeString(start);
+      if (!startDate) return false;
+      return new Date().getTime() < startDate.getTime();
+    },
+
+    // 是否已过签到时间（当前时间 > 结束时间，且仍未签到）
+    isSignInExpired(row) {
+      const end = row.yuyueEnd || row.yuyue_end;
+      if (!end) return false;
+      const endDate = this.parseDateTimeString(end);
+      if (!endDate) return false;
+      return new Date().getTime() > endDate.getTime();
+    },
+
+    // 用在模板上：是否可以签退（已签到且当前时间不超过结束时间且仍在预约区间内）
+    isWithinSignOutWindow(row) {
+      const start = row.yuyueStart || row.yuyue_start;
+      const end = row.yuyueEnd || row.yuyue_end;
+      if (!start || !end) return false;
+      const now = new Date();
+      const endDate = this.parseDateTimeString(end);
+      if (!endDate) return false;
+      return now.getTime() <= endDate.getTime();
+    },
+
+    // 新增：判断已签到但已超过结束时间（签退已过期）
+    isSignOutExpired(row) {
+      const qiandao = row.qiandaozhuangtai === '已签到';
+      const qiantuix = !(row.qiantuizhuangtai === '已签退');
+      const end = row.yuyueEnd || row.yuyue_end;
+      if (!qiandao || !qiantuix || !end) return false;
+      const endDate = this.parseDateTimeString(end);
+      if (!endDate) return false;
+      return new Date().getTime() > endDate.getTime();
+    },
+
+    // 签到请求（保持原有逻辑）
     signIn(row) {
+      const start = row.yuyueStart || row.yuyue_start;
+      const end = row.yuyueEnd || row.yuyue_end;
+      if (!start || !end) {
+        this.$message.warning('预约时间信息不完整，无法签到！');
+        return;
+      }
+      if (!this.isWithinSignInWindow(row)) {
+        this.$message.warning('当前不在签到时间范围内，无法签到！');
+        return;
+      }
+
       this.$confirm('确定签到吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -468,10 +612,9 @@ export default {
           shouji: localStorage.getItem('phone') || '',
           banji: localStorage.getItem('banji') || '',
           yuyuedanhao: row.yuyuedanhao,
-          yuyueId: row.id // 传递预约ID
+          yuyueId: row.id
         };
 
-        // 调用新的事务接口
         this.$http.post('yuyuexinxi/signIn', signInData).then(({ data }) => {
           if (data.code === 0) {
             this.$message.success('签到成功！');
@@ -487,10 +630,43 @@ export default {
       });
     },
 
+    // 签退请求（保持原有逻辑，但前端已禁止不合法的签退）
     signOut(row) {
-      // 新增校验：只有在已签到 的情况下才允许签退
       if (!row || row.qiandaozhuangtai !== '已签到') {
         this.$message.warning('请先签到后再签退！');
+        return;
+      }
+
+      const start = row.yuyueStart || row.yuyue_start;
+      const end = row.yuyueEnd || row.yuyue_end;
+      if (!start || !end) {
+        this.$message.warning('预约时间信息不完整，无法签退！');
+        return;
+      }
+
+      const now = new Date();
+      const endDate = this.parseDateTimeString(end);
+      if (!endDate) {
+        this.$message.error('预约时间解析异常，无法签退！');
+        return;
+      }
+
+      if (now.getTime() > endDate.getTime()) {
+        // 已过期：前端会调用后端标记违规
+        this.$http.post('yuyuexinxi/update', {
+          id: row.id,
+          weigui_flag: 1
+        }).then((res) => {
+          if (res && res.data && res.data.code === 0) {
+            this.$message.warning('已超时未签退，已记录违规（weigui_flag=1）');
+            this.getDataList();
+          } else {
+            this.$message.error((res && res.data && res.data.msg) || '记录违规失败，请重试！');
+          }
+        }).catch((err) => {
+          console.error('记录违规失败：', err);
+          this.$message.error('记录违规请求失败，请重试！');
+        });
         return;
       }
 
@@ -499,21 +675,18 @@ export default {
         cancelButtonText: '取消',
         type: 'info'
       }).then(() => {
-        // 1. 构造签退数据（核心：时间转字符串，避免400）
-        const now = new Date();
-        // 转为后端能解析的时间字符串（yyyy-MM-dd HH:mm:ss）
-        const qiantuishijianStr = now.getFullYear() + "-" +
-            String(now.getMonth() + 1).padStart(2, '0') + "-" +
-            String(now.getDate()).padStart(2, '0') + " " +
-            String(now.getHours()).padStart(2, '0') + ":" +
-            String(now.getMinutes()).padStart(2, '0') + ":" +
-            String(now.getSeconds()).padStart(2, '0');
+        const now2 = new Date();
+        const qiantuishijianStr = now2.getFullYear() + "-" +
+            String(now2.getMonth() + 1).padStart(2, '0') + "-" +
+            String(now2.getDate()).padStart(2, '0') + " " +
+            String(now2.getHours()).padStart(2, '0') + ":" +
+            String(now2.getMinutes()).padStart(2, '0') + ":" +
+            String(now2.getSeconds()).padStart(2, '0');
 
         const signOutData = {
           zixishiid: Number(row.zixishiid) || 0,
           zuowei: Number(row.zuowei) || 0,
           mingcheng: row.mingcheng || '',
-          // 关键：传递字符串格式的时间，后端可直接解析
           qiantuishijian: qiantuishijianStr,
           qiantuibeizhu: '正常签退',
           xuehao: localStorage.getItem('username') || '',
@@ -523,7 +696,6 @@ export default {
           zixishichang: 0.0
         };
 
-        // 2. 调用签退保存接口（原有逻辑完全不变）
         this.$http.post('qiantuixinxi/save', signOutData).then((response) => {
           if (!response || !response.data) {
             this.$message.error('签退接口返回异常！');

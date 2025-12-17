@@ -172,8 +172,12 @@
               :rows="5"
               placeholder="请输入取消预约的原因"
               v-model="ruleForm.quxiaoyuanyin"
+              :disabled="!canCancel(ruleForm)"
           >
           </el-input>
+          <div v-if="!canCancel(ruleForm)" style="margin-top:8px;color:#f56c6c">
+            {{ cancelReason(ruleForm) }}
+          </div>
         </el-form-item>
       </template>
 
@@ -185,7 +189,7 @@
         <el-button
             :style="{
             border: '0',
-            cursor: 'pointer',
+            cursor: canCancel(ruleForm) ? 'pointer' : 'not-allowed',
             padding: '0',
             margin: '0 20px 0 0',
             outline: 'none',
@@ -200,6 +204,7 @@
             type="primary"
             class="btn-success"
             @click="onSubmit"
+            :disabled="!canCancel(ruleForm)"
         >提交</el-button
         >
         <el-button
@@ -246,15 +251,18 @@ export default {
         yuyuedanhao: "",
         mingcheng: "",
         zuowei: "",
-        yuyue_start: "", // 新增：预约开始时间
-        yuyue_end: "",   // 新增：预约结束时间
+        yuyue_start: "", // 预约开始时间（字符串 yyyy-MM-dd HH:mm:ss）
+        yuyue_end: "",   // 预约结束时间
         quxiaoshijian: "",
         quxiaoyuanyin: "",
         xuehao: "",
         xingming: "",
         shouji: "",
         yuyueId: "", // 关联预约单ID
-        zixishiid: "" // 新增：自习室ID，解决非法表名问题
+        zixishiid: "", // 自习室ID
+        qiandaozhuangtai: "", // 来自预约记录
+        qiantuizhuangtai: "", // 来自预约记录
+        weiguiFlag: null // 来自预约记录，可能是 weiguiFlag 或 weigui_flag
       },
       rules: {
         quxiaoyuanyin: [
@@ -322,7 +330,7 @@ export default {
         this.back();
         return;
       }
-      if (!order.zuowei) {
+      if (!order.zuowei && order.zuowei !== 0) {
         this.$message.error('座位号缺失，无法取消');
         this.back();
         return;
@@ -332,19 +340,35 @@ export default {
       this.ruleForm.yuyuedanhao = order.yuyuedanhao || '';
       this.ruleForm.mingcheng = order.mingcheng || '';
       this.ruleForm.zuowei = order.zuowei || '';
-      this.ruleForm.yuyue_start = order.yuyueStart || order.yuyue_start || ''; // 新增：预约开始时间
-      this.ruleForm.yuyue_end = order.yuyueEnd || order.yuyue_end || '';       // 新增：预约结束时间
+      this.ruleForm.yuyue_start = order.yuyueStart || order.yuyue_start || '';
+      this.ruleForm.yuyue_end = order.yuyueEnd || order.yuyue_end || '';
       this.ruleForm.xuehao = order.xuehao || '';
       this.ruleForm.xingming = order.xingming || '';
       this.ruleForm.shouji = order.shouji || '';
       this.ruleForm.yuyueId = order.id || '';
       this.ruleForm.zixishiid = order.zixishiid || '';
+      this.ruleForm.qiandaozhuangtai = order.qiandaozhuangtai || '';
+      this.ruleForm.qiantuizhuangtai = order.qiantuizhuangtai || '';
+      // 支持两种字段命名
+      this.ruleForm.weiguiFlag = order.weiguiFlag != null ? order.weiguiFlag : order.weigui_flag != null ? order.weigui_flag : null;
+
+      // 如果当前不允许取消，给用户提示（但仍显示页面，禁止提交）
+      if (!this.canCancel(this.ruleForm)) {
+        // 不自动返回页，防止用户看见详情并理解原因
+        this.$message.warning(this.cancelReason(this.ruleForm));
+      }
 
       console.log('初始化后的表单数据:', this.ruleForm);
     },
 
-    // 提交取消预约（优化错误提示）
+    // 提交取消预约（前端二次校验）
     onSubmit() {
+      // 前端再校验一次，避免页面被绕过
+      if (!this.canCancel(this.ruleForm)) {
+        this.$message.warning(this.cancelReason(this.ruleForm));
+        return;
+      }
+
       this.$refs["ruleForm"].validate((valid) => {
         if (valid) {
           // 构造提交数据
@@ -382,7 +406,6 @@ export default {
             }
           }).catch((error) => {
             console.error('请求失败详情:', error);
-            // 区分网络错误和后端错误
             if (error.status === 500) {
               this.$message.error('服务器处理失败，请联系管理员或稍后重试');
             } else if (error.status === 404) {
@@ -400,6 +423,52 @@ export default {
     // 返回列表页
     back() {
       this.$router.push('/index/yuyuexinxi');
+    },
+
+    // 辅助：解析后端时间字符串 "yyyy-MM-dd HH:mm:ss" 为 Date
+    parseDateTimeString(dateTimeStr) {
+      if (!dateTimeStr || typeof dateTimeStr !== 'string') return null;
+      const parts = dateTimeStr.trim().split(' ');
+      if (parts.length < 2) return null;
+      const datePart = parts[0];
+      const timePart = parts[1];
+      const [y, m, d] = datePart.split('-').map(Number);
+      const [hh, mm, ss] = (timePart || '00:00:00').split(':').map(Number);
+      if (![y, m, d].every(n => !isNaN(n))) return null;
+      return new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0, ss || 0);
+    },
+
+    // 是否可以取消：仅在“未到可签到时间”且未签到且未违规时允许取消
+    canCancel(row) {
+      if (!row) return false;
+      // 已违规不可取消
+      const wf = row.weiguiFlag != null ? row.weiguiFlag : row.weigui_flag != null ? row.weigui_flag : null;
+      if (wf === 1 || String(wf) === '1') return false;
+
+      // 若已经签到 且 未签退 -> 不可取消
+      if (row.qiandaozhuangtai === '已签到' && row.qiantuizhuangtai !== '已签退') return false;
+
+      // 仅当当前时间 < 预约开始时间才允许取消（未到可签到时间）
+      const start = row.yuyue_start || row.yuyueStart || row.yuyueStart;
+      if (!start) return false;
+      const startDate = this.parseDateTimeString(start);
+      if (!startDate) return false;
+
+      return new Date().getTime() < startDate.getTime();
+    },
+
+    // 返回禁止取消的原因文本（用于展示）
+    cancelReason(row) {
+      if (!row) return '不可取消';
+      const wf = row.weiguiFlag != null ? row.weiguiFlag : row.weigui_flag != null ? row.weigui_flag : null;
+      if (wf === 1 || String(wf) === '1') return '不可取消（已违规）';
+      if (row.qiandaozhuangtai === '已签到' && row.qiantuizhuangtai !== '已签退') return '不可取消（已签到）';
+      const start = row.yuyue_start || row.yuyueStart || row.yuyueStart;
+      if (start) {
+        const startDate = this.parseDateTimeString(start);
+        if (startDate && new Date().getTime() >= startDate.getTime()) return '（预约已开始）';
+      }
+      return '不可取消';
     }
   }
 };
