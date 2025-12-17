@@ -10,20 +10,26 @@ import com.service.XueshengService;
 import com.utils.MPUtil;
 import com.utils.PageUtils;
 import com.utils.R;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 学生
  * 后端接口
+ *
+ * 说明：
+ * - update 方法不再使用 @RequestBody 注入（避免 Spring 在方法入口尝试解析导致 415）
+ * - update 方法会根据 Content-Type 手动解析 JSON 或从 request.getParameterMap() 读取表单字段
+ * - 兼容 application/json、application/x-www-form-urlencoded、multipart/form-data
  */
 @RestController
 @RequestMapping("/xuesheng")
@@ -31,13 +37,9 @@ public class XueshengController {
     @Autowired
     private XueshengService xueshengService;
 
-
     @Autowired
     private TokenService tokenService;
 
-    /**
-     * 登录
-     */
     @IgnoreAuth
     @RequestMapping(value = "/login")
     public R login(String username, String password, String captcha, HttpServletRequest request) {
@@ -50,14 +52,9 @@ public class XueshengController {
         return R.ok().put("token", token);
     }
 
-
-    /**
-     * 注册
-     */
     @IgnoreAuth
     @RequestMapping("/register")
     public R register(@RequestBody XueshengEntity xuesheng) {
-        //ValidatorUtils.validateEntity(xuesheng);
         XueshengEntity u = xueshengService.selectOne(new EntityWrapper<XueshengEntity>().eq("xuehao", xuesheng.getXuehao()));
         if (u != null) {
             return R.error("注册用户已存在");
@@ -68,19 +65,12 @@ public class XueshengController {
         return R.ok();
     }
 
-
-    /**
-     * 退出
-     */
     @RequestMapping("/logout")
     public R logout(HttpServletRequest request) {
         request.getSession().invalidate();
         return R.ok("退出成功");
     }
 
-    /**
-     * 获取用户的session用户信息
-     */
     @RequestMapping("/session")
     public R getCurrUser(HttpServletRequest request) {
         Long id = (Long) request.getSession().getAttribute("userId");
@@ -88,9 +78,6 @@ public class XueshengController {
         return R.ok().put("data", u);
     }
 
-    /**
-     * 密码重置
-     */
     @IgnoreAuth
     @RequestMapping(value = "/resetPass")
     public R resetPass(String username, HttpServletRequest request) {
@@ -103,36 +90,23 @@ public class XueshengController {
         return R.ok("密码已重置为：123456");
     }
 
-
-    /**
-     * 后端列表
-     */
     @RequestMapping("/page")
     public R page(@RequestParam Map<String, Object> params, XueshengEntity xuesheng,
                   HttpServletRequest request) {
         EntityWrapper<XueshengEntity> ew = new EntityWrapper<XueshengEntity>();
-
         PageUtils page = xueshengService.queryPage(params, MPUtil.sort(MPUtil.between(MPUtil.likeOrEq(ew, xuesheng), params), params));
-
         return R.ok().put("data", page);
     }
 
-    /**
-     * 前端列表
-     */
     @IgnoreAuth
     @RequestMapping("/list")
     public R list(@RequestParam Map<String, Object> params, XueshengEntity xuesheng,
                   HttpServletRequest request) {
         EntityWrapper<XueshengEntity> ew = new EntityWrapper<XueshengEntity>();
-
         PageUtils page = xueshengService.queryPage(params, MPUtil.sort(MPUtil.between(MPUtil.likeOrEq(ew, xuesheng), params), params));
         return R.ok().put("data", page);
     }
 
-    /**
-     * 列表
-     */
     @RequestMapping("/lists")
     public R list(XueshengEntity xuesheng) {
         EntityWrapper<XueshengEntity> ew = new EntityWrapper<XueshengEntity>();
@@ -140,9 +114,6 @@ public class XueshengController {
         return R.ok().put("data", xueshengService.selectListView(ew));
     }
 
-    /**
-     * 查询
-     */
     @RequestMapping("/query")
     public R query(XueshengEntity xuesheng) {
         EntityWrapper<XueshengEntity> ew = new EntityWrapper<XueshengEntity>();
@@ -151,18 +122,12 @@ public class XueshengController {
         return R.ok("查询学生成功").put("data", xueshengView);
     }
 
-    /**
-     * 后端详情
-     */
     @RequestMapping("/info/{id}")
     public R info(@PathVariable("id") Long id) {
         XueshengEntity xuesheng = xueshengService.selectById(id);
         return R.ok().put("data", xuesheng);
     }
 
-    /**
-     * 前端详情
-     */
     @IgnoreAuth
     @RequestMapping("/detail/{id}")
     public R detail(@PathVariable("id") Long id) {
@@ -170,14 +135,9 @@ public class XueshengController {
         return R.ok().put("data", xuesheng);
     }
 
-
-    /**
-     * 后端保存
-     */
     @RequestMapping("/save")
     public R save(@RequestBody XueshengEntity xuesheng, HttpServletRequest request) {
         xuesheng.setId(new Date().getTime() + new Double(Math.floor(Math.random() * 1000)).longValue());
-        //ValidatorUtils.validateEntity(xuesheng);
         XueshengEntity u = xueshengService.selectOne(new EntityWrapper<XueshengEntity>().eq("xuehao", xuesheng.getXuehao()));
         if (u != null) {
             return R.error("用户已存在");
@@ -187,13 +147,9 @@ public class XueshengController {
         return R.ok();
     }
 
-    /**
-     * 前端保存
-     */
     @RequestMapping("/add")
     public R add(@RequestBody XueshengEntity xuesheng, HttpServletRequest request) {
         xuesheng.setId(new Date().getTime() + new Double(Math.floor(Math.random() * 1000)).longValue());
-        //ValidatorUtils.validateEntity(xuesheng);
         XueshengEntity u = xueshengService.selectOne(new EntityWrapper<XueshengEntity>().eq("xuehao", xuesheng.getXuehao()));
         if (u != null) {
             return R.error("用户已存在");
@@ -203,31 +159,70 @@ public class XueshengController {
         return R.ok();
     }
 
-
     /**
-     * 修改
+     * update — 统一入口，兼容多种 Content-Type，避免 415
      */
-    @RequestMapping("/update")
+    @PostMapping("/update")
     @Transactional
-    public R update(@RequestBody XueshengEntity xuesheng, HttpServletRequest request) {
-        //ValidatorUtils.validateEntity(xuesheng);
-        xueshengService.updateById(xuesheng);//全部更新
-        return R.ok();
+    public R update(HttpServletRequest request) {
+        XueshengEntity xuesheng = null;
+        try {
+            String contentType = request.getContentType();
+            if (contentType != null && contentType.toLowerCase().contains("application/json")) {
+                // JSON 请求，手动读取并解析
+                String body = readInputStreamToString(request.getInputStream());
+                if (body != null && !body.trim().isEmpty()) {
+                    ObjectMapper mapper = new ObjectMapper();
+                    xuesheng = mapper.readValue(body, XueshengEntity.class);
+                }
+            } else {
+                // 非 JSON（表单或 multipart）——先尝试参数映射
+                Map<String, String[]> paramMap = request.getParameterMap();
+                if (paramMap != null && !paramMap.isEmpty()) {
+                    xuesheng = new XueshengEntity();
+                    if (paramMap.containsKey("id")) {
+                        try {
+                            String v = paramMap.get("id")[0];
+                            if (v != null && !v.isEmpty()) xuesheng.setId(Long.parseLong(v));
+                        } catch (Exception ignored) {}
+                    }
+                    if (paramMap.containsKey("xuehao")) xuesheng.setXuehao(paramMap.get("xuehao")[0]);
+                    if (paramMap.containsKey("mima")) xuesheng.setMima(paramMap.get("mima")[0]);
+                    if (paramMap.containsKey("xingming")) xuesheng.setXingming(paramMap.get("xingming")[0]);
+                    if (paramMap.containsKey("shouji")) xuesheng.setShouji(paramMap.get("shouji")[0]);
+                    if (paramMap.containsKey("banji")) xuesheng.setBanji(paramMap.get("banji")[0]);
+                    if (paramMap.containsKey("touxiang")) xuesheng.setTouxiang(paramMap.get("touxiang")[0]);
+                } else {
+                    // 兜底：尝试从流读取（可能是 JSON）
+                    String body = readInputStreamToString(request.getInputStream());
+                    if (body != null && !body.trim().isEmpty()) {
+                        ObjectMapper mapper = new ObjectMapper();
+                        xuesheng = mapper.readValue(body, XueshengEntity.class);
+                    }
+                }
+            }
+
+            if (xuesheng == null) {
+                return R.error("请求参数为空，无法更新");
+            }
+            if (xuesheng.getId() == null) {
+                return R.error("更新失败：请提供用户ID");
+            }
+
+            xueshengService.updateById(xuesheng);
+            return R.ok();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.error("更新失败：" + e.getMessage());
+        }
     }
 
-
-    /**
-     * 删除
-     */
     @RequestMapping("/delete")
     public R delete(@RequestBody Long[] ids) {
         xueshengService.deleteBatchIds(Arrays.asList(ids));
         return R.ok();
     }
 
-    /**
-     * 提醒接口
-     */
     @RequestMapping("/remind/{columnName}/{type}")
     public R remindCount(@PathVariable("columnName") String columnName, HttpServletRequest request,
                          @PathVariable("type") String type, @RequestParam Map<String, Object> map) {
@@ -263,10 +258,22 @@ public class XueshengController {
             wrapper.le(columnName, map.get("remindend"));
         }
 
-
         int count = xueshengService.selectCount(wrapper);
         return R.ok().put("count", count);
     }
 
-
+    private String readInputStreamToString(InputStream is) {
+        if (is == null) return null;
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            byte[] buffer = new byte[4096];
+            int len;
+            while ((len = is.read(buffer)) != -1) {
+                baos.write(buffer, 0, len);
+            }
+            return new String(baos.toByteArray(), StandardCharsets.UTF_8);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return null;
+        }
+    }
 }

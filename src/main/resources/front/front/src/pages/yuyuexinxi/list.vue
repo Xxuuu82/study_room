@@ -588,8 +588,9 @@ export default {
       return new Date().getTime() > endDate.getTime();
     },
 
-    // 签到请求（保持原有逻辑）
+    // 修复：调用新的签到事务接口（前端增加时间检查并确保发送 JSON）
     signIn(row) {
+      // 1. 时间校验：只有在预约开始时间之后且在结束时间之前（或等于）才允许签到
       const start = row.yuyueStart || row.yuyue_start;
       const end = row.yuyueEnd || row.yuyue_end;
       if (!start || !end) {
@@ -598,6 +599,12 @@ export default {
       }
       if (!this.isWithinSignInWindow(row)) {
         this.$message.warning('当前不在签到时间范围内，无法签到！');
+        return;
+      }
+
+      // 2. 字段校验（避免空 body 导致后端 415）
+      if (!row.yuyuedanhao && !row.id) {
+        this.$message.error('缺少预约单号或预约ID，无法签到！');
         return;
       }
 
@@ -612,26 +619,41 @@ export default {
           shouji: localStorage.getItem('phone') || '',
           banji: localStorage.getItem('banji') || '',
           yuyuedanhao: row.yuyuedanhao,
-          yuyueId: row.id
+          yuyueId: row.id // 传递预约ID
         };
 
-        this.$http.post('yuyuexinxi/signIn', signInData).then(({ data }) => {
-          if (data.code === 0) {
+        // 3. 强制以 JSON 形式发送，带 Content-Type: application/json
+        let payload = JSON.stringify(signInData);
+        let config = {
+          headers: {
+            'Content-Type': 'application/json;charset=UTF-8'
+          }
+        };
+
+        this.$http.post('yuyuexinxi/signIn', payload, config).then(({ data }) => {
+          if (data && data.code === 0) {
             this.$message.success('签到成功！');
             this.getDataList();
           } else {
-            this.$message.error(data.msg || '签到失败！');
+            this.$message.error((data && data.msg) || '签到失败！');
           }
-        }).catch(() => {
-          this.$message.error('签到请求失败，请重试！');
+        }).catch((err) => {
+          console.error('签到请求错误：', err);
+          const status = err && err.status ? err.status : (err && err.response && err.response.status ? err.response.status : null);
+          if (status === 415) {
+            this.$message.error('请求格式不被服务器接受 (415)，已尝试以 JSON 发送，请检查后端是否支持 application/json。');
+          } else {
+            this.$message.error('签到请求失败，请重试！');
+          }
         });
       }).catch(() => {
         this.$message.info('已取消签到');
       });
     },
 
-    // 签退请求（保持原有逻辑，但前端已禁止不合法的签退）
+    // 修复签退：确保发送 JSON，接收并处理后端返回（避免 415）
     signOut(row) {
+      // 新增校验：只有在已签到 的情况下才允许签退（并且在预约结束时间之前）
       if (!row || row.qiandaozhuangtai !== '已签到') {
         this.$message.warning('请先签到后再签退！');
         return;
@@ -646,17 +668,18 @@ export default {
 
       const now = new Date();
       const endDate = this.parseDateTimeString(end);
-      if (!endDate) {
+      const startDate = this.parseDateTimeString(start);
+      if (!endDate || !startDate) {
         this.$message.error('预约时间解析异常，无法签退！');
         return;
       }
 
+      // 情形 A：已经超出预约结束时间（now > end）
       if (now.getTime() > endDate.getTime()) {
-        // 已过期：前端会调用后端标记违规
-        this.$http.post('yuyuexinxi/update', {
-          id: row.id,
-          weigui_flag: 1
-        }).then((res) => {
+        // 无法签退，需将该预约标记为违纪（weigui_flag = 1）
+        const payload = JSON.stringify({ id: row.id, weigui_flag: 1 });
+        const cfg = { headers: { 'Content-Type': 'application/json;charset=UTF-8' } };
+        this.$http.post('yuyuexinxi/update', payload, cfg).then((res) => {
           if (res && res.data && res.data.code === 0) {
             this.$message.warning('已超时未签退，已记录违规（weigui_flag=1）');
             this.getDataList();
@@ -670,11 +693,13 @@ export default {
         return;
       }
 
+      // 情形 B：当前时间在或早于结束时间（允许正常签退）
       this.$confirm('确定签退吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'info'
       }).then(() => {
+        // 1. 构造签退数据（核心：时间转字符串）
         const now2 = new Date();
         const qiantuishijianStr = now2.getFullYear() + "-" +
             String(now2.getMonth() + 1).padStart(2, '0') + "-" +
@@ -696,17 +721,23 @@ export default {
           zixishichang: 0.0
         };
 
-        this.$http.post('qiantuixinxi/save', signOutData).then((response) => {
+        // 2. 发送签退保存请求 — 以 JSON 发送并带 Content-Type（避免 415）
+        const payload = JSON.stringify(signOutData);
+        const cfg = { headers: { 'Content-Type': 'application/json;charset=UTF-8' } };
+
+        this.$http.post('qiantuixinxi/save', payload, cfg).then((response) => {
           if (!response || !response.data) {
             this.$message.error('签退接口返回异常！');
             return Promise.reject(new Error('接口返回空数据'));
           }
           const data = response.data;
           if (data.code === 0) {
-            return this.$http.post('yuyuexinxi/update', {
+            // 成功保存签退记录后，更新预约的签退状态（同样以 JSON 发送）
+            const updatePayload = JSON.stringify({
               id: row.id,
               qiantuizhuangtai: '已签退'
             });
+            return this.$http.post('yuyuexinxi/update', updatePayload, cfg);
           } else {
             this.$message.error(data.msg || '签退失败！');
             return Promise.reject(new Error(data.msg || '签退失败'));
@@ -725,10 +756,15 @@ export default {
           }
         }).catch((err) => {
           console.error('签退失败详情：', err);
-          const errorMsg = err && err.response && err.response.data && err.response.data.msg
-              ? err.response.data.msg
-              : (err.message || '签退请求失败，请重试！');
-          this.$message.error(errorMsg);
+          const status = err && err.status ? err.status : (err && err.response && err.response.status ? err.response.status : null);
+          if (status === 415) {
+            this.$message.error('签退请求格式不被服务器接受 (415)，已尝试以 JSON 发送，请检查后端是否支持 application/json。');
+          } else {
+            const errorMsg = err && err.response && err.response.data && err.response.data.msg
+                ? err.response.data.msg
+                : (err.message || '签退请求失败，请重试！');
+            this.$message.error(errorMsg);
+          }
         });
       }).catch(() => {
         this.$message.info('已取消签退');
