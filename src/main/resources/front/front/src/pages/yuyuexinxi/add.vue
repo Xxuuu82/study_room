@@ -19,15 +19,17 @@
         :rules="rules"
         label-width="120px"
     >
+      <!-- 预约单号（可选） -->
+      <!--
       <el-form-item
           :style="{
-          width: '100%',
-          maxWidth: '800px',
-          padding: '10px',
-          margin: '0 auto 10px',
-          display: 'block',
-          boxSizing: 'border-box'
-        }"
+            width: '100%',
+            maxWidth: '800px',
+            padding: '10px',
+            margin: '0 auto 10px',
+            display: 'block',
+            boxSizing: 'border-box'
+          }"
           label="预约单号"
           prop="yuyuedanhao"
       >
@@ -37,7 +39,7 @@
             readonly
         ></el-input>
       </el-form-item>
-
+      -->
       <el-form-item
           :style="{
           width: '100%',
@@ -57,7 +59,6 @@
             :readonly="ro.mingcheng"
         ></el-input>
       </el-form-item>
-
       <el-form-item
           :style="{
           width: '100%',
@@ -77,8 +78,7 @@
             readonly
         ></el-input>
       </el-form-item>
-
-      <!-- 重构时间选择区域：改为时间段选择 -->
+      <!-- 重构时间选择区域：改用picker-options实现日期禁用+样式 -->
       <el-form-item
           :style="{
         width: '100%',
@@ -92,24 +92,24 @@
           prop="timeRange"
       >
         <div style="display: flex; gap: 10px; align-items: center;">
-          <!-- 日期选择：新增cell-class-name属性 -->
+          <!-- 日期选择：改用picker-options + 全局样式实现 -->
           <el-date-picker
               v-model="selectedDate"
               type="date"
               placeholder="选择日期"
               style="width: 40%;"
-              :disabled-date="disabledDate"
+              :picker-options="datePickerOptions"
               @change="generateTimeOptions"
-              :cell-class-name="setCellClassName"
+              popper-class="custom-date-picker"
           ></el-date-picker>
-
-          <!-- 开始时间选择（下拉框展示30分钟粒度的可选时间） -->
+          <!-- 开始时间选择：添加no-data-text属性修改无数据提示 -->
           <el-select
               v-model="ruleForm.yuyue_start"
               placeholder="选择开始时间"
               style="width: 30%;"
               @change="handleStartTimeChange"
               filterable
+              no-data-text="无可选时间"
           >
             <el-option
                 v-for="time in availableStartTimeOptions"
@@ -118,14 +118,14 @@
                 :value="time.value"
             ></el-option>
           </el-select>
-
-          <!-- 结束时间选择（下拉框展示30分钟粒度的可选时间） -->
+          <!-- 结束时间选择：添加no-data-text属性修改无数据提示 -->
           <el-select
               v-model="ruleForm.yuyue_end"
               placeholder="选择结束时间"
               style="width: 30%;"
               @change="checkTimeRange"
               filterable
+              no-data-text="无可选时间"
           >
             <el-option
                 v-for="time in availableEndTimeOptions"
@@ -136,7 +136,6 @@
           </el-select>
         </div>
       </el-form-item>
-
       <el-form-item
           :style="{
           width: '100%',
@@ -155,7 +154,6 @@
             clearable
         ></el-input>
       </el-form-item>
-
       <el-form-item
           :style="{
           width: '100%',
@@ -174,7 +172,6 @@
             clearable
         ></el-input>
       </el-form-item>
-
       <el-form-item
           :style="{
     width: '100%',
@@ -193,7 +190,6 @@
             clearable
         ></el-input>
       </el-form-item>
-
       <el-form-item
           :style="{
           width: '100%',
@@ -212,7 +208,6 @@
             clearable
         ></el-input>
       </el-form-item>
-
       <el-form-item :style="{
         padding: '20px 0 0',
         margin: '0',
@@ -242,7 +237,7 @@
             height: '40px',
             borderRadius: '4px',
             fontSize: '14px',
-            background: '#f5f7fa',
+            background: '#f5f5f5',
             color: '#666',
             border: '1px solid #e4e7ed',
             transition: 'opacity 0.2s'
@@ -254,7 +249,6 @@
     </el-form>
   </div>
 </template>
-
 <script>
 export default {
   data() {
@@ -289,8 +283,7 @@ export default {
         xingming: "",
         shouji: "",
       },
-      // 新增：日期和时间选择相关
-      selectedDate: "", // 选中的日期 (可以是 Date 对象或 yyyy-MM-dd 字符串）
+      selectedDate: "", // 选中的日期
       availableStartTimeOptions: [], // 可选开始时间列表
       availableEndTimeOptions: [], // 可选结束时间列表
       // 时间配置常量
@@ -299,8 +292,17 @@ export default {
         endHour: 22,     // 结束小时
         stepMinutes: 30  // 时间步长（分钟）
       },
-      qiandaozhuangtaiOptions: [],
-      qiantuizhuangtaiOptions: [],
+      // 日期选择器配置：仅允许今明两天，其他日期禁用+样式
+      datePickerOptions: {
+        disabledDate: (time) => {
+          const today = new Date();
+          const todayTime = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+          const tomorrowTime = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).getTime();
+          const currentTime = new Date(time.getFullYear(), time.getMonth(), time.getDate()).getTime();
+          // 仅允许今天和明天，其他日期禁用
+          return currentTime !== todayTime && currentTime !== tomorrowTime;
+        }
+      },
       rules: {
         yuyuedanhao: [],
         mingcheng: [
@@ -324,15 +326,13 @@ export default {
       },
     };
   },
-  computed: {},
   created() {
     let type = this.$route.query.type ? this.$route.query.type : "";
     this.init(type);
     this.baseUrl = this.$config.baseUrl;
-    // 初始化默认选中今天（字符串形式）
+    // 初始化默认选中今天
     const today = new Date();
     this.selectedDate = this.formatDate(today);
-    // 生成默认时间选项
     this.generateTimeOptions();
   },
   methods: {
@@ -342,7 +342,6 @@ export default {
     download(file) {
       window.open(`${file}`);
     },
-
     // 格式化日期为 yyyy-MM-dd
     formatDate(date) {
       const year = date.getFullYear();
@@ -350,8 +349,7 @@ export default {
       const day = this.getMakeZero(date.getDate());
       return `${year}-${month}-${day}`;
     },
-
-    // 获取 selectedDate 的字符串 yyyy-MM-dd（兼容 Date 或 字符串）
+    // 获取 selectedDate 的字符串 yyyy-MM-dd
     getSelectedDateStr() {
       if (!this.selectedDate) return "";
       if (typeof this.selectedDate === "string") {
@@ -359,8 +357,7 @@ export default {
       }
       return this.formatDate(this.selectedDate);
     },
-
-    // 将 "yyyy-MM-dd HH:mm:ss" 解析为 Date 对象（避免直接 new Date 字符串解析差异）
+    // 解析日期时间字符串为Date对象
     parseDateTimeString(dateTimeStr) {
       if (!dateTimeStr || typeof dateTimeStr !== 'string') return null;
       const parts = dateTimeStr.trim().split(' ');
@@ -372,32 +369,6 @@ export default {
       if (![y, m, d].every(n => !isNaN(n))) return null;
       return new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0, ss || 0);
     },
-
-    // 严格限制日期为今明两天，其余日期禁用
-    disabledDate(time) {
-      const today = new Date();
-      const todayTime = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-      const tomorrowTime = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).getTime();
-      const currentTime = new Date(time.getFullYear(), time.getMonth(), time.getDate()).getTime();
-
-      // 仅允许今天和明天，其余日期返回true（禁用）
-      return currentTime !== todayTime && currentTime !== tomorrowTime;
-    },
-
-    // 新增：给非今明两天的日期添加自定义类名
-    setCellClassName({ date }) {
-      const today = new Date();
-      const todayTime = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
-      const tomorrowTime = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).getTime();
-      const currentTime = new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-
-      // 非今明两天的日期添加自定义类
-      if (currentTime !== todayTime && currentTime !== tomorrowTime) {
-        return 'disabled-date-custom';
-      }
-      return '';
-    },
-
     // 生成可选时间选项（30分钟粒度）
     generateTimeOptions() {
       const selectedDateStr = this.getSelectedDateStr();
@@ -408,47 +379,38 @@ export default {
         this.ruleForm.yuyue_end = "";
         return;
       }
-
       const { startHour, endHour, stepMinutes } = this.TIME_CONFIG;
       const now = new Date();
       const isToday = this.formatDate(now) === selectedDateStr;
-
       // 生成基础时间列表（8:00 - 22:00，30分钟步长）
       const timeList = [];
       for (let hour = startHour; hour <= endHour; hour++) {
         for (let minute = 0; minute < 60; minute += stepMinutes) {
           if (hour === endHour && minute > 0) break;
-
           const timeStr = `${this.getMakeZero(hour)}:${this.getMakeZero(minute)}:00`;
           const fullTimeStr = `${selectedDateStr} ${timeStr}`;
           const timeObj = this.parseDateTimeString(fullTimeStr);
           if (!timeObj) continue;
-
-          // 当天：必须晚于当前系统时间（严格大于 now）
+          // 当天：必须晚于当前系统时间
           if (isToday && timeObj.getTime() <= now.getTime()) continue;
-
           timeList.push({
             label: timeStr,
             value: fullTimeStr
           });
         }
       }
-
       this.availableStartTimeOptions = [...timeList];
       this.availableEndTimeOptions = [...timeList];
-
       this.ruleForm.yuyue_start = "";
       this.ruleForm.yuyue_end = "";
     },
-
-    // 开始时间变化时，正确更新结束时间可选范围
+    // 开始时间变化时更新结束时间可选范围
     handleStartTimeChange() {
       if (!this.ruleForm.yuyue_start) {
         this.availableEndTimeOptions = [...this.availableStartTimeOptions];
         this.ruleForm.yuyue_end = "";
         return;
       }
-
       const startDateObj = this.parseDateTimeString(this.ruleForm.yuyue_start);
       if (!startDateObj) {
         this.$message.error("开始时间解析失败，请重新选择");
@@ -457,33 +419,26 @@ export default {
         return;
       }
       const startTimeTs = startDateObj.getTime();
-
       this.availableEndTimeOptions = this.availableStartTimeOptions.filter(item => {
         const t = this.parseDateTimeString(item.value);
         return t && t.getTime() > startTimeTs;
       });
-
       this.ruleForm.yuyue_end = "";
-
       if (this.availableEndTimeOptions.length === 0) {
         this.$message.warning("当前没有可选的结束时间，请重新选择开始时间");
       }
     },
-
     // 检查时间范围合法性
     checkTimeRange() {
       if (!this.ruleForm.yuyue_start || !this.ruleForm.yuyue_end) return;
-
       const startDateObj = this.parseDateTimeString(this.ruleForm.yuyue_start);
       const endDateObj = this.parseDateTimeString(this.ruleForm.yuyue_end);
       if (!startDateObj || !endDateObj) {
         this.$message.error("时间解析失败，请重新选择时间");
         return;
       }
-
       const start = startDateObj.getTime();
       const end = endDateObj.getTime();
-
       if (end <= start) {
         this.$message.error("结束时间必须晚于开始时间");
         this.ruleForm.yuyue_end = "";
@@ -496,18 +451,24 @@ export default {
         }
       }
     },
-
-    // 简化的时间校验（保留核心逻辑） - 兜底
-    checkTime() {
-      if (this.ruleForm.yuyue_start && this.ruleForm.yuyue_end) {
-        this.checkTimeRange();
-      }
-    },
-
     init(type) {
       this.type = type;
       if (type == "cross") {
         var obj = JSON.parse(localStorage.getItem("crossObj") || "{}");
+        // ====== 重点修正：优先用seatSelection的座位号=======
+        try {
+          const seatSelection = localStorage.getItem('seatSelection');
+          if (seatSelection) {
+            const selectionObj = JSON.parse(atob(seatSelection));
+            if (selectionObj.data && selectionObj.data.seatNumbers) {
+              this.ruleForm.zuowei = selectionObj.data.seatNumbers.join(', ');
+              this.ro.zuowei = true;
+            }
+          }
+        } catch (e) {
+          this.ruleForm.zuowei = '';
+        }
+        // 其余对象字段赋值
         for (var o in obj) {
           if (o == 'id') {
             this.ruleForm.zixishiid = obj[o];
@@ -533,7 +494,8 @@ export default {
             this.ro.mingcheng = true;
             continue;
           }
-          if (o == "zuowei") {
+          // 兼容两种赋值方式：优先seatSelection，同时保留crossObj的赋值逻辑（防止seatSelection获取失败）
+          if (o == "zuowei" && !this.ruleForm.zuowei) {
             this.ruleForm.zuowei = obj[o];
             this.ro.zuowei = true;
             continue;
@@ -581,7 +543,6 @@ export default {
             console.error("获取用户信息失败：", err);
           });
     },
-
     onSubmit() {
       // 1. 前端基础校验
       if (!this.ruleForm.yuyue_start) {
@@ -604,7 +565,6 @@ export default {
         this.$message.error("图书馆/自习室名称不能为空");
         return;
       }
-
       this.$refs["ruleForm"].validate((valid) => {
         if (valid) {
           const submitData = {
@@ -614,9 +574,7 @@ export default {
             yuyue_start: this.ruleForm.yuyue_start,
             yuyue_end: this.ruleForm.yuyue_end
           };
-
           console.log("最终提交的参数：", submitData);
-
           this.$http.post("yuyuexinxi/submit", submitData, {
             headers: {
               'Content-Type': 'application/json;charset=UTF-8'
@@ -645,19 +603,31 @@ export default {
         }
       });
     },
-
     getUUID() {
       return new Date().getTime();
     },
-
     back() {
       this.$router.go(-1);
     },
   }
 };
 </script>
-
+<!-- 全局样式（必须放在不带scoped的style标签中） -->
+<style lang="scss">
+.custom-date-picker {
+  .el-date-table td.disabled {
+    pointer-events: none !important; /* 禁止点击 */
+    .cell {
+      background-color: #f5f5f5 !important; /* 变灰背景 */
+      color: #c0c4cc !important; /* 变灰文字 */
+      text-decoration: line-through !important; /* 划去效果 */
+      text-decoration-color: #999 !important;
+    }
+  }
+}
+</style>
 <style rel="stylesheet/scss" lang="scss" scoped>
+/* 原有布局样式 */
 @media (max-width: 768px) {
   .add-update-preview .el-form-item >>> .el-form-item__label {
     width: 100% !important;
@@ -665,49 +635,22 @@ export default {
     line-height: 24px !important;
     padding: 0 0 8px 0 !important;
   }
-
   .add-update-preview .el-form-item >>> .el-form-item__content {
     margin-left: 0 !important;
   }
-
-  /* 移动端时间选择区域适配 */
   .el-form-item .el-form-item__content > div {
     flex-direction: column;
   }
-
   .el-form-item .el-form-item__content > div .el-date-picker,
   .el-form-item .el-form-item__content > div .el-select {
     width: 100% !important;
     margin-bottom: 10px;
   }
 }
-
 .el-date-editor.el-input,
 .el-select {
   width: 100%;
 }
-
-
-/* 终极强制样式：直接匹配日期选择器的所有非今明日期 */
-::v-deep .el-date-table td:not(.current):not(.today) .cell {
-  background: #f5f5f5 !important;
-  color: #c0c4cc !important;
-  text-decoration: line-through !important;
-  text-decoration-color: #A0A0A0 !important;
-  text-decoration-thickness: 1px !important;
-  pointer-events: none !important;
-  border-radius: 4px !important;
-}
-
-/* 兼容Element Plus */
-::v-deep .el-date-table__cell:not(.is-today):not(.is-selected) .el-date-table__cell-content {
-  background: #f5f5f5 !important;
-  color: #c0c4cc !important;
-  text-decoration: line-through !important;
-  text-decoration-color: #A0A0A0 !important;
-  pointer-events: none !important;
-}
-
 .add-update-preview .el-form-item >>> .el-form-item__label {
   padding: 0 10px 0 0;
   color: #666;
@@ -717,11 +660,9 @@ export default {
   line-height: 40px;
   text-align: right;
 }
-
 .add-update-preview .el-form-item >>> .el-form-item__content {
   margin-left: 120px;
 }
-
 .add-update-preview .el-input >>> .el-input__inner,
 .add-update-preview .el-select >>> .el-input__inner,
 .add-update-preview .el-date-editor >>> .el-input__inner {
@@ -736,37 +677,17 @@ export default {
   height: 40px;
   box-sizing: border-box;
 }
-
-/* 优化下拉选择框样式 */
 ::v-deep .el-select-dropdown__item {
   padding: 8px 16px;
   font-size: 14px;
 }
-
 ::v-deep .el-select-dropdown__item.selected {
   color: #2e61e1;
   background-color: #f0f5ff;
 }
-
 ::v-deep .el-button:hover {
   opacity: 0.9;
 }
-
-/* 核心：自定义禁用日期样式（强制生效） */
-::v-deep .disabled-date-custom {
-  pointer-events: none !important;
-}
-
-::v-deep .disabled-date-custom .cell {
-  background: #f5f5f5 !important;
-  color: #c0c4cc !important;
-  text-decoration: line-through !important;
-  text-decoration-color: #A0A0A0 !important;
-  text-decoration-thickness: 1px !important;
-  border-radius: 4px !important;
-}
-
-/* 保留原有 textarea 样式 */
 .add-update-preview .el-textarea >>> .el-textarea__inner {
   border: 2px solid #2e61e1;
   border-radius: 4px;

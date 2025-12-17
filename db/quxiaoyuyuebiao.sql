@@ -41,3 +41,5 @@ ALTER TABLE yuyuexinxi
     DROP COLUMN qiantui_time;
 
 DESCRIBE yuyuexinxi;
+
+DESCRIBE zixishi;

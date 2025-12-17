@@ -46,8 +46,6 @@ public class YuyuexinxiEntity<T> implements Serializable {
      */
     private String mingcheng;
 
-
-
     /**
      * 自习室序号
      */
@@ -69,19 +67,17 @@ public class YuyuexinxiEntity<T> implements Serializable {
     private String qiantuizhuangtai;
 
     /**
-     * 预约开始时间（替换原单一预约时间）
-     * 关键修复：加@TableField指定数据库字段名yuyue_start
+     * 预约开始时间（映射到数据库 yuyue_start）
      */
-    @TableField("yuyue_start") // 映射数据库下划线字段
+    @TableField("yuyue_start")
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date yuyueStart;
 
     /**
-     * 预约结束时间
-     * 关键修复：加@TableField指定数据库字段名yuyue_end
+     * 预约结束时间（映射到数据库 yuyue_end）
      */
-    @TableField("yuyue_end") // 映射数据库下划线字段
+    @TableField("yuyue_end")
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date yuyueEnd;
@@ -111,7 +107,6 @@ public class YuyuexinxiEntity<T> implements Serializable {
      */
     private String shhf;
 
-
     @TableField(exist = false)
     @JsonFormat(shape = JsonFormat.Shape.STRING, locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -125,14 +120,17 @@ public class YuyuexinxiEntity<T> implements Serializable {
     @TableField(exist = false)
     private Double zixishichang; // 自习时长（从签退表关联）
 
-// 需生成对应的get/set方法
-
+    /**
+     * 违纪标记：映射到数据库列 weigui_flag (tinyint)
+     */
+    @TableField("weigui_flag")
+    private Integer weiguiFlag;
 
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date addtime;
 
-    // ========== getter/setter 方法 ==========
+    // ========== getter/setter ==========
     public Date getAddtime() {
         return addtime;
     }
@@ -164,14 +162,6 @@ public class YuyuexinxiEntity<T> implements Serializable {
     public void setMingcheng(String mingcheng) {
         this.mingcheng = mingcheng;
     }
-
-//    public String getTupian() {
-//        return tupian;
-//    }
-//
-//    public void setTupian(String tupian) {
-//        this.tupian = tupian;
-//    }
 
     public Integer getZuowei() {
         return zuowei;
@@ -205,7 +195,6 @@ public class YuyuexinxiEntity<T> implements Serializable {
         this.qiantuizhuangtai = qiantuizhuangtai;
     }
 
-    // 预约开始时间 getter/setter
     public Date getYuyueStart() {
         return yuyueStart;
     }
@@ -214,7 +203,6 @@ public class YuyuexinxiEntity<T> implements Serializable {
         this.yuyueStart = yuyueStart;
     }
 
-    // 预约结束时间 getter/setter
     public Date getYuyueEnd() {
         return yuyueEnd;
     }
@@ -285,5 +273,13 @@ public class YuyuexinxiEntity<T> implements Serializable {
 
     public void setQiantuishijian(Date qiantuishijian) {
         this.qiantuishijian = qiantuishijian;
+    }
+
+    public Integer getWeiguiFlag() {
+        return weiguiFlag;
+    }
+
+    public void setWeiguiFlag(Integer weiguiFlag) {
+        this.weiguiFlag = weiguiFlag;
     }
 }

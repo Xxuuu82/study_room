@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 
+import com.service.YuyuexinxiService;
+import java.time.LocalDate;
 /**
  * 自习室
  * 后端接口
@@ -36,6 +39,9 @@ public class ZixishiController {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private YuyuexinxiService yuyuexinxiService;
     /**
      * 后端列表
      */
@@ -236,5 +242,28 @@ public class ZixishiController {
         return R.ok().put("count", count);
     }
 
+
+    @GetMapping("/seat/{zixishiId}/{zuowei}/availability")
+    public R seatAvailability(@PathVariable Long zixishiId, @PathVariable Integer zuowei,
+                              @RequestParam(required=false) String date,
+                              @RequestParam(defaultValue = "30") Integer granularity) {
+        try {
+            LocalDate d;
+            if (date == null || date.isEmpty()) d = LocalDate.now();
+            else d = LocalDate.parse(date);
+            ZixishiEntity z = zixishiService.selectById(zixishiId);
+            String open = z != null ? z.getKeyueshijian() : null;
+            List<Map<String,Object>> avail = yuyuexinxiService.getSeatAvailability(zixishiId.intValue(), zuowei, d, granularity, 10, open);
+            Map<String,Object> resp = new HashMap<>();
+            resp.put("date", d.toString());
+            resp.put("intervals", avail);
+            resp.put("openStart", /* from parsed open */ "");
+            resp.put("openEnd", "");
+            return R.ok().put("data", resp);
+        } catch(Exception e) {
+            e.printStackTrace();
+            return R.error("获取可约时间失败：" + e.getMessage());
+        }
+    }
 
 }
