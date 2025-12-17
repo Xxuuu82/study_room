@@ -58,4 +58,22 @@
         ORDER BY yuyue_start ASC
     </select>
 
+    <!-- 新增：查询指定日期的最大流水号 -->
+    <select id="getMaxYuyueSeqByDate" resultType="int">
+        SELECT COALESCE(MAX(SUBSTR(yuyuedanhao, 11, 3)), 0)
+        FROM yuyuexinxi
+        WHERE SUBSTR(yuyuedanhao, 3, 8) = #{dateStr}
+    </select>
+
+    <!-- 查询某座位在指定时间段内的预约（不包含已取消） -->
+    <select id="selectBookingsInRange" resultType="com.entity.YuyuexinxiEntity">
+        SELECT id, yuyue_start AS yuyueStart, yuyue_end AS yuyueEnd
+        FROM yuyuexinxi
+        WHERE zixishiid = #{zixishiid}
+          AND zuowei = #{zuowei}
+          AND yuyue_start &lt;#{dayEnd}
+          AND yuyue_end > #{dayStart}
+        ORDER BY yuyue_start ASC
+    </select>
+
 </mapper>

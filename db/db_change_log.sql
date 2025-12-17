@@ -8,3 +8,6 @@ ALTER TABLE yuyuexinxi ADD COLUMN qiantui_time datetime DEFAULT NULL COMMENT '�
 
 -- 2025-12-13 第二次变更：新增违约标记字段
 ALTER TABLE yuyuexinxi ADD COLUMN weigui_flag tinyint(1) DEFAULT 0 COMMENT '是否触发违约 0=否 1=是';
+
+-- 新增唯一索引（执行一次即可）
+ALTER TABLE yuyuexinxi ADD UNIQUE INDEX idx_yuyuedanhao (yuyuedanhao);
