@@ -40,5 +40,5 @@ public interface YuyuexinxiService extends IService<YuyuexinxiEntity> {
     // 新增：查询指定座位的所有已预约时段（供前端展示空闲/占用时段）
     List<YuyuexinxiEntity> getSeatYuyueList(Integer zixishiid, Integer zuowei);
 
-    List<Map<String, Object>> getSeatAvailability(Integer zixishiid, Integer zuowei, LocalDate ld, int i, int i1, Object o);
+    List<Map<String,Object>> getSeatAvailability(Integer zixishiid, Integer zuowei, LocalDate date, int granularityMinutes, int bufferMinutes, String openTimeStr);
 }

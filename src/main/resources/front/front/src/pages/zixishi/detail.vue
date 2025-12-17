@@ -7,7 +7,6 @@
         <el-breadcrumb-item v-for="(item, index) in breadcrumbItem" :key="index">{{item.name}}</el-breadcrumb-item>
       </el-breadcrumb>
     </div>
-
     <!-- 详情容器（全屏自适应） -->
     <div class="detail-preview" :style='{
       width: "100%",
@@ -32,772 +31,639 @@
       }">
         <!-- 轮播图 -->
         <el-carousel
-            :style="{
-            flex: '1 1 400px',
-            minWidth: '300px',
-            height: '400px',
-            borderRadius: '8px',
-            overflow: 'hidden'
-          }"
+            :style="{ flex: '1 1 400px', minWidth: '300px', height: '400px', borderRadius: '8px', overflow: 'hidden' }"
+            :autoplay="true"
             trigger="click"
             indicator-position="inside"
             arrow="always"
-            autoplay="true"
-            interval="3000"
-            loop="true"
+            :loop="true"
+            :interval="3000"
         >
-          <el-carousel-item
-              :style="{ borderRadius: '8px', width: '100%', height: '100%' }"
-              v-for="(item, idx) in detailBanner"
-              :key="idx"
-          >
+          <el-carousel-item v-for="(item, idx) in detailBanner" :key="idx" :style="{ borderRadius: '8px', width: '100%', height: '100%' }">
             <el-image
-                :style="{ objectFit: 'cover', width: '100%', height: '100%' }"
-                v-if="item.substr(0, 4) == 'http'"
+                v-if="item && item.substr && item.substr(0,4) === 'http'"
                 :src="item"
                 fit="cover"
-                class="image"
-            ></el-image>
-            <el-image
                 :style="{ objectFit: 'cover', width: '100%', height: '100%' }"
+            />
+            <el-image
                 v-else
                 :src="baseUrl + item"
                 fit="cover"
-                class="image"
-            ></el-image>
+                :style="{ objectFit: 'cover', width: '100%', height: '100%' }"
+            />
           </el-carousel-item>
         </el-carousel>
-
         <!-- 信息面板 -->
-        <div class="info" :style="{
-          flex: '2 1 500px',
-          minWidth: '300px',
-          padding: '20px',
-          background: '#fff',
-          borderRadius: '8px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-        }">
-          <!-- 标题和收藏 -->
-          <div class="item" :style="{
-            padding: '10px 0',
-            margin: '0 0 20px 0',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            display: 'flex',
-            borderBottom: '1px solid #eee'
-          }">
-            <div :style="{ color: '#333', fontSize: '18px', fontWeight: '500' }">
-              {{ detail.mingcheng }}
-            </div>
-            <!-- 收藏功能已注释 -->
-            <!-- <div
-                @click="storeup(1)"
-                v-show="!isStoreup"
-                :style="{
-                padding: '8px 12px',
-                background: '#f8f9fa',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }"
-                @mouseenter="this.style.background='#e9ecef'"
-                @mouseleave="this.style.background='#f8f9fa'"
-            >
-              <i :style="{ color: '#999', fontSize: '14px', marginRight: '6px' }" class="el-icon-star-off"></i>
-              <span :style="{ color: '#666', fontSize: '14px' }">点我收藏</span>
-            </div>
-            <div
-                @click="storeup(-1)"
-                v-show="isStoreup"
-                :style="{
-                padding: '8px 12px',
-                background: '#f8f9fa',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                transition: 'all 0.2s'
-              }"
-                @mouseenter="this.style.background='#e9ecef'"
-                @mouseleave="this.style.background='#f8f9fa'"
-            >
-              <i :style="{ color: '#2E61E1', fontSize: '14px', marginRight: '6px' }" class="el-icon-star-on"></i>
-              <span :style="{ color: '#666', fontSize: '14px' }">取消收藏</span>
-            </div> -->
+        <div class="info" :style="{ flex: '2 1 500px', minWidth: '300px', padding: '20px', background: '#fff', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)'}">
+          <div class="item" :style="{ padding: '10px 0', margin: '0 0 20px 0', alignItems: 'center', justifyContent: 'space-between', display: 'flex', borderBottom: '1px solid #eee' }">
+            <div :style="{ color: '#333', fontSize: '18px', fontWeight: '500' }">{{ detail.mingcheng }}</div>
           </div>
-
-          <!-- 信息列表 -->
           <div style="display: grid; gridTemplateColumns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px;">
-            <div class="info-item" :style="{
-              padding: '12px',
-              background: '#f8f9fa',
-              borderRadius: '6px'
-            }">
+            <div class="info-item" :style="{ padding: '12px', background: '#f8f9fa', borderRadius: '6px' }">
               <div :style="{ color: '#999', fontSize: '13px', marginBottom: '4px' }">规模</div>
               <div :style="{ color: '#333', fontSize: '14px', fontWeight: '400' }">{{ detail.guimo || '暂无' }}</div>
             </div>
-            <div class="info-item" :style="{
-              padding: '12px',
-              background: '#f8f9fa',
-              borderRadius: '6px'
-            }">
+            <div class="info-item" :style="{ padding: '12px', background: '#f8f9fa', borderRadius: '6px' }">
               <div :style="{ color: '#999', fontSize: '13px', marginBottom: '4px' }">座位</div>
               <div :style="{ color: '#333', fontSize: '14px', fontWeight: '400' }">{{ detail.sd_zuowei || '暂无' }}</div>
             </div>
-            <div class="info-item" :style="{
-              padding: '12px',
-              background: '#f8f9fa',
-              borderRadius: '6px'
-            }">
+            <div class="info-item" :style="{ padding: '12px', background: '#f8f9fa', borderRadius: '6px' }">
               <div :style="{ color: '#999', fontSize: '13px', marginBottom: '4px' }">位置</div>
               <div :style="{ color: '#333', fontSize: '14px', fontWeight: '400' }">{{ detail.weizhi || '暂无' }}</div>
             </div>
-            <!-- 删除了“设施”模块 -->
-            <div class="info-item" :style="{
-              padding: '12px',
-              background: '#f8f9fa',
-              borderRadius: '6px'
-            }">
-              <div :style="{ color: '#999', fontSize: '13px', marginBottom: '4px' }">可约时间</div>
-              <div :style="{ color: '#333', fontSize: '14px', fontWeight: '400' }">8:00-22:00</div>
+            <div class="info-item" :style="{ padding: '12px', background: '#f8f9fa', borderRadius: '6px' }">
+              <div :style="{ color: '#999', fontSize: '13px', marginBottom: '4px' }">开放时间</div>
+              <div :style="{ color: '#333', fontSize: '14px', fontWeight: '400' }">{{ parseKeyue(detail.keyueshijian) }}</div>
             </div>
-            <!-- 删除了“是否有课”模块 -->
           </div>
-
-          <!-- 在线预约按钮 -->
-          <div class="btn" :style="{
-            padding: '20px 0 10px',
-            justifyContent: 'center',
-            display: 'flex'
-          }">
-            <el-button
-                :style="{
-                border: '1px solid #97C9D6',
-                cursor: 'pointer',
-                padding: '0 24px',
-                boxShadow: '0px 2px 2px 0px #78ABC3',
-                outline: 'none',
-                margin: '10px 0 0',
-                color: '#78ABC3',
-                borderRadius: '30px',
-                background: '#fff',
-                fontSize: '14px',
-                height: '40px',
-                transition: 'all 0.2s'
-              }"
-                v-if="isAuth('zixishi', '在线预约')"
-                @click="onAcross('yuyuexinxi', '', '', '')"
-                type="success"
-                @mouseenter="this.style.transform='translateY(-1px)'"
-                @mouseleave="this.style.transform='translateY(0)'"
-            >在线预约</el-button
-            >
+          <div class="btn" :style="{ padding: '20px 0 10px', justifyContent: 'center', display: 'flex' }">
+            <el-button v-if="isAuth('zixishi','在线预约')" type="success" @click="onAcross('yuyuexinxi')" :style="buttonStyle">在线预约</el-button>
+            <el-button v-if="canShowAvailabilityButton" type="primary" @click="openAvailability" :style="buttonStyle">可约时间</el-button>
           </div>
         </div>
       </div>
-
-      <!-- 座位选择模块（美化版） -->
-      <div class="seat-map" :style="{
-        padding: '30px',
-        margin: '0 0 20px 0',
-        background: '#f8f9fa',
-        borderRadius: '8px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        position: 'relative'
-      }">
-        <!-- 标题+状态说明 -->
-        <div class="seat-header" :style="{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '20px',
-          flexWrap: 'wrap',
-          gap: '10px'
-        }">
-          <div class="seat-title" :style="{
-            fontSize: '16px',
-            color: '#333',
-            fontWeight: '500',
-            paddingBottom: '10px',
-            borderBottom: '1px solid #eee',
-            flex: '1 1 100%'
-          }">
-            座位选择
-          </div>
-          <!-- 状态说明标签 -->
-          <div class="seat-legend" :style="{
-            display: 'flex',
-            gap: '20px',
-            fontSize: '13px',
-            color: '#666'
-          }">
+      <!-- 座位选择模块 -->
+      <div class="seat-map" :style="{ padding: '30px', margin: '0 0 20px 0', background: '#f8f9fa', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', position: 'relative' }">
+        <div class="seat-header" :style="{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '10px' }">
+          <div class="seat-title" :style="{ fontSize: '16px', color: '#333', fontWeight: '500', paddingBottom: '10px', borderBottom: '1px solid #eee', flex: '1 1 100%' }">座位选择</div>
+          <div class="seat-legend" :style="{ display: 'flex', gap: '20px', fontSize: '13px', color: '#666' }">
             <div :style="{display: 'flex', alignItems: 'center', gap: '6px'}">
-              <div :style="{
-                width: '16px',
-                height: '16px',
-                border: '2px solid #2E61E1',
-                borderRadius: '4px',
-                background: '#fff'
-              }"></div>
+              <div :style="{ width: '16px', height: '16px', border: '2px solid #2E61E1', borderRadius: '4px', background: '#fff' }"></div>
               <span>可选座位</span>
             </div>
             <div :style="{display: 'flex', alignItems: 'center', gap: '6px'}">
-              <div :style="{
-                width: '16px',
-                height: '16px',
-                border: '2px solid #2E61E1',
-                borderRadius: '4px',
-                background: '#2E61E1',
-                boxShadow: '0 0 0 2px rgba(46, 97, 225, 0.3)'
-              }"></div>
+              <div :style="{ width: '16px', height: '16px', border: '2px solid #2E61E1', borderRadius: '4px', background: '#2E61E1', boxShadow: '0 0 0 2px rgba(46, 97, 225, 0.3)' }"></div>
               <span>已选座位</span>
             </div>
             <div :style="{display: 'flex', alignItems: 'center', gap: '6px'}">
-              <div :style="{
-                width: '16px',
-                height: '16px',
-                border: '2px solid #dcdfe6',
-                borderRadius: '4px',
-                background: '#f0f2f5'
-              }"></div>
-              <span>已占用</span>
+              <div :style="{ width: '16px', height: '16px', border: '2px solid #dcdfe6', borderRadius: '4px', background: '#f0f2f5' }"></div>
+              <span>维护中</span>
             </div>
           </div>
         </div>
-
-        <!-- 座位网格 -->
-        <div v-if="seats" class="seat-grid" :style="{
-          display: 'grid',
-          gap: '15px',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(45px, 1fr))',
-          justifyItems: 'center',
-          maxWidth: '900px',
-          margin: '0 auto',
-          padding: '20px',
-          background: '#fff',
-          borderRadius: '8px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
-        }">
-          <!-- 座位方框（美化版） -->
-          <div
-              v-for="seat in seats"
-              :key="seat.id"
-              class="seat-item"
-              :class="{
-              'seat-selected': seat.selected,
-              'seat-occupied': seat.status === 'occupied',
-              'seat-available': seat.status === 'available'
-            }"
-              @click="handleSeatClick(seat)"
-              :style="{
-              width: '45px',
-              height: '45px',
-              borderRadius: '8px',
-              cursor: seat.status === 'occupied' ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '15px',
-              fontWeight: '500',
-              transition: 'all 0.2s ease-in-out',
-              position: 'relative',
-              border: seat.status === 'occupied'
-                ? '2px solid #dcdfe6'
-                : '2px solid #2E61E1',
-              backgroundColor: seat.selected
-                ? '#2E61E1'
-                : (seat.status === 'occupied' ? '#f0f2f5' : '#fff'),
-              color: seat.selected ? '#fff' : (seat.status === 'occupied' ? '#c0c4cc' : '#333')
-            }"
-          >
-            <!-- 座位号 -->
+        <div v-if="seats" class="seat-grid" :style="{ display: 'grid', gap: '15px', gridTemplateColumns: 'repeat(auto-fill, minmax(45px, 1fr))', justifyItems: 'center', maxWidth: '900px', margin: '0 auto', padding: '20px', background: '#fff', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)'}">
+          <div v-for="seat in seats" :key="seat.id" class="seat-item"
+               :class="{ 'seat-selected': seat.selected, 'seat-occupied': seat.status === 'occupied', 'seat-available': seat.status === 'available' }"
+               @click="handleSeatClick(seat)"
+               :style="seatStyle(seat)">
             {{ seat.number }}
-            <!-- 已占用座位添加禁用图标 -->
-            <i
-                v-if="seat.status === 'occupied'"
-                class="el-icon-lock"
-                :style="{
-                position: 'absolute',
-                bottom: '2px',
-                right: '2px',
-                fontSize: '10px',
-                color: '#c0c4cc'
-              }"
-            ></i>
+            <i v-if="seat.status === 'occupied'" class="el-icon-lock" :style="{ position: 'absolute', bottom: '2px', right: '2px', fontSize: '10px', color: '#c0c4cc' }"></i>
           </div>
         </div>
-
-        <!-- 已选座位提示 -->
-        <div class="selected-hint" v-if="seats" :style="{
-          marginTop: '20px',
-          color: '#666',
-          fontSize: '14px',
-          textAlign: 'center',
-          padding: '10px',
-          background: '#fff',
-          borderRadius: '6px',
-          maxWidth: '500px',
-          margin: '0 auto'
-        }">
+        <div class="selected-hint" v-if="seats" :style="{ marginTop: '20px', color: '#666', fontSize: '14px', textAlign: 'center', padding: '10px', background: '#fff', borderRadius: '6px', maxWidth: '500px', margin: '0 auto' }">
           <i class="el-icon-info" :style="{color: '#2E61E1', marginRight: '6px'}"></i>
           已选座位：<span style="color: #2e61e1; font-weight: 500;">{{ selectedSeatsText }}</span>
-          <span style="marginLeft: 10px; color: '#999';">（最多选择{{ maxSelect }}个座位）</span>
+          <span style="margin-left: 10px; color: #999;">（最多选择{{ maxSelect }}个座位）</span>
         </div>
-
         <div v-else style="padding: 20px; color: #666; text-align: center;">加载座位信息中...</div>
       </div>
-
-      <!-- 新增：返回按钮区域 -->
+      <!-- 返回按钮 -->
       <div style="width: 100%; display: flex; justify-content: center; margin: 30px 0 20px;">
-        <el-button
-            :style="{
-            border: '1px solid #97C9D6',
-            cursor: 'pointer',
-            padding: '0 24px',
-            boxShadow: '0px 2px 2px 0px #78ABC3',
-            outline: 'none',
-            color: '#78ABC3',
-            borderRadius: '30px',
-            background: '#fff',
-            fontSize: '14px',
-            height: '40px',
-            transition: 'all 0.2s'
-          }"
-            @click="goBack"
-            @mouseenter="this.style.transform='translateY(-1px)'"
-            @mouseleave="this.style.transform='translateY(0)'"
-        >
-          <i class="el-icon-arrow-left" style="margin-right: 6px;"></i>返回自习室列表
-        </el-button>
+        <el-button @click="goBack" :style="buttonStyle"><i class="el-icon-arrow-left" style="margin-right:6px;"></i>返回自习室列表</el-button>
       </div>
     </div>
+    <!-- 可约时间弹窗 -->
+    <el-dialog title="可约时间" :visible.sync="availabilityDialog" width="900px">
+      <div style="display:flex; gap:12px; align-items:center; margin-bottom:12px;">
+        <!-- 核心修改：日期选择器绑定picker-options + 自定义类名 -->
+        <el-date-picker
+            v-model="availabilityDate"
+            type="date"
+            placeholder="选择日期(默认今日)"
+            style="width:200px;"
+            :picker-options="datePickerOptions"
+            value-format="yyyy-MM-dd"
+            popper-class="custom-availability-date-picker"
+        >
+        </el-date-picker>
+        <el-button type="primary" @click="fetchSeatStatus">查询</el-button>
+        <div style="margin-left: auto; color: #666;">已选座位：<span style="color:#2E61E1; font-weight:500">{{ selectedSeatsText }}</span></div>
+      </div>
+      <div v-if="availabilitySlots && availabilitySlots.length" style="padding:12px; background:#fff; border-radius:6px; border:1px solid #eee;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div style="font-size:14px; color:#666;">显示：{{ availabilityDate }} （08:00 - 22:00，共 {{ availabilitySlots.length }} 槽）</div>
+          <div style="font-size:12px; color:#999;">绿色=可约，灰色=已占或已过</div>
+        </div>
+        <div class="availability-grid">
+          <div
+              v-for="slot in availabilitySlots"
+              :key="slot.startStr"
+              :class="['slot', slot.status, { 'slot-past': slot.isPast }]"
+              @click="onSlotClick(slot)"
+              :title="formatSlotTitle(slot)"
+          >
+            <div class="slot-time">{{ formatTimeShort(slot.startStr) }} - {{ formatTimeShort(slot.endStr) }}</div>
+            <div class="slot-label">{{ slot.status === 'available' && !slot.isPast ? '可约' : (slot.isPast ? '已过' : '已占') }}</div>
+          </div>
+        </div>
+      </div>
+      <div v-else style="padding: 20px; color: #666;">暂无可约数据，或请先选择座位并点击 查询。</div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="availabilityDialog=false">关闭</el-button>
+      </span>
+      <el-button type="text" @click="fetchSeatStatus">刷新</el-button>
+    </el-dialog>
   </div>
 </template>
-
 <script>
-import CountDown from "@/components/CountDown";
 export default {
   data() {
     return {
       tablename: "zixishi",
       baseUrl: "",
       breadcrumbItem: [{ name: "自习室详情" }],
-      title: "",
       detailBanner: [],
-      endTime: 0,
       detail: {},
-      total: 1,
-      pageSize: 5,
-      pageSizes: [10, 20, 30, 50],
-      totalPage: 1,
-      rules: {
-        content: [{ required: true, message: "请输入内容", trigger: "blur" }],
-      },
-      // 收藏功能相关数据已注释
-      // storeupParams: {
-      //   name: "",
-      //   picture: "",
-      //   refid: 0,
-      //   tablename: "zixishi",
-      //   userid: localStorage.getItem("userid"),
-      // },
-      // isStoreup: false,
-      // storeupInfo: {},
-      buynumber: 1,
-      seats: null, // 座位数据
+      seats: null,
       maxSelect: 1,
-      error: ""
+      selectedSeatObj: null,
+      availabilityDialog: false,
+      availabilityDate: new Date().toISOString().slice(0,10),
+      availabilityData: null,
+      availabilitySlots: [],
+      loadingStatus: false,
+      // button style used in template
+      buttonStyle: {
+        border: '1px solid #97C9D6',
+        cursor: 'pointer',
+        padding: '0 24px',
+        boxShadow: '0px 2px 2px 0px #78ABC3',
+        outline: 'none',
+        color: '#78ABC3',
+        borderRadius: '30px',
+        background: '#fff',
+        fontSize: '14px',
+        height: '40px',
+        transition: 'all 0.2s'
+      },
+      availabilityViewOnly: true, // true = 仅查看（点击不跳转）；false = 点击会跳转到预约页面（原行为）
+      highlightedSlot: null,      // 用于在仅查看模式下高亮选中槽
+      // 新增：日期选择器配置（核心禁用逻辑）
+      datePickerOptions: {
+        disabledDate: (time) => {
+          const today = new Date();
+          // 清空时分秒，仅保留年月日
+          const todayTime = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+          const tomorrowTime = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1).getTime();
+          const currentTime = new Date(time.getFullYear(), time.getMonth(), time.getDate()).getTime();
+          // 仅允许今天和明天，其他日期禁用
+          return currentTime !== todayTime && currentTime !== tomorrowTime;
+        }
+      }
     };
   },
   computed: {
-    // 已选座位文字显示
     selectedSeatsText() {
-      return (
-          this.seats
-              .filter((s) => s.selected)
-              .map((s) => s.number)
-              .join(", ") || "暂无"
-      );
+      return (this.seats && this.seats.filter(s=>s.selected).map(s=>s.number).join(', ')) || '暂无';
     },
+    canShowAvailabilityButton() {
+      return !!this.selectedSeatObj;
+    }
   },
   created() {
     this.init();
     this.initSeats();
   },
   methods: {
-    // 新增：返回列表页方法
-    goBack() {
-      this.$router.push('/index/zixishi');
-    },
+    goBack() { this.$router.push('/index/zixishi'); },
     init() {
-      this.baseUrl = this.$config.baseUrl;
-      if (this.$route.query.detailObj) {
-        this.detail = JSON.parse(this.$route.query.detailObj);
+      this.baseUrl = this.$config ? this.$config.baseUrl : '';
+      if (this.$route && this.$route.query && this.$route.query.detailObj) {
+        try { this.detail = JSON.parse(this.$route.query.detailObj); } catch(e){;}
       }
-      if (this.$route.query.storeupObj) {
-        this.detail.id = JSON.parse(this.$route.query.storeupObj).refid;
+      if (this.$route && this.$route.query && this.$route.query.storeupObj) {
+        try { this.detail.id = JSON.parse(this.$route.query.storeupObj).refid; } catch(e){;}
       }
-      this.$http
-          .get(this.tablename + "/detail/" + this.detail.id, {})
-          .then((res) => {
-            if (res.data.code == 0) {
-              this.detail = res.data.data;
-              this.title = this.detail.mingcheng;
-              this.detailBanner = this.detail.tupian
-                  ? this.detail.tupian.split(",")
-                  : [];
-              this.$forceUpdate();
-            }
-          });
-
-      // 收藏状态获取已注释
-      // this.getStoreupStatus();
-    },
-    async initSeats(zixishiId) {
-      try {
-        // 1. 从后端获取座位数据
-        const response = await this.$http.get(this.tablename + "/seats/" + this.detail.id, {});
-        const dbSeats = response.data;
-        console.log(dbSeats);
-        // 2. 转换为前端需要的格式
-        this.seats = dbSeats.map((seat) => ({
-          id: `seat_${seat.id}`,
-          number: `${seat.id}`,
-          status: seat.status === 1 ? "available" : "occupied",
-          selected: false,
-        }));
-
-        // 3. 清除旧状态
-        this.error = "";
-      } catch (err) {
-        this.error = "座位数据加载失败";
-        console.error("API错误:", err.response?.data || err.message);
-
-        // 可选：显示默认空数据
-        this.seats = [];
-      }
-    },
-
-    // 获取座位颜色（保留原有逻辑，兼容样式）
-    getSeatColor(seat) {
-      if (seat.selected) return "#2E61E1";
-      return seat.status === "occupied" ? "#F0F2F5" : "#fff";
-    },
-
-    // 点击座位（原有逻辑完全不变）
-    handleSeatClick(seat) {
-      if (seat.status === "occupied") {
-        this.$message.warning("该座位已被占用");
-        return;
-      }
-
-      const selectedCount = this.seats.filter((s) => s.selected).length;
-      const newSeats = this.seats.map((s) => {
-        if (s.id === seat.id) {
-          if (!s.selected && selectedCount >= this.maxSelect) {
-            this.$message.warning(`最多选择${this.maxSelect}个座位`);
-            return s;
+      if (this.detail && this.detail.id) {
+        this.$http.get(this.tablename + "/detail/" + this.detail.id).then(res=>{
+          if (res.data && res.data.code === 0) {
+            this.detail = res.data.data;
+            this.detailBanner = this.detail.tupian ? this.detail.tupian.split(',') : [];
           }
-          return { ...s, selected: !s.selected };
+        }).catch(()=>{});
+      }
+    },
+    async initSeats() {
+      try {
+        if (!this.detail || !this.detail.id) { this.seats = []; return; }
+        const res = await this.$http.get(this.tablename + "/seats/" + this.detail.id);
+        const dbSeats = res.data;
+        const list = Array.isArray(dbSeats) ? dbSeats : (dbSeats.data && Array.isArray(dbSeats.data) ? dbSeats.data : dbSeats);
+        this.seats = list.map(seat => ({ id: `seat_${seat.id}`, number: `${seat.id}`, status: Number(seat.status)===1 ? 'available' : 'occupied', selected:false }));
+      } catch (e) {
+        this.seats = [];
+        console.error('initSeats error', e);
+      }
+    },
+    seatStyle(seat) {
+      return {
+        width: '45px',
+        height: '45px',
+        borderRadius: '8px',
+        cursor: seat.status === 'occupied' ? 'not-allowed' : 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '15px',
+        fontWeight: '500',
+        transition: 'all 0.2s ease-in-out',
+        position: 'relative',
+        border: seat.status === 'occupied' ? '2px solid #dcdfe6' : '2px solid #2E61E1',
+        backgroundColor: seat.selected ? '#2E61E1' : (seat.status === 'occupied' ? '#f0f2f5' : '#fff'),
+        color: seat.selected ? '#fff' : (seat.status === 'occupied' ? '#c0c4cc' : '#333')
+      };
+    },
+    handleSeatClick(seat) {
+      if (seat.status === 'occupied') { this.$message.warning('该座位已被占用'); return; }
+      const selectedCount = this.seats.filter(s=>s.selected).length;
+      const newSeats = this.seats.map(s => {
+        if (s.id === seat.id) {
+          if (!s.selected && selectedCount >= this.maxSelect) { this.$message.warning(`最多选择${this.maxSelect}个座位`); return s; }
+          return {...s, selected: !s.selected};
         }
         return s;
       });
-
       this.seats = newSeats;
+      const selecteds = this.seats.filter(s=>s.selected);
+      this.selectedSeatObj = selecteds.length === 1 ? selecteds[0] : null;
     },
-    onAcross(
-        acrossTable,
-        crossOptAudit,
-        statusColumnName,
-        tips,
-        statusColumnValue
-    ) {
-      // ========== 1. 数据验证 ==========
-      const validateSelection = () => {
-        const selectedSeats = this.seats.filter((s) => s.selected);
-
-        // 基础验证
-        if (selectedSeats.length === 0) {
-          this.$message.error("请先选择座位");
-          return false;
-        }
-
-        // 二次验证（可选）：检查是否有座位在选中后被占用
-        const conflictSeats = selectedSeats.filter(
-            (s) => s.status === "occupied"
-        );
-        if (conflictSeats.length > 0) {
-          this.$message.error(
-              `座位 ${conflictSeats.map((s) => s.number)} 已被占用，请重新选择`
-          );
-          return false;
-        }
-
-        return selectedSeats;
-      };
-
-      // ========== 2. 数据存储 ==========
-      const storeSelectionData = (seats) => {
-        try {
-          // 结构化存储数据
-          const storageData = {
-            version: "1.0",
-            timestamp: new Date().getTime(),
-            data: {
-              seatNumbers: seats.map((s) => s.number),
-              seatIds: seats.map((s) => s.id),
-              zixishiId: this.detail.id,
-            },
-          };
-
-          // 使用加密存储（可选）
-          const encrypted = btoa(JSON.stringify(storageData));
-          localStorage.setItem("seatSelection", encrypted);
-
-          // 同步存储基础跨表数据
-          localStorage.setItem("crossTable", "zixishi");
-          localStorage.setItem("crossObj", JSON.stringify(this.detail));
-        } catch (error) {
-          console.error("本地存储失败:", error);
-          this.$message.error("数据保存失败，请检查浏览器设置");
-          return false;
-        }
-        return true;
-      };
-
-      // ========== 3. 主流程 ==========
-      const selected = validateSelection();
-      if (!selected) return;
-
-      if (!storeSelectionData(selected)) return;
-
-      // ========== 4. 路由跳转 ==========
-      const routeParams = {
-        path: `/index/${acrossTable}Add`,
-        query: {
-          type: "cross",
-          // 通过URL传递基础信息（防localStorage失效）
-          seats: selected.map((s) => s.id).join(","),
-          zixishiId: this.detail.id,
-        },
-      };
-
-      // 处理特殊状态跳转
-      if (statusColumnName && !statusColumnName.startsWith("[")) {
-        const obj = JSON.parse(localStorage.getItem("crossObj") || {});
-        if (obj[statusColumnName] === statusColumnValue) {
-          this.$message.success(tips);
-          return;
-        }
-      }
-      const obj = JSON.parse(localStorage.getItem("crossObj") || {});
-
-      obj["zuowei"] =
-          this.seats
-              .filter((s) => s.selected)
-              .map((s) => s.number)
-              .join(", ") || "暂无";
-      var updatedCrossObjStr = JSON.stringify(obj);
-
-      // 保存回 localStorage
-      localStorage.setItem("crossObj", updatedCrossObjStr);
-      console.log(updatedCrossObjStr);
-      this.$router.push(routeParams);
-    },
-    // 收藏功能方法已注释
-    // storeup(type) {
-    //   if (type == 1 && !this.isStoreup) {
-    //     this.storeupParams.name = this.title;
-    //     this.storeupParams.picture = this.detailBanner[0];
-    //     this.storeupParams.refid = this.detail.id;
-    //     this.storeupParams.type = type;
-    //     this.$http.post("storeup/add", this.storeupParams).then((res) => {
-    //       if (res.data.code == 0) {
-    //         this.isStoreup = true;
-    //         this.$message({
-    //           type: "success",
-    //           message: "收藏成功!",
-    //           duration: 1500,
-    //         });
-    //       }
-    //     });
-    //   }
-    //   if (type == -1 && this.isStoreup) {
-    //     let delIds = new Array();
-    //     delIds.push(this.storeupInfo.id);
-    //     this.$http.post("storeup/delete", delIds).then((res) => {
-    //       if (res.data.code == 0) {
-    //         this.isStoreup = false;
-    //         this.$message({
-    //           type: "success",
-    //           message: "取消成功!",
-    //           duration: 1500,
-    //         });
-    //       }
-    //     });
-    //   }
-    // },
-    // getStoreupStatus() {
-    //   if (localStorage.getItem("Token")) {
-    //     this.$http
-    //         .get("storeup/list", {
-    //           params: {
-    //             page: 1,
-    //             limit: 1,
-    //             type: 1,
-    //             refid: this.detail.id,
-    //             tablename: "zixishi",
-    //             userid: localStorage.getItem("userid"),
-    //           },
-    //         })
-    //         .then((res) => {
-    //           if (res.data.code == 0 && res.data.data.list.length > 0) {
-    //             this.isStoreup = true;
-    //             this.storeupInfo = res.data.data.list[0];
-    //           }
-    //         });
-    //   }
-    // },
-    curChange(page) {
-      this.getDiscussList(page);
-    },
-    prevClick(page) {
-      this.getDiscussList(page);
-    },
-    nextClick(page) {
-      this.getDiscussList(page);
-    },
-    // 下载
-    download(file) {
-      if (!file) {
-        this.$message({
-          type: "error",
-          message: "文件不存在",
-          duration: 1500,
-        });
+    onAcross(acrossTable) {
+      const selectedSeats = this.seats.filter((s) => s.selected);
+      if (selectedSeats.length === 0) { this.$message.error("请先选择座位"); return; }
+      try {
+        const storageData = {
+          version: "1.0",
+          timestamp: new Date().getTime(),
+          data: {
+            seatNumbers: selectedSeats.map((s) => s.number),
+            seatIds: selectedSeats.map((s) => s.id),
+            zixishiId: this.detail.id,
+          },
+        };
+        localStorage.setItem("seatSelection", btoa(JSON.stringify(storageData)));
+        localStorage.setItem("crossTable", "zixishi");
+        localStorage.setItem("crossObj", JSON.stringify(this.detail));
+      } catch (error) {
+        console.error("本地存储失败:", error);
+        this.$message.error("数据保存失败，请检查浏览器设置");
         return;
       }
-      window.open(this.baseUrl + file);
+      this.$router.push({ path: `/index/${acrossTable}Add`, query: { type: "cross", seats: selectedSeats.map(s=>s.id).join(","), zixishiId: this.detail.id }});
     },
-    isAuth() {
-      // 保留原有权限判断逻辑
-      return true;
-    }
-  },
-  components: {
-    CountDown,
-  },
+    parseKeyue(kstr) {
+      // 如果后端有 keyueshijian 字段并且格式正确，可解析并返回；
+      // 否则强制返回 "开放时间：08:00-22:00"
+      try {
+        if (!kstr) return '可约时间：08:00-22:00';
+        const s = kstr.replace("：", ":").replace("至", "-").replace(/每[天周月年\s]*/g, "").trim();
+        if (s.indexOf("-") >= 0) {
+          const parts = s.split("-");
+          return  '可约时间'+parts[0].trim() + '-' + parts[1].trim();
+        }
+        return '可约时间：08:00-22:00';
+      } catch (e) {
+        return '可约时间：08:00-22:00';
+      }
+    },
+    openAvailability() {
+      if (!this.selectedSeatObj) {
+        this.$message.warning('请先选择座位');
+        return;
+      }
+      // 默认今天
+      if (!this.availabilityDate) this.availabilityDate = new Date().toISOString().slice(0,10);
+      this.availabilityDialog = true;
+      // 立即查询最新可约/已占数据
+      this.fetchSeatStatus();
+    },
+
+    async fetchSeatStatus() {
+      if (!this.selectedSeatObj) {
+        this.$message.warning('请先选择座位');
+        return;
+      }
+      this.loadingStatus = true;
+      const zixishiid = Number(this.detail.id);
+      const zuowei = parseInt(this.selectedSeatObj.number, 10);
+      // 确保 date 字符串 yyyy-MM-dd
+      let date = this.availabilityDate;
+      if (!date) date = new Date().toISOString().slice(0,10);
+      else if (date instanceof Date) {
+        const d = date;
+        date = `${d.getFullYear()}-${('0'+(d.getMonth()+1)).slice(-2)}-${('0'+d.getDate()).slice(-2)}`;
+      }
+      try {
+        const res = await this.$axios.get('/yuyuexinxi/seat/list', { params: { zixishiid, zuowei, date }})
+        this.loadingStatus = false;
+        const resBody = res.body || res.data || {};
+        let bookings = [];
+        if (resBody.code !== undefined) {
+          if (resBody.code !== 0) {
+            this.$message.error(resBody.msg || '获取可约时间失败');
+            this.availabilitySlots = [];
+            return;
+          }
+          const data = resBody.data || {};
+          bookings = data.bookings || [];
+        } else {
+          bookings = Array.isArray(resBody) ? resBody : (resBody.bookings || []);
+        }
+        // 输出所有booking记录
+        console.log('fetchSeatStatus bookings:', bookings);
+
+        // 核心修改：直接基于原始bookings生成slot，删除小时级聚合逻辑
+        this.availabilitySlots = this._build30MinSlots(date, bookings);
+
+        // 生成bookingIntervals（仅用于调试）
+        const bookingIntervals = bookings.map(b => {
+          let startStr = b.yuyueStart || b.startStr || b.start;
+          let endStr = b.yuyueEnd   || b.endStr   || b.end;
+          const s = startStr ? new Date(startStr).getTime() : NaN;
+          const e = endStr   ? new Date(endStr).getTime()   : NaN;
+          return { start: s, end: e, startStr, endStr };
+        });
+        // 输出所有bookingIntervals
+        console.log('bookingIntervals:', bookingIntervals);
+
+        // 核心调试：输出每个slot与其重叠的booking
+        this.availabilitySlots = this.availabilitySlots.map(slot => {
+          const slotS = new Date(slot.start).getTime();
+          const slotE = new Date(slot.end).getTime();
+          // 严格重叠判断逻辑
+          const overlappedBookings = bookingIntervals.filter(bi =>
+              !isNaN(bi.start) && !isNaN(bi.end) &&
+              slotS < bi.end && slotE > bi.start
+          );
+          const isBooked = overlappedBookings.length > 0;
+
+          // 仅调试重点段：输出11:30-12:00或其它你关心的段
+          if (
+              slot.startStr.includes("10:30") ||
+              slot.startStr.includes("11:00") ||
+              slot.startStr.includes("11:30") ||
+              slot.startStr.includes("12:00") ||
+              slot.startStr.includes("12:30") ||
+              slot.startStr.includes("14:00") ||
+              slot.startStr.includes("14:30")
+          ) {
+            console.log(
+                `[DEBUG] slot ${slot.startStr} ~ ${slot.endStr} | isBooked: ${isBooked}`,
+                { overlappedBookings }
+            );
+          }
+
+          return {
+            ...slot,
+            status: isBooked ? 'occupied' : slot.status
+          };
+        });
+
+        console.log(
+            '最终14:30-15:00slot:',
+            this.availabilitySlots.find(s => s.startStr.includes('14:30'))
+        );
+      } catch (err) {
+        this.loadingStatus = false;
+        console.error('fetchSeatStatus error', err);
+        const status = err && (err.status || (err.response && err.response.status));
+        if (status === 400) this.$message.error('请求参数错误 (400)');
+        else if (status === 404) this.$message.error('接口未找到 (404)');
+        else this.$message.error('网络异常，无法连接后端');
+        this.availabilitySlots = [];
+      }
+    },
+
+    // 核心修改：重构_build30MinSlots，直接基于原始预约记录判断，删除小时级聚合逻辑
+    _build30MinSlots(dateStr, bookings, granularity = 30) {
+      const slots = [];
+      const dayStartHour = 8;
+      const dayEndHour = 22;
+      const now = new Date();
+      const isToday = dateStr === now.toISOString().slice(0,10);
+      const parts = dateStr.split('-');
+      const year = Number(parts[0]);
+      const month = Number(parts[1]) - 1;
+      const day = Number(parts[2]);
+
+      // 转换预约记录为时间戳区间
+      const bookingIntervals = bookings.map(b => {
+        const start = new Date(b.yuyueStart || b.startStr || b.start).getTime();
+        const end = new Date(b.yuyueEnd || b.endStr || b.end).getTime();
+        return { start, end };
+      }).filter(bi => !isNaN(bi.start) && !isNaN(bi.end));
+
+      for (let h = dayStartHour; h < dayEndHour; h++) {
+        const stepsPerHour = Math.floor(60 / granularity);
+        for (let step = 0; step < stepsPerHour; step++) {
+          const minute = step * granularity;
+          const startDate = new Date(year, month, day, h, minute, 0);
+          const endDate = new Date(startDate.getTime() + granularity * 60 * 1000);
+          const slotStart = startDate.getTime();
+          const slotEnd = endDate.getTime();
+
+          // 1. 默认都是可约
+          let status = 'available';
+
+          // 2. 判断是否与原始预约有严格交集（左闭右开）
+          const isBooked = bookingIntervals.some(bi => slotStart < bi.end && slotEnd > bi.start);
+          if (isBooked) status = 'occupied';
+
+          // 3. 已过时间判断：仅当当前时间 ≥ slot开始时间才算已过
+          const isPast = isToday && now.getTime() >= slotStart;
+          if (isPast) status = 'occupied';
+
+          slots.push({
+            start: startDate,
+            end: endDate,
+            startStr: this._toDateStr(slotStart),
+            endStr: this._toDateStr(slotEnd),
+            status,
+            isPast
+          });
+        }
+      }
+      return slots;
+    },
+
+    formatSlotTitle(slot) {
+      return `${slot.startStr} → ${slot.endStr}  ${slot.status === 'available' && !slot.isPast ? '可约' : (slot.isPast ? '已过' : '已占')}`;
+    },
+
+    onSlotClick(slot) {
+      if (slot.status !== 'available' || slot.isPast) {
+        this.$message.info('该时段不可预约');
+        return;
+      }
+      if (this.availabilityViewOnly) {
+        // 仅查看：高亮，显示提示，不跳转
+        this.highlightedSlot = slot.startStr + '→' + slot.endStr;
+        this.$message({ message: `查看时段：${this.formatTimeShort(slot.startStr)} - ${this.formatTimeShort(slot.endStr)}`, type: 'info', duration: 1500 });
+        return;
+      } else {
+        // 旧逻辑：选中并跳转到预约页面（保持原行为）
+        const pick = { start: slot.startStr, end: slot.endStr, zixishiId: this.detail.id, zuowei: this.selectedSeatObj.number };
+        localStorage.setItem('availabilitySelection', JSON.stringify(pick));
+        this.$message.success('已选时段，正在跳转到预约页面');
+        this.availabilityDialog = false;
+        this.$router.push({ path: '/index/yuyuexinxiAdd', query: { type: 'cross' } });
+      }
+    },
+
+    // 保留该方法但不再使用（避免删除导致其他引用报错）
+    _buildAvailabilityFromReservations(dateStr, reservedList) {
+      const openStart = '08:00';
+      const openEnd = '22:00';
+      const hours = [];
+      for (let h = 8; h < 22; h++) hours.push({ hour: h, isBooked: false });
+      if (Array.isArray(reservedList)) {
+        reservedList.forEach(item => {
+          try {
+            const s = new Date(item.yuyueStart);
+            const e = new Date(item.yuyueEnd);
+            for (let h = 8; h < 22; h++) {
+              const slotStart = new Date(dateStr + ' ' + (('0'+h).slice(-2) + ':00:00'));
+              const slotEnd = new Date(dateStr + ' ' + (('0'+(h+1)).slice(-2) + ':00:00'));
+              if (e > slotStart && s < slotEnd) {
+                const idx = h - 8;
+                if (hours[idx]) hours[idx].isBooked = true;
+              }
+            }
+          } catch (e) {}
+        });
+      }
+      const intervals = [];
+      let cur = null;
+      for (let i = 0; i < hours.length; i++) {
+        const h = hours[i];
+        const status = h.isBooked ? 'occupied' : 'available';
+        const segStartHour = 8 + i;
+        const segStartStr = `${dateStr} ${('0'+segStartHour).slice(-2)}:00:00`;
+        const segEndStr = `${dateStr} ${('0'+(segStartHour+1)).slice(-2)}:00:00`;
+        if (!cur) cur = { status, startStr: segStartStr, endStr: segEndStr };
+        else {
+          if (cur.status === status) cur.endStr = segEndStr;
+          else { intervals.push(cur); cur = { status, startStr: segStartStr, endStr: segEndStr }; }
+        }
+      }
+      if (cur) intervals.push(cur);
+      return { date: dateStr, openStart, openEnd, intervals };
+    },
+
+    _toDateStr(ts) {
+      if (!ts) return '';
+      const d = new Date(Number(ts));
+      const Y = d.getFullYear();
+      const M = ('0'+(d.getMonth()+1)).slice(-2);
+      const D = ('0'+d.getDate()).slice(-2);
+      const h = ('0'+d.getHours()).slice(-2);
+      const m = ('0'+d.getMinutes()).slice(-2);
+      const s = ('0'+d.getSeconds()).slice(-2);
+      return `${Y}-${M}-${D} ${h}:${m}:${s}`;
+    },
+
+    formatTimeShort(fullStr) {
+      if (!fullStr) return '';
+      const m = fullStr.match(/\d{2}:\d{2}(:\d{2})?$/);
+      return m ? m[0].slice(0,5) : fullStr;
+    },
+
+    isAuth() { return true; },
+
+    _timeStrFromDate(d) {
+      const hh = ('0'+d.getHours()).slice(-2);
+      const mm = ('0'+d.getMinutes()).slice(-2);
+      return `${hh}:${mm}`;
+    },
+
+    _addMinutesToTimeStr(timeStr, addMin) {
+      if (!timeStr) return timeStr;
+      const parts = timeStr.split(':');
+      const d = new Date();
+      d.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
+      d.setMinutes(d.getMinutes() + addMin);
+      return ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2);
+    },
+
+    tupianUploadChange(fileUrls) { this.detail.tupian = fileUrls.replace(new RegExp(this.$config?.baseUrl || '', "g"), ""); }
+  }
 };
 </script>
-
 <style lang="scss" scoped>
-// 全局盒模型
-* {
-  box-sizing: border-box;
+/* 原有样式保持不变 */
+.availability-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
 }
-
-// 面包屑样式
-.breadcrumb-preview .el-breadcrumb >>> .el-breadcrumb__separator {
-  margin: 0 9px;
-  color: #000;
-  font-weight: 500;
+.slot {
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  border: 1px solid #e6e6e6;
 }
-.breadcrumb-preview .el-breadcrumb >>> .el-breadcrumb__inner {
-  color: #000;
-  display: inline-block;
+.slot .slot-time { font-size: 13px; color: #fff; font-weight: 600; }
+.slot .slot-label { font-size: 12px; color: #fff; margin-top: 4px; }
+/* online-style for available slot: mimic the "在线预约" button */
+.slot.available {
+  background: #fff !important;
+  border: 2px solid #97C9D6 !important; /* same border as online button */
+  color: #78ABC3 !important;            /* text color like your online button */
+  border-radius: 30px !important;
+  box-shadow: 0 2px 6px rgba(120,138,195,0.08) !important;
+  padding: 12px 6px !important;
+  cursor: pointer;
 }
-
-// 轮播图样式
-.el-carousel >>> .el-carousel__arrow {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.3);
-  color: #fff;
-  transition: all 0.3s;
+/* hover effect to be slightly filled */
+.slot.available:hover {
+  background: linear-gradient(180deg, rgba(120,138,195,0.06), rgba(120,138,195,0.02)) !important;
+  transform: translateY(-2px);
 }
-.el-carousel >>> .el-carousel__arrow:hover {
-  background: rgba(46, 97, 225, 0.8);
+/* small text style inside slot */
+.slot .slot-time { font-size: 13px; color: inherit; font-weight: 600; }
+.slot .slot-label { font-size: 12px; color: inherit; }
+/* occupied/past remain gray and disabled */
+.slot.occupied, .slot-past {
+  background: #f0f2f5 !important;
+  border-color: #e6e6e6 !important;
+  color: #999 !important;
+  cursor: not-allowed;
+  box-shadow: none !important;
 }
-.el-carousel >>> .el-carousel__indicators {
-  bottom: 10px;
-}
-.el-carousel >>> .el-carousel__indicators li {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.5);
-  margin: 0 4px;
-}
-.el-carousel >>> .el-carousel__indicators li.is-active {
-  width: 20px;
-  border-radius: 4px;
-  background: #fff;
-}
-
-// 座位样式优化
-.seat-item {
-  // 可选座位悬停效果
-  &.seat-available:not(.seat-selected):hover {
-    transform: scale(1.1);
-    box-shadow: 0 4px 8px rgba(46, 97, 225, 0.15);
-    border-color: #1E4CD8 !important;
-  }
-
-  // 已选座位动画效果
-  &.seat-selected {
-    box-shadow: 0 0 0 3px rgba(46, 97, 225, 0.3);
-    animation: pulse 1.5s infinite;
-  }
-
-  // 已占用座位样式强化
-  &.seat-occupied {
-    cursor: not-allowed;
-    opacity: 0.8;
-  }
-}
-
-// 脉冲动画
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(46, 97, 225, 0.4);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgba(46, 97, 225, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(46, 97, 225, 0);
-  }
-}
-
-// 解决scoped动画穿透问题
-::v-deep .seat-item.seat-selected {
-  animation: pulse 1.5s infinite;
-}
-
-// 响应式适配
+.slot.occupied { background: #f0f2f5; border-color: #e6e6e6; color: #999; cursor: not-allowed; }
+.slot-past { background: #f5f7fa; border-color: #eaeef5; color: #bbb; cursor: not-allowed; }
 @media (max-width: 768px) {
-  .attr {
-    flex-direction: column !important;
-  }
-  .seat-grid {
-    gridTemplateColumns: repeat(auto-fill, minmax(35px, 1fr)) !important;
-  }
-  .seat-item {
-    width: 35px !important;
-    height: 35px !important;
-    font-size: 12px !important;
-  }
-  .info-item {
-    min-width: 100% !important;
-  }
-  .seat-legend {
-    flex-wrap: wrap !important;
-    gap: 10px !important;
-  }
+  .availability-grid { grid-template-columns: repeat(3, 1fr); }
 }
-
-// 按钮悬停效果
-.el-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+</style>
+<!-- 全局样式：强制控制日期选择器禁用样式（必须无scoped） -->
+<style lang="scss">
+/* 定位自定义类名的日期选择器弹出层 */
+.custom-availability-date-picker {
+  /* 禁用日期的核心样式：变灰+删除线+禁止点击 */
+  .el-date-table td.disabled {
+    pointer-events: none !important; /* 彻底禁止点击 */
+    .cell {
+      background-color: #f5f5f5 !important; /* 灰色背景 */
+      color: #c0c4cc !important; /* 灰色文字 */
+      text-decoration: line-through !important; /* 删除线 */
+      text-decoration-color: #999 !important; /* 删除线颜色 */
+      opacity: 1 !important; /* 取消透明，确保样式清晰 */
+    }
+  }
+  /* 确保可选日期样式正常 */
+  .el-date-table td:not(.disabled) .cell {
+    text-decoration: none !important;
+    background-color: transparent !important;
+    color: #333 !important;
+  }
+  /* 高亮今天/明天的可选日期 */
+  .el-date-table td.is-today .cell {
+    background-color: #f0f5ff !important;
+    color: #2e61e1 !important;
+    font-weight: 600;
+  }
 }
 </style>
