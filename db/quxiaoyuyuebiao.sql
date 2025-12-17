@@ -13,8 +13,9 @@ ALTER TABLE quxiaoyuyue
     DROP COLUMN tupian;
 
 DESCRIBE qiandaoxinxi;
-
+DESCRIBE yuyuexinxi;
 DESCRIBE qiantuixinxi;
+DESCRIBE quxiaoyuyue;
 
 -- 给签到表新增预约单号字段
 ALTER TABLE qiandaoxinxi ADD COLUMN yuyuedanhao VARCHAR(50) COMMENT '关联的预约单号';
@@ -40,6 +41,6 @@ ALTER TABLE yuyuexinxi
     DROP COLUMN qiandao_time,
     DROP COLUMN qiantui_time;
 
-DESCRIBE yuyuexinxi;
-
-DESCRIBE zixishi;
+ALTER TABLE yuyuexinxi
+    MODIFY COLUMN yuyue_start datetime NULL,
+    MODIFY COLUMN yuyue_end datetime NULL;

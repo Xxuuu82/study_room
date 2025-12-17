@@ -20,7 +20,6 @@ import FileUpload from '@/components/FileUpload'
 import Editor from "@/components/Editor";
 import aplayer from 'vue-aplayer';
 import store from './store'
-import axios from 'axios'
 
 // 把 axios 的 baseURL 也设置好（供你在某些模块想用 axios 时使用）
 axios.defaults.baseURL = process.env.VUE_APP_API_BASE || 'http://localhost:8080/study_room'
