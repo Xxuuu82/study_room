@@ -17,6 +17,7 @@
             <i class="el-icon-user"></i>
           </div>
 
+          <!-- 保留 el-upload，但不要在里面手动放 <input>（这会导致页面上出现两个 file input，进而触发两次选择框） -->
           <el-upload
               ref="avatarUploader"
               class="avatar-uploader"
@@ -25,7 +26,6 @@
               :show-file-list="false"
               :auto-upload="false"
               style="display: none;">
-            <input type="file" accept="image/*">
           </el-upload>
         </div>
 
@@ -65,24 +65,26 @@
           </el-form>
         </div>
 
-        <div v-if="activeTab === '修改头像'" :style='{"background":"#fff","borderRadius":"8px","padding":"50px 20px","textAlign":"center","boxShadow":"0 2px 8px rgba(0,0,0,0.05)"}'>
+        <div v-if="activeTab === '修改头像'" :style='{"background":"#fff","borderRadius":"8px","padding":"30px 40px","textAlign":"center","boxShadow":"0 2px 8px rgba(0,0,0,0.05)"}'>
           <p :style='{"fontSize":"16px","color":"#666","marginBottom":"30px"}'>点击下方按钮选择新头像上传</p>
-          <el-button type="primary" @click="triggerAvatarUpload" :style='{"background":"#409EFF","color":"#fff","border":"none","padding":"0 30px","height":"48px","fontSize":"16px","borderRadius":"8px"}'>上传头像</el-button>
+          <!-- 这里使用单一按钮，点击后只会触发一次文件选择 -->
+          <el-button type="primary" @click="triggerAvatarUpload" class="upload-btn">上传头像</el-button>
+          <div v-if="uploading" style="margin-top:12px;color:#999">上传中，请稍候…</div>
         </div>
 
-        <div v-if="activeTab === '修改密码'" :style='{"background":"#fff","borderRadius":"8px","padding":"20px","boxShadow":"0 2px 8px rgba(0,0,0,0.05)"}'>
-          <el-form ref="pwdForm" :model="pwdForm" :rules="pwdRules" label-width="80px" :style='{"width":"100%","maxWidth":"500px","margin":"0 auto"}'>
-            <el-form-item label="原密码" prop="oldPassword" :style='{"marginBottom":"20px"}'>
-              <el-input v-model="pwdForm.oldPassword" type="password" placeholder="请输入原密码" style="width: 300px;"></el-input>
+        <div v-if="activeTab === '修改密码'" class="pwd-card">
+          <el-form ref="pwdForm" :model="pwdForm" :rules="pwdRules" label-width="120px" class="pwd-form">
+            <el-form-item label="原密码" prop="oldPassword">
+              <el-input v-model="pwdForm.oldPassword" type="password" placeholder="请输入原密码"></el-input>
             </el-form-item>
-            <el-form-item label="新密码" prop="newPassword" :style='{"marginBottom":"20px"}'>
-              <el-input v-model="pwdForm.newPassword" type="password" placeholder="请输入新密码" style="width: 300px;"></el-input>
+            <el-form-item label="新密码" prop="newPassword">
+              <el-input v-model="pwdForm.newPassword" type="password" placeholder="请输入新密码"></el-input>
             </el-form-item>
-            <el-form-item label="确认密码" prop="confirmPassword" :style='{"marginBottom":"20px"}'>
-              <el-input v-model="pwdForm.confirmPassword" type="password" placeholder="请确认新密码" style="width: 300px;"></el-input>
+            <el-form-item label="确认密码" prop="confirmPassword">
+              <el-input v-model="pwdForm.confirmPassword" type="password" placeholder="请确认新密码"></el-input>
             </el-form-item>
             <el-form-item>
-              <el-button type="primary" @click="updatePassword" :style='{"background":"#409EFF","color":"#fff","border":"none","padding":"0 20px","height":"40px"}'>确认修改</el-button>
+              <el-button type="primary" class="pwd-submit" @click="updatePassword">确认修改</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -95,7 +97,7 @@
                 <label :style="{ color: '#333', fontSize: '14px', fontWeight: '500', marginBottom: '4px' }">预约单号</label>
                 <el-input v-model="searchForm.yuyuedanhao" placeholder="输入预约单号查询" clearable :style="{ width: '100%', borderColor: '#78abc3' }"></el-input>
               </div>
-              <el-button type="success" @click="searchCancelOrder" :style='{"border":"1px solid #97C9D6","color":"#78ABC3","borderRadius":"30px","height":"40px"}'>查询</el-button>
+              <el-button type="success" @click="searchCancelOrder" :style='{"border":"1px solid #97C9D6","color":"#fff","background":"#4fc08d","borderRadius":"20px","height":"40px","padding":"0 18px"}'>查询</el-button>
             </el-form>
           </div>
 
@@ -157,7 +159,8 @@ export default {
       headers: { Token: localStorage.getItem('Token') },
       userTableName: localStorage.getItem('UserTableName'),
       searchForm: { yuyuedanhao: '' },
-      cancelOrderList: [], cancelOrderLoading: false, pageIndex: 1, pageSize: 10, totalPage: 0
+      cancelOrderList: [], cancelOrderLoading: false, pageIndex: 1, pageSize: 10, totalPage: 0,
+      uploading: false
     }
   },
   created() {
@@ -246,33 +249,53 @@ export default {
       this.$message.info('请点击左侧「修改头像」按钮，在右侧页面上传新头像');
     },
 
+    // 仅触发一次文件选择：解决“出现两次选择框”的问题
     triggerAvatarUpload() {
-      if (this.$refs.avatarUploader) {
-        const uploader = this.$refs.avatarUploader;
-        const fileInput = uploader.$el.querySelector('input[type="file"]');
-        if (fileInput) {
-          fileInput.value = '';
-          fileInput.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) this.uploadAvatarFile(file);
-            fileInput.onchange = null;
-          };
-          fileInput.click();
-        } else this.$message.error('上传组件加载失败');
-      } else this.$message.error('上传组件未初始化');
+      const uploader = this.$refs.avatarUploader;
+      if (!uploader) {
+        this.$message.error('上传组件未初始化');
+        return;
+      }
+
+      // 找到 el-upload 内部真实的 input[type=file]
+      // Element UI 内部可能把 input 放在组件 DOM 内，通过 $el 查询即可
+      const el = uploader.$el || (uploader.$refs && uploader.$refs.input && uploader.$refs.input.$el) || null;
+      const fileInput = (el && el.querySelector) ? el.querySelector('input[type="file"]') : null;
+
+      if (!fileInput) {
+        this.$message.error('上传组件加载失败');
+        return;
+      }
+
+      // 清空并绑定一次性 onchange，然后触发 click —— 只触发一次选择框
+      fileInput.value = '';
+      fileInput.onchange = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+          // 仅使用第一次选择的文件（如果用户选择后取消并重新选择会再次触发）
+          this.uploadAvatarFile(file);
+        }
+        // 解绑，防止重复绑定导致多次触发
+        fileInput.onchange = null;
+      };
+      fileInput.click();
     },
 
+    // 上传文件：原实现保留，仅增加上传状态标记以在 UI 显示“上传中”
     uploadAvatarFile(file) {
       const formData = new FormData();
       formData.append('file', file);
       const uploadUrl = this.baseUrl + 'file/upload';
+      this.uploading = true;
       this.$http.post(uploadUrl, formData, { headers: { 'Content-Type': 'multipart/form-data', Token: localStorage.getItem('Token') } }).then(res => {
+        this.uploading = false;
         if (res.data && res.data.code === 0) {
           const filePath = res.data.file || (res.data.data && (res.data.data.file || res.data.data)) || res.data.url;
           if (!filePath) { this.$message.error('后端未返回文件路径'); return; }
           const filenameOnly = filePath.toString().split('/').pop();
           const fullAvatarUrl = this.baseUrl + 'file/getAvatar?fileName=' + encodeURIComponent(filenameOnly);
           this.sessionForm.touxiang = fullAvatarUrl;
+          // 更新用户头像到数据库（使用 emulateJSON 保持兼容）
           this.$http.post(this.userTableName + '/update', { id: this.sessionForm.id, touxiang: filePath }, { emulateJSON: true }).then(updateRes => {
             if (updateRes.data && updateRes.data.code === 0) {
               this.$message.success('头像上传成功');
@@ -288,6 +311,7 @@ export default {
           this.$message.error(res.data?.msg || '头像上传失败');
         }
       }).catch(err => {
+        this.uploading = false;
         console.error('文件上传失败：', err);
         this.$message.error('网络异常，上传失败');
       });
@@ -325,29 +349,64 @@ export default {
 }
 .el-input >>> .el-input__inner {
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
   height: 40px;
   padding: 0 12px;
+  transition: box-shadow .2s;
 }
+.el-input >>> .el-input__inner:focus {
+  box-shadow: 0 0 6px rgba(64,158,255,0.12);
+  border-color: #409EFF;
+}
+
 .el-select >>> .el-input__inner {
   border: 1px solid #ccc;
-  border-radius: 4px;
+  border-radius: 6px;
   height: 40px;
   padding: 0 12px;
 }
-.el-icon-user {
-  font-size: 36px !important;
-  line-height: 100px !important;
+
+/* 上传按钮风格 */
+.upload-btn {
+  border-radius: 8px;
+  padding: 8px 18px;
+  background: linear-gradient(90deg,#4aa8ff,#2f86f6);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(47,134,246,0.12);
 }
-.avatar-wrap:hover {
-  opacity: 0.9;
-  transition: opacity 0.2s;
+
+/* 修改密码卡片美化 */
+.pwd-card {
+  background:#fff;
+  border-radius:8px;
+  padding: 28px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  max-width:640px;
+  margin:0 auto;
+}
+.pwd-form .el-form-item {
+  margin-bottom: 18px;
+}
+.pwd-form .el-form-item .el-input__inner {
+  border-radius: 6px;
+  height: 44px;
+  padding: 0 14px;
+}
+
+/* 更好看的确认按钮 */
+.pwd-submit {
+  background: linear-gradient(90deg,#ffb980,#ff8a65);
+  border: none;
+  color: #fff;
+  border-radius: 24px;
+  padding: 10px 22px;
+  box-shadow: 0 6px 18px rgba(255,138,101,0.12);
 }
 
 /* 取消预约列表样式优化 */
 .custom-table {
   .el-table__body-wrapper tr:hover td {
-    background: rgba(147, 199, 179, 0.1);
+    background: rgba(147, 199, 179, 0.05);
   }
 }
 </style>

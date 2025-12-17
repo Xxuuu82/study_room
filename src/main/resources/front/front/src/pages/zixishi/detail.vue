@@ -66,7 +66,7 @@
             </div>
             <div class="info-item" :style="{ padding: '12px', background: '#f8f9fa', borderRadius: '6px' }">
               <div :style="{ color: '#999', fontSize: '13px', marginBottom: '4px' }">座位</div>
-              <div :style="{ color: '#333', fontSize: '14px', fontWeight: '400' }">{{ detail.sd_zuowei || '暂无' }}</div>
+              <div :style="{ color: '#333', fontSize: '14px', fontWeight: '400' }">{{ detail.zuowei || '暂无' }}</div>
             </div>
             <div class="info-item" :style="{ padding: '12px', background: '#f8f9fa', borderRadius: '6px' }">
               <div :style="{ color: '#999', fontSize: '13px', marginBottom: '4px' }">位置</div>
