@@ -80,6 +80,14 @@ const menu = {
                   buttons: ["查看", "审批"],
                   menu: "黑名单管理",
                   tableName: "blacklist"
+                },
+                // 核心修改：tableName和路由path一致，补充menuJump
+                {
+                  appFrontIcon: "cuIcon-list",
+                  buttons: ["新增", "查看", "删除"],
+                  menu: "违规记录管理",
+                  menuJump: "列表", // 和其他菜单保持一致的配置
+                  tableName: "WeiguiRecord" // 匹配路由path：weiguiRecord
                 }
                 ],
                 menu: "黑名单管理"
@@ -222,5 +230,5 @@ const menu = {
       ];
     }
   };
-  
+
   export default menu;

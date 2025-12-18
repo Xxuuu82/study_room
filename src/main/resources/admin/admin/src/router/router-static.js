@@ -17,18 +17,21 @@ import xuesheng_add from '@/views/modules/xuesheng/add-or-update'
 import zixishi_list from '@/views/modules/zixishi/list'
 import zixishi_add from '@/views/modules/zixishi/add-or-update'
 import qiandaoxinxi from '@/views/modules/qiandaoxinxi/list'
-// 删掉重复的旧引入：import blacklist from '@/views/modules/blacklist/list'
 import message_tousu from '@/views/modules/message/tousu/list'
 import ranking from '@/views/modules/ranking/ranking'
-import chart from '@/views/modules/chart/chart'
+// 注释掉旧的chart组件导入（不再使用）
+// import chart from '@/views/modules/chart/chart'
 import config from '@/views/modules/config/list'
 import news from '@/views/modules/news/list'
-// 只保留你新建的blacklist.vue的引入（统一命名为blacklist，避免大小写冲突）
+// 导入根目录的blacklist.vue
 import blacklist from '@/views/blacklist.vue';
-// 修正：导入weiguiRecord.vue，路径和blacklist一致（views根目录）
+// 导入根目录的weiguiRecord.vue
 import weiguiRecord from '@/views/weiguiRecord.vue';
-// 新增：导入申诉处理页面shensu.vue（路径和blacklist/weiguiRecord一致）
+// 导入根目录的shensu.vue
 import shensu from '@/views/shensu.vue';
+// 导入根目录的tubiaozhanshi.vue（和blacklist同级）
+import tubiaozhanshi from '@/views/tubiaozhanshi.vue';
+
 
 //2.配置路由   注意：名字
 const routes = [{
@@ -85,20 +88,20 @@ const routes = [{
     , {
     path: '/blacklist',
     name: '黑名单管理',
-    component: blacklist, // 现在指向你新建的blacklist.vue文件
-    meta: { icon: '', title: 'blacklist' } // 补充meta，确保菜单匹配
+    component: blacklist,
+    meta: { icon: '', title: 'blacklist' }
   }
   , {
-    path: '/WeiguiRecord', // 新增违规记录管理路由
+    path: '/WeiguiRecord',
     name: '违规记录管理',
-    component: weiguiRecord, // 修正：直接使用导入的组件，路径和blacklist一致
-    meta: { icon: 'cuIcon-list', title: 'WeiguiRecord' } // 补充icon，和menu匹配
+    component: weiguiRecord,
+    meta: { icon: 'cuIcon-list', title: 'WeiguiRecord' }
   }
   , {
-    path: '/message_shensu', // 核心修改：路径改为menu.js中tableName的值
+    path: '/message_shensu',
     name: '申诉处理',
-    component: shensu, // 指向根目录的shensu.vue文件
-    meta: { icon: 'cuIcon-list', title: 'message_shensu' } // title和menu.js中tableName一致
+    component: shensu,
+    meta: { icon: 'cuIcon-list', title: 'message_shensu' }
   }
     , {
     path: '/message_tousu',
@@ -113,8 +116,10 @@ const routes = [{
     , {
     path: '/chart',
     name: '图表展示',
-    component: chart
+    component: tubiaozhanshi, // 核心修改：指向你的tubiaozhanshi.vue
+    meta: { icon: 'cuIcon-piechart', title: 'chart' } // title和menu.js的tableName一致
   }
+    // 删除多余的/tubiaozhanshi路由（避免冲突）
     , {
     path: '/config',
     name: '轮播图管理',
