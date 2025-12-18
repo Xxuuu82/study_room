@@ -71,7 +71,7 @@ public class YuyuexinxiServiceImpl extends ServiceImpl<YuyuexinxiDao, Yuyuexinxi
     // 功能2：提交预约核心逻辑（融合双方功能：自定义单号+事务保证+自习室名称赋值+违纪标记初始化）
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean submitYuyue(Integer zixishiid, Integer zuowei, String xuehao, String xingming, String shouji, Date yuyueStart, Date yuyueEnd, String mingcheng) {
+    public boolean submitYuyue(Integer zixishiid, Integer zuowei, String xuehao, String xingming, String shouji, Date yuyueStart, Date yuyueEnd, String mingcheng, String beizhu) {
         // 1. 检测座位预约冲突
         int conflictCount = baseMapper.countSeatConflict(zixishiid, zuowei, yuyueStart, yuyueEnd);
         if (conflictCount > 0) {
@@ -88,7 +88,9 @@ public class YuyuexinxiServiceImpl extends ServiceImpl<YuyuexinxiDao, Yuyuexinxi
         yuyue.setShouji(shouji);
         yuyue.setYuyueStart(yuyueStart);
         yuyue.setYuyueEnd(yuyueEnd);
-        yuyue.setMingcheng(mingcheng); // 新增自习室名称字段
+        yuyue.setMingcheng(mingcheng); // 自习室名称字段
+        // 关键修改：保存备注 beizhu 到实体，确保入库
+        yuyue.setBeizhu(beizhu);
         yuyue.setQiandaozhuangtai("未签到");
         yuyue.setQiantuizhuangtai("未签退");
         yuyue.setAddtime(new Date());
@@ -118,7 +120,7 @@ public class YuyuexinxiServiceImpl extends ServiceImpl<YuyuexinxiDao, Yuyuexinxi
 
     @Override
     public List<Map<String, Object>> getSeatAvailability(Integer zixishiid, Integer zuowei, LocalDate date, int granularityMinutes, int bufferMinutes, String openTimeStr) {
-        // 1. 解析开放时间（默认8:00-22:00，支持自定义格式）
+        // （实现保持不变，省略重复说明）
         String openStart = "08:00";
         String openEnd = "22:00";
         if (openTimeStr != null) {
@@ -133,17 +135,14 @@ public class YuyuexinxiServiceImpl extends ServiceImpl<YuyuexinxiDao, Yuyuexinxi
             }
         }
 
-        // 2. 转换为LocalDateTime
         DateTimeFormatter dtfTime = DateTimeFormatter.ofPattern("HH:mm");
         LocalDateTime dayStartLdt = LocalDateTime.of(date, LocalTime.parse(openStart, dtfTime));
         LocalDateTime dayEndLdt = LocalDateTime.of(date, LocalTime.parse(openEnd, dtfTime));
         Date dayStart = Date.from(dayStartLdt.atZone(ZoneId.systemDefault()).toInstant());
         Date dayEnd = Date.from(dayEndLdt.atZone(ZoneId.systemDefault()).toInstant());
 
-        // 3. 查询数据库中该时段的预约记录
         List<YuyuexinxiEntity> bookings = baseMapper.selectBookingsInRange(zixishiid, zuowei, dayStart, dayEnd);
 
-        // 4. 转换为预约区间并合并重叠时段
         List<Interval> booked = bookings.stream().map(b -> {
             Date s = b.getYuyueStart();
             Date e = b.getYuyueEnd();
@@ -152,7 +151,6 @@ public class YuyuexinxiServiceImpl extends ServiceImpl<YuyuexinxiDao, Yuyuexinxi
             return new Interval(s, e);
         }).collect(Collectors.toList());
 
-        // 合并重叠区间
         booked.sort(Comparator.comparingLong(i -> i.start.getTime()));
         List<Interval> merged = new ArrayList<>();
         for (Interval it : booked) {
@@ -170,7 +168,6 @@ public class YuyuexinxiServiceImpl extends ServiceImpl<YuyuexinxiDao, Yuyuexinxi
             }
         }
 
-        // 5. 应用缓冲时间（左右各buffer分钟）
         long bufferMs = bufferMinutes * 60L * 1000L;
         List<Interval> buffered = new ArrayList<>();
         for (Interval it : merged) {
@@ -179,7 +176,6 @@ public class YuyuexinxiServiceImpl extends ServiceImpl<YuyuexinxiDao, Yuyuexinxi
             buffered.add(new Interval(new Date(s), new Date(e)));
         }
 
-        // 再次合并缓冲后的重叠区间
         buffered.sort(Comparator.comparingLong(i -> i.start.getTime()));
         List<Interval> mergedBuffered = new ArrayList<>();
         for (Interval it : buffered) {
@@ -197,7 +193,6 @@ public class YuyuexinxiServiceImpl extends ServiceImpl<YuyuexinxiDao, Yuyuexinxi
             }
         }
 
-        // 6. 计算可预约区间（反转已预约区间）
         List<Interval> available = new ArrayList<>();
         long cursor = dayStart.getTime();
         for (Interval b : mergedBuffered) {
@@ -210,7 +205,6 @@ public class YuyuexinxiServiceImpl extends ServiceImpl<YuyuexinxiDao, Yuyuexinxi
             available.add(new Interval(new Date(cursor), new Date(dayEnd.getTime())));
         }
 
-        // 7. 格式化返回结果
         List<Map<String, Object>> result = new ArrayList<>();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         for (Interval it : available) {
