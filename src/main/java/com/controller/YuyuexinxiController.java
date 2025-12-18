@@ -498,6 +498,7 @@ public class YuyuexinxiController {
             Date yuyueStart = yuyuexinxi.getYuyueStart();
             Date yuyueEnd = yuyuexinxi.getYuyueEnd();
             String mingcheng = yuyuexinxi.getMingcheng();
+            String beizhu = yuyuexinxi.getBeizhu(); // <- 前端填写的备注
 
             if (zixishiid == null || zuowei == null || xuehao == null || yuyueStart == null || yuyueEnd == null) {
                 logger.warn("提交预约失败：必填参数为空，自习室ID：{}，座位ID：{}，学号：{}", zixishiid, zuowei, xuehao);
@@ -612,9 +613,31 @@ public class YuyuexinxiController {
                 return R.error("预约时长需为 30 分钟的倍数");
             }
 
-            // 提交预约
+            // 提交预约（业务层校验座位可用性并插入）
             boolean success = yuyuexinxiService.submitYuyue(zixishiid, zuowei, xuehao, xingming, shouji, yuyueStart, yuyueEnd, mingcheng);
             if (success) {
+                // ---- 新增处理：如果前端有传 beizhu，则尝试基于唯一的 yuyuedanhao 更新刚插入的记录的备注字段 ----
+                try {
+                    if (yuyuexinxi.getYuyuedanhao() != null && !yuyuexinxi.getYuyuedanhao().trim().isEmpty() && beizhu != null) {
+                        EntityWrapper<YuyuexinxiEntity> ew = new EntityWrapper<>();
+                        ew.eq("yuyuedanhao", yuyuexinxi.getYuyuedanhao());
+                        // 可多字段校验：加上 xuehao 和 zixishiid 可进一步确保命中正确记录（容错）
+                        if (xuehao != null) ew.eq("xuehao", xuehao);
+                        if (zixishiid != null) ew.eq("zixishiid", zixishiid);
+
+                        YuyuexinxiEntity inserted = yuyuexinxiService.selectOne(ew);
+                        if (inserted != null) {
+                            inserted.setBeizhu(beizhu);
+                            yuyuexinxiService.updateById(inserted);
+                            logger.info("已为刚插入的预约记录更新备注，yuyuedanhao={}, beizhu={}", yuyuexinxi.getYuyuedanhao(), beizhu);
+                        } else {
+                            logger.warn("提交预约成功但未找到插入记录以更新备注，yuyuedanhao={}", yuyuexinxi.getYuyuedanhao());
+                        }
+                    }
+                } catch (Exception ex) {
+                    logger.warn("提交预约后尝试更新备注失败：{}", ex.getMessage());
+                }
+
                 logger.info("预约成功，自习室ID：{}，座位ID：{}，学号：{}", zixishiid, zuowei, xuehao);
                 return R.ok("预约成功");
             } else {

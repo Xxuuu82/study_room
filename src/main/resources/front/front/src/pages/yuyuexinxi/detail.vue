@@ -52,14 +52,17 @@
             <div :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{ detail.zixishichang != null ? detail.zixishichang : '-' }}</div>
           </div>
 
-          <!-- 是否违规 -->
+          <!-- 是否违规：使用数据库字段 weiguiFlag / weigui_flag 显示 -->
           <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
-            <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>是否违规</div>
-            <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.shifouweigui || '否'}}</div>
+            <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>是否违约</div>
+            <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>
+              {{ (detail.weiguiFlag === 1 || detail.weigui_flag === 1) ? '已违约' : '未违约' }}
+            </div>
           </div>
+
           <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>备注</div>
-            <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.beizhu || '无备注'}}</div>
+            <div  :style='{"flex":1,"padding":"0 16px","fontSize":"14px","lineHeight":"24px","color":"#666","height":"24px"}'>{{detail.beizhu && detail.beizhu.trim() !== '' ? detail.beizhu : '无备注'}}</div>
           </div>
           <div class="item" :style='{"padding":"12px 16px","margin":"0 0 12px 0","background":"#fff","justifyContent":"space-between","display":"flex","borderRadius":"4px","boxShadow":"0 1px 3px rgba(0, 0, 0, .05)"}'>
             <div class="lable" :style='{"padding":"0 16px 0 0","color":"#333","textAlign":"right","width":"100px","fontSize":"14px","lineHeight":"24px","height":"24px","fontWeight":"500"}'>学号</div>
@@ -168,14 +171,18 @@ export default {
       if(this.$route.query.detailObj) {
         this.detail = JSON.parse(this.$route.query.detailObj);
       }
-      // 已删除：关联查询签到/签退表的逻辑，仅保留基础detail查询
-      this.$http.get(this.tablename + '/detail/'  + this.detail.id, {}).then(res => {
-        if (res.data.code == 0) {
-          this.detail = res.data.data;
-          this.title = this.detail.mingcheng; // 替换原qiandaozhuangtai，避免空值报错
-          this.$forceUpdate();
-        }
-      });
+      // 请求后端 detail 获取最新字段（包含 weigui_flag、beizhu 等）
+      if (this.detail && this.detail.id) {
+        this.$http.get(this.tablename + '/detail/'  + this.detail.id, {}).then(res => {
+          if (res.data.code == 0) {
+            this.detail = res.data.data;
+            this.title = this.detail.mingcheng; // 替换原qiandaozhuangtai，避免空值报错
+            this.$forceUpdate();
+          }
+        }).catch(err => {
+          console.error('获取详情失败：', err);
+        });
+      }
     },
     onAcross(acrossTable,crossOptAudit,statusColumnName,tips,statusColumnValue){
       localStorage.setItem('crossTable',`yuyuexinxi`);
