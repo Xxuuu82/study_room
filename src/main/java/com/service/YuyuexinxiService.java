@@ -26,6 +26,7 @@ public interface YuyuexinxiService extends IService<YuyuexinxiEntity> {
     PageUtils queryPage(Map<String, Object> params, Wrapper<YuyuexinxiEntity> wrapper);
 
     // 新增：提交预约（核心业务方法，适配你的数据库和预约逻辑）
+    // 注意：新增了 beizhu 参数，确保备注能被保存
     boolean submitYuyue(
             Integer zixishiid,  // 自习室序号
             Integer zuowei,     // 座位号
@@ -34,7 +35,8 @@ public interface YuyuexinxiService extends IService<YuyuexinxiEntity> {
             String shouji,      // 手机
             Date yuyueStart,    // 预约开始时间（对应数据库yuyue_start）
             Date yuyueEnd,      // 预约结束时间（对应数据库yuyue_end）
-            String mingcheng    // 新增：自习室名称
+            String mingcheng,   // 自习室名称
+            String beizhu       // 备注（新增）
     );
 
     // 新增：查询指定座位的所有已预约时段（供前端展示空闲/占用时段）

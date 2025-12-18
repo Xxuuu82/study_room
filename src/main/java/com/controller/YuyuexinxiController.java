@@ -614,7 +614,7 @@ public class YuyuexinxiController {
             }
 
             // 提交预约（业务层校验座位可用性并插入）
-            boolean success = yuyuexinxiService.submitYuyue(zixishiid, zuowei, xuehao, xingming, shouji, yuyueStart, yuyueEnd, mingcheng);
+            boolean success = yuyuexinxiService.submitYuyue(zixishiid, zuowei, xuehao, xingming, shouji, yuyueStart, yuyueEnd, mingcheng,beizhu);
             if (success) {
                 // ---- 新增处理：如果前端有传 beizhu，则尝试基于唯一的 yuyuedanhao 更新刚插入的记录的备注字段 ----
                 try {
