@@ -15,3 +15,26 @@ ALTER TABLE yuyuexinxi ADD UNIQUE INDEX idx_yuyuedanhao (yuyuedanhao);
 UPDATE heimingdan
 SET xuehao = '236001205', xingming = 'xushiyu'
 WHERE id = 4;
+
+describe complaint;
+
+INSERT INTO complaint (
+    complaint_no,
+    user_id,
+    room_id,
+    seat_id,
+    category,
+    detail,
+    status,
+    is_processed
+)
+VALUES (
+           'CP20251220001',  -- 唯一投诉编号（可自定义）
+           236001205,          -- 你的目标user_id
+           1,                  -- 自习室ID（根据实际情况调整）
+           10,                 -- 座位ID（根据实际情况调整）
+           2,                  -- 类型：2对应“大声喧哗”
+           '在自习室大声讨论问题，影响他人学习',  -- 投诉详情
+           0,                  -- 状态：0对应“待处理”
+           0                   -- 是否处理：0对应未处理
+       );
