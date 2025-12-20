@@ -36,168 +36,6 @@
 
     <!-- 列表容器 -->
     <div class="list-preview" :style='{"width":"100%","boxShadow":"0px 4px 10px 0px rgba(0,0,0,0.302)","margin":"20px auto","position":"relative","background":"#fff","boxSizing":"border-box","padding":"0 10px"}'>
-      <!-- 查询表单 -->
-      <el-form
-          class="center-form-pv"
-          :style="{ width: '100%', padding: '20px 6px', margin: '0 auto', background: 'rgba(0,0,0,0.102)', boxSizing: 'border-box' }"
-          :inline="true"
-          :model="searchForm"
-      >
-        <el-row :style="{ flexDirection: 'row', display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '20px' }">
-          <div
-              :style="{ margin: '0', flexDirection: 'column', display: 'flex', minWidth: '200px', flex: '1 1 200px' }"
-          >
-            <label
-                :style="{
-                margin: '0',
-                color: '#000',
-                textAlign: 'left',
-                display: 'inline-block',
-                width: '100%',
-                lineHeight: '40px',
-                fontSize: '14px',
-                fontWeight: '500',
-                height: '40px',
-              }"
-                class="item-label"
-            >违规单号</label
-            >
-            <el-input
-                v-model="searchForm.weiguidanhao"
-                placeholder="违规单号"
-                clearable
-                style="width: 100%;"
-            ></el-input>
-          </div>
-          <div
-              :style="{ margin: '0', flexDirection: 'column', display: 'flex', minWidth: '200px', flex: '1 1 200px' }"
-              class="select"
-              label="违规类型"
-              prop="weiguileixing"
-          >
-            <label
-                :style="{
-                margin: '0',
-                color: '#000',
-                textAlign: 'left',
-                display: 'inline-block',
-                width: '100%',
-                lineHeight: '40px',
-                fontSize: '14px',
-                fontWeight: '500',
-                height: '40px',
-              }"
-                class="item-label"
-            >违规类型</label
-            >
-            <el-select
-                clearable
-                v-model="searchForm.weiguileixing"
-                placeholder="请选择违规类型"
-                style="width: 100%;"
-            >
-              <el-option
-                  v-for="(item, index) in weiguileixingOptions"
-                  v-bind:key="index"
-                  :label="item"
-                  :value="item"
-              ></el-option>
-            </el-select>
-          </div>
-          <div
-              :style="{ margin: '0', flexDirection: 'column', display: 'flex', minWidth: '200px', flex: '1 1 200px' }"
-              class="select"
-              label="处理状态"
-              prop="chulizhuangtai"
-          >
-            <label
-                :style="{
-                margin: '0',
-                color: '#000',
-                textAlign: 'left',
-                display: 'inline-block',
-                width: '100%',
-                lineHeight: '40px',
-                fontSize: '14px',
-                fontWeight: '500',
-                height: '40px',
-              }"
-                class="item-label"
-            >处理状态</label
-            >
-            <el-select
-                clearable
-                v-model="searchForm.chulizhuangtai"
-                placeholder="请选择处理状态"
-                style="width: 100%;"
-            >
-              <el-option
-                  v-for="(item, index) in chulizhuangtaiOptions"
-                  v-bind:key="index"
-                  :label="item"
-                  :value="item"
-              ></el-option>
-            </el-select>
-          </div>
-          <!-- 新增申诉状态查询条件 -->
-          <div
-              :style="{ margin: '0', flexDirection: 'column', display: 'flex', minWidth: '200px', flex: '1 1 200px' }"
-              class="select"
-              label="申诉状态"
-              prop="shensuStatus"
-          >
-            <label
-                :style="{
-                margin: '0',
-                color: '#000',
-                textAlign: 'left',
-                display: 'inline-block',
-                width: '100%',
-                lineHeight: '40px',
-                fontSize: '14px',
-                fontWeight: '500',
-                height: '40px',
-              }"
-                class="item-label"
-            >申诉状态</label
-            >
-            <el-select
-                clearable
-                v-model="searchForm.shensuStatus"
-                placeholder="请选择申诉状态"
-                style="width: 100%;"
-            >
-              <el-option
-                  v-for="(item, index) in shensuStatusOptions"
-                  v-bind:key="index"
-                  :label="item"
-                  :value="item"
-              ></el-option>
-            </el-select>
-          </div>
-          <div :style="{ margin: 'auto 0 0', minWidth: '120px' }">
-            <el-button
-                :style="{
-                border: '1px solid #97C9D6',
-                cursor: 'pointer',
-                padding: '0 24px',
-                boxShadow: '0px 2px 2px 0px #78ABC3',
-                outline: 'none',
-                margin: '10px 0 0',
-                color: '#78ABC3',
-                borderRadius: '30px',
-                background: '#fff',
-                width: '100%',
-                fontSize: '14px',
-                height: '40px',
-              }"
-                type="success"
-                @click="search()"
-            >查询</el-button
-            >
-          </div>
-        </el-row>
-      </el-form>
 
       <!-- 违规记录表格 -->
       <el-table
@@ -233,13 +71,23 @@
           </template>
         </el-table-column>
         <el-table-column
-            prop="weiguidanhao"
-            label="违规单号"
+            prop="xuehao"
+            label="学号"
             min-width="120"
             align="center"
         >
           <template #default="{ row }">
-            {{ row.weiguidanhao }}
+            {{ row.xuehao }}
+          </template>
+        </el-table-column>
+        <el-table-column
+            prop="xingming"
+            label="姓名"
+            min-width="120"
+            align="center"
+        >
+          <template #default="{ row }">
+            {{ row.xingming }}
           </template>
         </el-table-column>
         <el-table-column
@@ -265,41 +113,27 @@
           </template>
         </el-table-column>
         <el-table-column
-            prop="relatedOrder"
-            label="关联预约单号"
+            prop="weiguiZixishi"
+            label="违规自习室"
             min-width="120"
             align="center"
         >
           <template #default="{ row }">
-            {{ row.relatedOrder || "-" }}
+            {{ row.weiguiZixishi || "-" }}
           </template>
         </el-table-column>
         <el-table-column
-            prop="chulizhuangtai"
-            label="处理状态"
-            min-width="100"
+            prop="weiguiXiangqing"
+            label="违规详情"
+            min-width="180"
             align="center"
         >
           <template #default="{ row }">
-            <el-tag :type="row.chulizhuangtai === '已处理' ? 'success' : 'warning'">
-              {{ row.chulizhuangtai }}
-            </el-tag>
+            <div class="remark-box" :title="row.weiguiXiangqing">
+              {{ row.weiguiXiangqing || "无" }}
+            </div>
           </template>
         </el-table-column>
-        <!-- 新增申诉状态列 -->
-        <el-table-column
-            prop="shensuStatus"
-            label="申诉状态"
-            min-width="100"
-            align="center"
-        >
-          <template #default="{ row }">
-            <el-tag :type="row.shensuStatus === '已申诉' ? 'info' : 'default'">
-              {{ row.shensuStatus || '未申诉' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <!-- 新增申诉处理状态列 -->
         <el-table-column
             prop="shensuHandleStatus"
             label="申诉处理状态"
@@ -312,66 +146,32 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column
-            prop="weiguiReason"
-            label="违规原因"
-            min-width="180"
-            align="center"
-        >
-          <template #default="{ row }">
-            <div class="remark-box" :title="row.weiguiReason">
-              {{ row.weiguiReason || "无" }}
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column
-            prop="punishment"
-            label="处罚措施"
-            min-width="120"
-            align="center"
-        >
-          <template #default="{ row }">
-            {{ row.punishment || "-" }}
-          </template>
-        </el-table-column>
-        <!-- 新增申诉处理结果列 -->
-        <el-table-column
-            prop="shensuResult"
-            label="申诉处理结果"
-            min-width="180"
-            align="center"
-        >
-          <template #default="{ row }">
-            <div class="remark-box" :title="row.shensuResult">
-              {{ row.shensuResult || "暂无" }}
-            </div>
-          </template>
-        </el-table-column>
         <!-- 操作列 -->
         <el-table-column
             label="操作"
-            min-width="180"
+            min-width="100"
             align="center"
         >
           <template #default="{ row }">
             <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
-              <el-button
-                  type="primary"
-                  size="mini"
-                  icon="el-icon-view"
-                  @click="toDetail(row)"
-                  style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #409EFF; background: #409EFF; color: #fff;"
-              >详情</el-button
-              >
-              <!-- 新增申诉按钮，仅未申诉状态显示 -->
+              <!-- 申诉按钮：未申诉显示可点击，已申诉显示变灰 -->
               <el-button
                   type="warning"
                   size="mini"
                   icon="el-icon-circle-check"
                   @click="toShensu(row)"
-                  v-if="row.shensuStatus !== '已申诉'"
-                  style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #E6A23C; background: #E6A23C; color: #fff;"
-              >申诉</el-button
+                  :disabled="row.shensuStatus === '已申诉'"
+                  :style="{
+                    borderRadius: '4px',
+                    padding: '0 10px',
+                    height: '32px',
+                    lineHeight: '32px',
+                    transition: 'all 0.2s',
+                    borderColor: row.shensuStatus === '已申诉' ? '#ccc' : '#E6A23C',
+                    background: row.shensuStatus === '已申诉' ? '#f5f5f5' : '#E6A23C',
+                    color: row.shensuStatus === '已申诉' ? '#999' : '#fff'
+                  }"
+              >{{ row.shensuStatus === '已申诉' ? '已申诉' : '申诉' }}</el-button
               >
             </div>
           </template>
@@ -407,78 +207,107 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
       // 黑名单状态
-      isInBlacklist: true, // 模拟用户在黑名单中
-      banEndTime: "2天8小时30分钟", // 模拟解禁时间
+      isInBlacklist: false,
+      banEndTime: "",
 
       // 搜索表单
       searchForm: {
-        weiguidanhao: '',
-        weiguileixing: '',
-        chulizhuangtai: '',
-        shensuStatus: '' // 新增申诉状态查询条件
+        xuehao: '',
+        weiguileixing: ''
       },
 
-      // 违规记录列表（模拟数据，新增申诉相关字段）
+      // 违规记录列表（按图一格式调整数据结构）
       violationList: [
         {
-          weiguidanhao: "WG20251215001",
-          weiguileixing: "迟到签到",
-          weiguiTime: "2025-12-10 09:30:25",
-          relatedOrder: "YY20251210001",
-          chulizhuangtai: "已处理",
-          weiguiReason: "预约签到时间超过规定时间30分钟",
-          punishment: "警告一次",
+          xuehao: "236003000",
+          xingming: "李四",
+          weiguileixing: "大声喧哗",
+          weiguiTime: "2025-12-14 00:00:00",
+          weiguiZixishi: "$2s",
+          weiguiXiangqing: "自习室大声喧哗",
           shensuStatus: "未申诉",
-          shensuHandleStatus: "未处理",
-          shensuResult: ""
+          shensuHandleStatus: "未处理"
         },
         {
-          weiguidanhao: "WG20251215002",
-          weiguileixing: "未签退",
-          weiguiTime: "2025-12-08 18:00:00",
-          relatedOrder: "YY20251208002",
-          chulizhuangtai: "已处理",
-          weiguiReason: "预约结束后未按时签退，占用座位资源",
-          punishment: "限制预约1天",
+          xuehao: "236001000",
+          xingming: "周泽楷",
+          weiguileixing: "大声喧哗",
+          weiguiTime: "2025-12-18 00:04:30",
+          weiguiZixishi: "图书馆",
+          weiguiXiangqing: "大吵大闹，影响他人自习",
           shensuStatus: "已申诉",
-          shensuHandleStatus: "处理中",
-          shensuResult: ""
+          shensuHandleStatus: "处理中"
         },
         {
-          weiguidanhao: "WG20251215003",
-          weiguileixing: "多次取消",
-          weiguiTime: "2025-12-05 10:15:40",
-          relatedOrder: "YY20251205003",
-          chulizhuangtai: "处理中",
-          weiguiReason: "单日取消预约超过3次，影响资源分配",
-          punishment: "列入黑名单3天",
+          xuehao: "236003000",
+          xingming: "李四",
+          weiguileixing: "未签到",
+          weiguiTime: "2025-12-18 00:06:51",
+          weiguiZixishi: "图书馆",
+          weiguiXiangqing: "未进行签到",
+          shensuStatus: "未申诉",
+          shensuHandleStatus: "未处理"
+        },
+        {
+          xuehao: "236002000",
+          xingming: "赵皓天",
+          weiguileixing: "教室乱吃乱喝",
+          weiguiTime: "2025-12-16 00:00:00",
+          weiguiZixishi: "图书馆",
+          weiguiXiangqing: "教室违规吃东西",
           shensuStatus: "已申诉",
-          shensuHandleStatus: "已处理",
-          shensuResult: "申诉不成立，维持原处罚决定，因用户单日取消预约达5次，严重影响资源分配"
+          shensuHandleStatus: "已处理"
+        },
+        {
+          xuehao: "236002000",
+          xingming: "赵皓天",
+          weiguileixing: "未签到",
+          weiguiTime: "2025-12-10 00:00:00",
+          weiguiZixishi: "图书馆",
+          weiguiXiangqing: "未按时签到",
+          shensuStatus: "未申诉",
+          shensuHandleStatus: "未处理"
+        },
+        {
+          xuehao: "236001000",
+          xingming: "周泽楷",
+          weiguileixing: "教室乱吃乱喝",
+          weiguiTime: "2025-12-18 00:15:05",
+          weiguiZixishi: "图书馆",
+          weiguiXiangqing: "乱吃乱喝",
+          shensuStatus: "未申诉",
+          shensuHandleStatus: "未处理"
         }
       ],
 
       // 分页相关
       pageIndex: 1,
       pageSize: 10,
-      total: 3, // 模拟总数
+      total: 6, // 模拟总数
       dataListLoading: false,
       layouts: ["total", "prev", "pager", "next", "sizes", "jumper"],
 
       // 下拉选项
-      weiguileixingOptions: "迟到签到,未签退,多次取消,占座超时,违规占位".split(","),
-      chulizhuangtaiOptions: "已处理,处理中,未处理".split(","),
-      shensuStatusOptions: "未申诉,已申诉".split(",") // 新增申诉状态选项
+      weiguileixingOptions: "大声喧哗,未签到,教室乱吃乱喝,迟到签到,未签退,多次取消,占座超时,违规占位".split(","),
     };
+  },
+  created() {
+    // 页面加载时检查当前登录学生的黑名单状态
+    this.fetchBlacklistStatus();
   },
   methods: {
     // 获取违规类型标签样式
     getViolationTagType(type) {
       const typeMap = {
+        "大声喧哗": "warning",
+        "未签到": "danger",
+        "教室乱吃乱喝": "danger",
         "迟到签到": "warning",
         "未签退": "danger",
         "多次取消": "info",
@@ -488,7 +317,7 @@ export default {
       return typeMap[type] || "info";
     },
 
-    // 新增：获取申诉处理状态标签样式
+    // 获取申诉处理状态标签样式
     getShensuHandleTagType(status) {
       const statusMap = {
         "未处理": "default",
@@ -521,23 +350,259 @@ export default {
       // 后续对接接口
     },
 
-    // 查看详情：跳转到违规详情页
-    toDetail(row) {
-      // 将当前违规记录存入localStorage，供详情页读取
-      localStorage.setItem("currentWeiguiObj", JSON.stringify(row));
-      // 跳转到违规详情页（对应router.js中的/index/weiguiDetail路由）
-      this.$router.push('/index/weiguiDetail');
-    },
-
-    // 新增：跳转到申诉页面
+    // 跳转到申诉页面
     toShensu(row) {
       // 将当前违规记录存入localStorage，供申诉页读取
       localStorage.setItem("currentWeiguiObj", JSON.stringify(row));
       // 跳转到申诉页（对应router.js中的/index/weiguiShensu路由）
       this.$router.push('/index/weiguiShensu');
       // 提示用户跳转成功
-      this.$message.success(`正在跳转到【${row.weiguidanhao}】的申诉页面`);
+      this.$message.success(`正在跳转到【${row.xuehao}】的申诉页面`);
+      // 模拟申诉后状态更新
+      row.shensuStatus = "已申诉";
+    },
+
+    // ------------------- 黑名单相关 -------------------
+    // 更健壮的读取当前登录学号方法（会打印 localStorage keys 供调试）
+    getCurrentXuehao() {
+      try {
+        console.log('[DEBUG] localStorage keys:', Object.keys(localStorage));
+      } catch (e) {
+        // 某些环境下访问 localStorage 可能出错
+      }
+
+      const tryKeys = ['currentUser', 'user', 'userInfo', 'userinfo', 'loginUser', 'xuehao', 'XUEHAO', 'userInfoRes', 'loginInfo', 'username', 'adminName'];
+      for (const k of tryKeys) {
+        const v = localStorage.getItem(k);
+        if (!v) continue;
+        console.log(`[DEBUG] localStorage.${k} =`, v);
+        // 如果是 JSON，解析后递归查找
+        try {
+          const parsed = JSON.parse(v);
+          // 如果 parsed 是字符串或数字，直接判断并返回
+          if (typeof parsed === 'string' || typeof parsed === 'number') {
+            const s = String(parsed).trim();
+            if (/^\d{6,12}$/.test(s)) {
+              console.log('[DEBUG] 从 parsed 原始值中识别到学号:', s);
+              return s;
+            }
+          }
+          const findX = (obj) => {
+            if (!obj || typeof obj !== 'object') return null;
+            const candidates = ['xuehao','xueHao','studentId','username','id','userId'];
+            for (const c of candidates) {
+              if (obj[c]) return obj[c];
+            }
+            // 递归搜索
+            for (const key of Object.keys(obj)) {
+              try {
+                const res = findX(obj[key]);
+                if (res) return res;
+              } catch(e) {}
+            }
+            return null;
+          };
+          const found = findX(parsed);
+          if (found) {
+            console.log('[DEBUG] 从 JSON 中解析到学号:', found);
+            return String(found);
+          }
+        } catch (e) {
+          // 如果不是 JSON，则直接返回字符串（可能就是学号）
+          const s = v.trim();
+          if (/^\d{6,12}$/.test(s)) {
+            console.log('[DEBUG] 从字符串中识别到学号:', s);
+            return s;
+          }
+        }
+      }
+
+      // 也尝试直接取单独存储的 xuehao
+      const direct = localStorage.getItem('xuehao') || localStorage.getItem('XUEHAO');
+      if (direct && /^\d{6,12}$/.test(String(direct).trim())) return String(direct).trim();
+
+      // 尝试解析 token payload
+      const token = localStorage.getItem('Token') || localStorage.getItem('token') || localStorage.getItem('Authorization');
+      if (token) {
+        try {
+          const raw = token.split(' ')[1] || token; // 处理 "Bearer xxx" 情况
+          const payload = raw.split('.')[1];
+          if (payload) {
+            const json = JSON.parse(atob(payload.replace(/-/g,'+').replace(/_/g,'/')));
+            const candidates = json.xuehao || json.username || json.studentId || json.userId;
+            if (candidates) {
+              console.log('[DEBUG] 从 token payload 中解析到学号:', candidates);
+              return String(candidates);
+            }
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      console.warn('未能从 localStorage 中识别出当前用户学号，请确认登录后将学号存入 localStorage（key: currentUser/user/userInfo/xuehao 等）');
+      return null;
+    },
+
+    // 向后端请求黑名单列表（按学号查询），并设置 isInBlacklist / banEndTime
+    async fetchBlacklistStatus() {
+      const xuehao = this.getCurrentXuehao();
+      console.log('[DEBUG] 使用学号查询黑名单：', xuehao);
+      if (!xuehao) {
+        // 没有学号则不继续
+        this.isInBlacklist = false;
+        this.banEndTime = "";
+        return;
+      }
+
+      try {
+        // 取 token（login.vue 登录时已把 token 存入 localStorage 的 'Token'）
+        const token = localStorage.getItem('Token') || localStorage.getItem('token') || localStorage.getItem('Authorization') || '';
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+          // 兼容部分后端使用自定义 Token 头
+          headers['Token'] = token;
+        }
+
+        // 调用后端接口（Controller 映射为 /api/heimingdan/list）
+        // 带上 headers（token），并开启 withCredentials 以兼容基于 cookie 的会话（若后端用 token，可忽略 withCredentials）
+        const resp = await axios.get('/api/heimingdan/list', {
+          params: {
+            xuehao: xuehao,
+            page: 1,
+            size: 10
+          },
+          headers,
+          withCredentials: true
+        });
+
+        console.log('[DEBUG] /api/heimingdan/list 响应：', resp && resp.data);
+
+        const data = resp && resp.data;
+        if (!data || data.code !== 0) {
+          console.warn('获取黑名单接口返回异常：', data);
+          this.isInBlacklist = false;
+          this.banEndTime = "";
+          return;
+        }
+
+        const records = (data.data && data.data.records) || [];
+        console.log('[DEBUG] records 长度：', records.length);
+        if (!records.length) {
+          this.isInBlacklist = false;
+          this.banEndTime = "";
+          return;
+        }
+
+        // 打印示例帮助调试
+        console.log('[DEBUG] records 示例（前3条）：', records.slice(0, 3));
+
+        // 找到尚未到期的黑名单记录（支持多种返回字段格式）
+        const now = Date.now();
+        let activeRecord = null;
+        for (const r of records) {
+          // 尝试找到可能的结束时间字段（多写几个候选）
+          const endStrCandidates = [
+            r.heimingdan_end_time, r.heimingdanEndTime, r.end_time, r.endTime, r.heimingdan_endtime,
+            r.heimingdanEndTime, r.heimingdan_end, r.heiming_end_time, r.end
+          ];
+          const endStr = endStrCandidates.find(v => v !== undefined && v !== null && String(v).trim() !== '');
+          console.log('[DEBUG] 当前记录：', r, ' 选到 endStr:', endStr);
+
+          // 如果无结束时间字段，认为长期封禁
+          if (!endStr) {
+            console.log('[DEBUG] 该记录无 endStr，认为为长期黑名单：', r);
+            activeRecord = { record: r, endDate: null };
+            break;
+          }
+
+          // 解析时间（支持数字时间戳和多种字符串格式）
+          const endDate = this.parseDateStr(endStr);
+          console.log('[DEBUG] 解析 endStr -> endDate:', endStr, '=>', endDate);
+          if (!endDate || isNaN(endDate.getTime())) {
+            console.warn('[DEBUG] 无法解析该 endStr，继续下一个记录：', endStr);
+            continue;
+          }
+
+          if (endDate.getTime() > now) {
+            activeRecord = { record: r, endDate };
+            console.log('[DEBUG] 找到有效未到期的黑名单记录：', r);
+            break;
+          } else {
+            console.log('[DEBUG] 该记录已过期：', endDate, ' now:', new Date(now));
+          }
+        }
+
+        if (activeRecord) {
+          this.isInBlacklist = true;
+          // 展示剩余时间（也包含精确解禁时间以便识别）
+          if (!activeRecord.endDate) this.banEndTime = '长期封禁';
+          else this.banEndTime = this.formatRemainingTime(activeRecord.endDate);
+        } else {
+          this.isInBlacklist = false;
+          this.banEndTime = "";
+        }
+      } catch (err) {
+        console.error('fetchBlacklistStatus 出错：', err);
+        this.isInBlacklist = false;
+        this.banEndTime = "";
+      }
+    },
+
+    // 将数据库的时间字符串解析成 Date 对象
+    // 支持数字时间戳（毫秒）、"yyyy-MM-dd HH:mm:ss"、"yyyy/MM/dd HH:mm:ss"、ISO 等
+    parseDateStr(str) {
+      if (!str && str !== 0) return null;
+      // 如果已经是 Date
+      if (str instanceof Date) return str;
+      // 如果是数字类型（时间戳毫秒）
+      if (typeof str === 'number') {
+        return new Date(str);
+      }
+      // 去掉两端空格
+      let s = String(str).trim();
+
+      // 如果是纯数字（长度 10 或 13），当作时间戳处理（10s -> *1000）
+      if (/^\d{10}$/.test(s)) {
+        return new Date(Number(s) * 1000);
+      }
+      if (/^\d{13}$/.test(s)) {
+        return new Date(Number(s));
+      }
+
+      // 把空格分隔的日期时间改为 ISO 格式 (T) 以便在各浏览器中解析一致
+      // 例如 "2025-12-22 09:00:00" -> "2025-12-22T09:00:00"
+      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) {
+        s = s.replace(' ', 'T');
+      }
+      if (/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) {
+        s = s.replace(' ', 'T').replace(/\//g, '-');
+      }
+
+      // 尝试直接用 Date 解析
+      const d = new Date(s);
+      if (isNaN(d.getTime())) {
+        return null;
+      }
+      return d;
+    },
+
+    // 将剩余时间格式化为 "Xd Yh Zm（解禁时间: yyyy-mm-dd hh:mm:ss）"
+    formatRemainingTime(endDate) {
+      const now = Date.now();
+      let diff = endDate.getTime() - now;
+      if (diff <= 0) return '已过期';
+      const days = Math.floor(diff / (24 * 3600 * 1000));
+      diff %= 24 * 3600 * 1000;
+      const hours = Math.floor(diff / (3600 * 1000));
+      diff %= 3600 * 1000;
+      const minutes = Math.floor(diff / (60 * 1000));
+      const pad = (n) => (n < 10 ? '0' + n : '' + n);
+      const fmtEnd = `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())} ${pad(endDate.getHours())}:${pad(endDate.getMinutes())}:${pad(endDate.getSeconds())}`;
+      return `${days}天${hours}小时${minutes}分钟（解禁时间: ${fmtEnd}）`;
     }
+    // ------------------- 黑名单相关 结束 -------------------
   }
 };
 </script>

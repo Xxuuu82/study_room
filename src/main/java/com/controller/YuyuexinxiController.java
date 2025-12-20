@@ -256,6 +256,7 @@ public class YuyuexinxiController {
     }
 
     // 功能10：修改接口（支持签退状态+违纪标记更新，带权限校验和时间校验）
+    // === 修改后的“/update”方法，签退时支持提前释放资源 ===
     @RequestMapping("/update")
     @Transactional(rollbackFor = Exception.class)
     public R update(@RequestBody Map<String, Object> updateData, HttpServletRequest request) {
@@ -315,8 +316,44 @@ public class YuyuexinxiController {
                     logger.warn("用户尝试在预约结束后标记已签退（id={}），拒绝并提示使用违纪标记", id);
                     return R.error("已超过预约结束时间，不能签退；请记录违纪（weigui_flag=1）");
                 }
+
+                // ===============【新增部分：提前签退释放剩余资源】================
+                // 仅当 当前时间早于预约结束时间，且签退时（已签退）才处理
+                if (now.getTime() < end.getTime()) {
+                    // 1. 更新当前预约记录的end为实际签退时间
+                    YuyuexinxiEntity updateEntity = new YuyuexinxiEntity();
+                    updateEntity.setId(id);
+                    updateEntity.setQiantuizhuangtai(qiantuizhuangtai);
+                    updateEntity.setYuyueEnd(now);  // 实际签退时 end 变为 now
+                    if (weiguiFlag != null) {
+                        updateEntity.setWeiguiFlag(weiguiFlag);
+                    }
+                    yuyuexinxiService.updateById(updateEntity);
+
+                    // 2. 新增一条空闲（可预约）的记录，时间段是now~原end
+                    YuyuexinxiEntity freeSlot = new YuyuexinxiEntity();
+                    freeSlot.setId(System.currentTimeMillis() + (long)(Math.random()*1000)); // 随机ID
+                    freeSlot.setZixishiid(old.getZixishiid());
+                    freeSlot.setZuowei(old.getZuowei());
+                    freeSlot.setYuyueStart(now);
+                    freeSlot.setYuyueEnd(end);
+                    freeSlot.setQiandaozhuangtai("未签到");
+                    freeSlot.setQiantuizhuangtai("未签退");
+                    freeSlot.setWeiguiFlag(0);
+                    freeSlot.setAddtime(new Date());
+                    freeSlot.setBeizhu(null);
+                    freeSlot.setXuehao(null);   // 代表空闲
+                    freeSlot.setXingming(null);
+                    freeSlot.setMingcheng(old.getMingcheng());
+                    freeSlot.setShouji(null);
+                    yuyuexinxiService.insert(freeSlot);
+
+                    logger.info("提前签退后已自动释放空余时段: {} ~ {}，新空闲预约ID={}", now, end, freeSlot.getId());
+                    return R.ok("签退成功，剩余时段已释放可预约");
+                }
             }
 
+            // ===============【原有逻辑：未提前签退时继续走下方代码】================
             // 组装更新实体
             YuyuexinxiEntity updateEntity = new YuyuexinxiEntity();
             updateEntity.setId(id);
@@ -335,6 +372,7 @@ public class YuyuexinxiController {
             return R.error("更新失败：" + e.getMessage());
         }
     }
+
 
     // 功能11：签到接口（带时间范围校验）
     @PostMapping("/signIn")

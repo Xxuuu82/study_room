@@ -11,3 +11,7 @@ ALTER TABLE yuyuexinxi ADD COLUMN weigui_flag tinyint(1) DEFAULT 0 COMMENT '是�
 
 -- 新增唯一索引（执行一次即可）
 ALTER TABLE yuyuexinxi ADD UNIQUE INDEX idx_yuyuedanhao (yuyuedanhao);
+
+UPDATE heimingdan
+SET xuehao = '236001205', xingming = 'xushiyu'
+WHERE id = 4;

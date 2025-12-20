@@ -143,13 +143,18 @@ public class YuyuexinxiServiceImpl extends ServiceImpl<YuyuexinxiDao, Yuyuexinxi
 
         List<YuyuexinxiEntity> bookings = baseMapper.selectBookingsInRange(zixishiid, zuowei, dayStart, dayEnd);
 
-        List<Interval> booked = bookings.stream().map(b -> {
-            Date s = b.getYuyueStart();
-            Date e = b.getYuyueEnd();
-            if (s.before(dayStart)) s = dayStart;
-            if (e.after(dayEnd)) e = dayEnd;
-            return new Interval(s, e);
-        }).collect(Collectors.toList());
+        for (YuyuexinxiEntity b : bookings) {
+            System.out.println("slot: start=" + b.getYuyueStart() + ", end=" + b.getYuyueEnd() + ", xuehao=" + b.getXuehao());
+        }
+        List<Interval> booked = bookings.stream()
+                .filter(b -> b.getXuehao() != null && !"".equals(b.getXuehao().trim()))
+                .map(b -> {
+                    Date s = b.getYuyueStart();
+                    Date e = b.getYuyueEnd();
+                    if (s.before(dayStart)) s = dayStart;
+                    if (e.after(dayEnd)) e = dayEnd;
+                    return new Interval(s, e);
+                }).collect(Collectors.toList());
 
         booked.sort(Comparator.comparingLong(i -> i.start.getTime()));
         List<Interval> merged = new ArrayList<>();

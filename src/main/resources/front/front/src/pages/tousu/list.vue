@@ -42,142 +42,8 @@
       </el-button>
     </div>
 
-    <!-- 面包屑 -->
-    <div :style='{"width":"100%","padding":"20px","margin":"10px auto","borderRadius":"27px","background":"#bfd2fc","boxSizing":"border-box"}' class="breadcrumb-preview">
-      <el-breadcrumb :separator="'Ξ'" :style='{"fontSize":"14px","lineHeight":"1"}'>
-        <el-breadcrumb-item @click="$router.push('/index/home')">首页</el-breadcrumb-item>
-        <el-breadcrumb-item>投诉中心</el-breadcrumb-item>
-      </el-breadcrumb>
-    </div>
-
     <!-- 列表容器 -->
     <div class="list-preview" :style='{"width":"100%","boxShadow":"0px 4px 10px 0px rgba(0,0,0,0.302)","margin":"20px auto","position":"relative","background":"#fff","boxSizing":"border-box","padding":"0 10px"}'>
-      <!-- 查询表单 -->
-      <el-form
-          class="center-form-pv"
-          :style="{ width: '100%', padding: '20px 6px', margin: '0 auto', background: 'rgba(0,0,0,0.102)', boxSizing: 'border-box' }"
-          :inline="true"
-          :model="searchForm"
-      >
-        <el-row :style="{ flexDirection: 'row', display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start', gap: '20px' }">
-          <div
-              :style="{ margin: '0', flexDirection: 'column', display: 'flex', minWidth: '200px', flex: '1 1 200px' }"
-          >
-            <label
-                :style="{
-                margin: '0',
-                color: '#000',
-                textAlign: 'left',
-                display: 'inline-block',
-                width: '100%',
-                lineHeight: '40px',
-                fontSize: '14px',
-                fontWeight: '500',
-                height: '40px',
-              }"
-                class="item-label"
-            >投诉单号</label
-            >
-            <el-input
-                v-model="searchForm.tousudanhao"
-                placeholder="投诉单号"
-                clearable
-                style="width: 100%;"
-            ></el-input>
-          </div>
-          <div
-              :style="{ margin: '0', flexDirection: 'column', display: 'flex', minWidth: '200px', flex: '1 1 200px' }"
-              class="select"
-              label="投诉类型"
-              prop="tousuleixing"
-          >
-            <label
-                :style="{
-                margin: '0',
-                color: '#000',
-                textAlign: 'left',
-                display: 'inline-block',
-                width: '100%',
-                lineHeight: '40px',
-                fontSize: '14px',
-                fontWeight: '500',
-                height: '40px',
-              }"
-                class="item-label"
-            >投诉类型</label
-            >
-            <el-select
-                clearable
-                v-model="searchForm.tousuleixing"
-                placeholder="请选择投诉类型"
-                style="width: 100%;"
-            >
-              <el-option
-                  v-for="(item, index) in tousuleixingOptions"
-                  v-bind:key="index"
-                  :label="item"
-                  :value="item"
-              ></el-option>
-            </el-select>
-          </div>
-          <div
-              :style="{ margin: '0', flexDirection: 'column', display: 'flex', minWidth: '200px', flex: '1 1 200px' }"
-              class="select"
-              label="处理状态"
-              prop="chulizhuangtai"
-          >
-            <label
-                :style="{
-                margin: '0',
-                color: '#000',
-                textAlign: 'left',
-                display: 'inline-block',
-                width: '100%',
-                lineHeight: '40px',
-                fontSize: '14px',
-                fontWeight: '500',
-                height: '40px',
-              }"
-                class="item-label"
-            >处理状态</label
-            >
-            <el-select
-                clearable
-                v-model="searchForm.chulizhuangtai"
-                placeholder="请选择处理状态"
-                style="width: 100%;"
-            >
-              <el-option
-                  v-for="(item, index) in chulizhuangtaiOptions"
-                  v-bind:key="index"
-                  :label="item"
-                  :value="item"
-              ></el-option>
-            </el-select>
-          </div>
-          <div :style="{ margin: 'auto 0 0', minWidth: '120px' }">
-            <el-button
-                :style="{
-                border: '1px solid #97C9D6',
-                cursor: 'pointer',
-                padding: '0 24px',
-                boxShadow: '0px 2px 2px 0px #78ABC3',
-                outline: 'none',
-                margin: '10px 0 0',
-                color: '#78ABC3',
-                borderRadius: '30px',
-                background: '#fff',
-                width: '100%',
-                fontSize: '14px',
-                height: '40px',
-              }"
-                type="success"
-                @click="search()"
-            >查询</el-button
-            >
-          </div>
-        </el-row>
-      </el-form>
 
       <!-- 投诉记录表格 -->
       <el-table
@@ -214,12 +80,42 @@
         </el-table-column>
         <el-table-column
             prop="tousudanhao"
-            label="投诉单号"
+            label="投诉编号"
             min-width="120"
             align="center"
         >
           <template #default="{ row }">
             {{ row.tousudanhao }}
+          </template>
+        </el-table-column>
+        <el-table-column
+            prop="tousurenxuehao"
+            label="投诉人学号"
+            min-width="120"
+            align="center"
+        >
+          <template #default="{ row }">
+            {{ row.tousurenxuehao }}
+          </template>
+        </el-table-column>
+        <el-table-column
+            prop="zixishi"
+            label="自习室"
+            min-width="100"
+            align="center"
+        >
+          <template #default="{ row }">
+            {{ row.zixishi || "-" }}
+          </template>
+        </el-table-column>
+        <el-table-column
+            prop="zuoweihao"
+            label="座位号"
+            min-width="100"
+            align="center"
+        >
+          <template #default="{ row }">
+            {{ row.zuoweihao || "-" }}
           </template>
         </el-table-column>
         <el-table-column
@@ -229,44 +125,12 @@
             align="center"
         >
           <template #default="{ row }">
-            <el-tag type="info">{{ row.tousuleixing }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column
-            prop="tousuTime"
-            label="投诉时间"
-            min-width="160"
-            align="center"
-        >
-          <template #default="{ row }">
-            {{ row.tousuTime || "-" }}
-          </template>
-        </el-table-column>
-        <el-table-column
-            prop="relatedOrder"
-            label="关联预约单号"
-            min-width="120"
-            align="center"
-        >
-          <template #default="{ row }">
-            {{ row.relatedOrder || "-" }}
-          </template>
-        </el-table-column>
-        <el-table-column
-            prop="chulizhuangtai"
-            label="处理状态"
-            min-width="100"
-            align="center"
-        >
-          <template #default="{ row }">
-            <el-tag :type="getStateTagType(row.chulizhuangtai)">
-              {{ row.chulizhuangtai }}
-            </el-tag>
+            <el-tag :type="getTypeTagType(row.tousuleixing)">{{ row.tousuleixing }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column
             prop="tousuReason"
-            label="投诉原因"
+            label="投诉详情"
             min-width="180"
             align="center"
         >
@@ -277,39 +141,40 @@
           </template>
         </el-table-column>
         <el-table-column
-            prop="feedback"
-            label="处理反馈"
-            min-width="180"
+            prop="chulizhuangtai"
+            label="状态"
+            min-width="100"
             align="center"
         >
           <template #default="{ row }">
-            <div class="remark-box" :title="row.feedback">
-              {{ row.feedback || "暂未反馈" }}
-            </div>
+            <el-tag :type="getStateTagType(row.chulizhuangtai)">
+              {{ row.chulizhuangtai }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+            prop="tousuTime"
+            label="创建时间"
+            min-width="160"
+            align="center"
+        >
+          <template #default="{ row }">
+            {{ row.tousuTime || "-" }}
           </template>
         </el-table-column>
         <!-- 操作列 -->
         <el-table-column
             label="操作"
-            min-width="200"
+            min-width="100"
             align="center"
         >
           <template #default="{ row }">
             <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
               <el-button
-                  type="primary"
-                  size="mini"
-                  icon="el-icon-view"
-                  @click="toDetail(row)"
-                  style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #409EFF; background: #409EFF; color: #fff;"
-              >查看详情</el-button
-              >
-              <el-button
                   type="danger"
                   size="mini"
                   icon="el-icon-circle-close"
                   @click="cancelComplaint(row)"
-                  v-if="row.chulizhuangtai === '处理中'"
                   style="border-radius: 4px; padding: 0 10px; height: 32px; line-height: 32px; transition: all 0.2s; border-color: #F56C6C; background: #F56C6C; color: #fff;"
               >取消投诉</el-button
               >
@@ -357,70 +222,136 @@ export default {
         chulizhuangtai: ''
       },
 
-      // 投诉记录列表（模拟数据）
+      // 投诉记录列表（按图一格式调整数据结构）
       complaintList: [
         {
-          tousudanhao: "TS20251215001",
-          tousuleixing: "占座违规",
-          tousuTime: "2025-12-10 10:20:35",
-          relatedOrder: "YY20251210001",
+          tousudanhao: "CP202512180003",
+          tousurenxuehao: "20230003",
+          zixishi: "2",
+          zuoweihao: "5",
+          tousuleixing: "大声喧哗",
+          tousuReason: "多次提醒仍持续喧哗，建议管理...",
+          chulizhuangtai: "已结案",
+          tousuTime: "2025-12-15 23:30"
+        },
+        {
+          tousudanhao: "CP202512180004",
+          tousurenxuehao: "20230004",
+          zixishi: "2",
+          zuoweihao: "9",
+          tousuleixing: "其他",
+          tousuReason: "怀疑有人占座，但未看到本人，只...",
+          chulizhuangtai: "已驳回",
+          tousuTime: "2025-12-13 23:30"
+        },
+        {
+          tousudanhao: "CP202512180005",
+          tousurenxuehao: "20230005",
+          zixishi: "2",
+          zuoweihao: "11",
+          tousuleixing: "大声喧哗",
+          tousuReason: "隔壁同学一直大声打电话影响学习",
+          chulizhuangtai: "待处理",
+          tousuTime: "2025-12-18 10:15"
+        },
+        {
+          tousudanhao: "CP202512180006",
+          tousurenxuehao: "20230006",
+          zixishi: "1",
+          zuoweihao: "3",
+          tousuleixing: "乱吃乱喝",
+          tousuReason: "座位上吃泡面气味很重，且有洒落",
           chulizhuangtai: "处理中",
-          tousuReason: "用户占用预约座位超过2小时未使用，且拒绝配合调整",
-          feedback: "暂未反馈"
+          tousuTime: "2025-12-18 11:05"
         },
         {
-          tousudanhao: "TS20251215002",
-          tousuleixing: "设备故障",
-          tousuTime: "2025-12-08 14:15:20",
-          relatedOrder: "YY20251208002",
-          chulizhuangtai: "投诉成功",
-          tousuReason: "预约的自习室座位电源故障，无法正常使用，管理员未及时处理",
-          feedback: "已安排维修人员修复电源，补偿用户1天免费预约时长"
+          tousudanhao: "CP202512180007",
+          tousurenxuehao: "20230007",
+          zixishi: "3",
+          zuoweihao: "20",
+          tousuleixing: "其他",
+          tousuReason: "疑似占座，桌上放书包但人不在很久",
+          chulizhuangtai: "已结案",
+          tousuTime: "2025-12-18 09:30"
         },
         {
-          tousudanhao: "TS20251215003",
-          tousuleixing: "服务态度",
-          tousuTime: "2025-12-05 09:30:10",
-          relatedOrder: "YY20251205003",
-          chulizhuangtai: "投诉失败",
-          tousuReason: "管理员态度恶劣，拒绝协助解决座位调整问题",
-          feedback: "经核实，管理员已按规定流程处理，不存在态度恶劣情况，投诉不成立"
+          tousudanhao: "CP202512180008",
+          tousurenxuehao: "20230008",
+          zixishi: "2",
+          zuoweihao: "8",
+          tousuleixing: "随地大小便",
+          tousuReason: "有人在自习室内做不文明行为（待...",
+          chulizhuangtai: "已驳回",
+          tousuTime: "2025-12-17 20:30"
+        },
+        {
+          tousudanhao: "CP202512180009",
+          tousurenxuehao: "20230009",
+          zixishi: "1",
+          zuoweihao: "15",
+          tousuleixing: "其他",
+          tousuReason: "座位附近有人频繁走动影响学习，...",
+          chulizhuangtai: "待处理",
+          tousuTime: "2025-12-18 13:00"
+        },
+        {
+          tousudanhao: "CP202512180010",
+          tousurenxuehao: "20230010",
+          zixishi: "3",
+          zuoweihao: "6",
+          tousuleixing: "大声喧哗",
+          tousuReason: "两人聊天声音很大，多次提醒无效",
+          chulizhuangtai: "处理中",
+          tousuTime: "2025-12-18 14:25"
         }
       ],
 
       // 分页相关
       pageIndex: 1,
       pageSize: 10,
-      total: 3, // 模拟总数
+      total: 8, // 模拟总数
       dataListLoading: false,
       layouts: ["total", "prev", "pager", "next", "sizes", "jumper"],
 
       // 下拉选项
-      tousuleixingOptions: "占座违规,设备故障,服务态度,预约问题,其他问题".split(","),
-      chulizhuangtaiOptions: "处理中,投诉成功,投诉失败".split(",")
+      tousuleixingOptions: "大声喧哗,乱吃乱喝,随地大小便,占座违规,设备故障,服务态度,其他".split(","),
+      chulizhuangtaiOptions: "待处理,处理中,已结案,已驳回".split(",")
     };
   },
   methods: {
+    // 获取投诉类型标签样式
+    getTypeTagType(type) {
+      const typeMap = {
+        "大声喧哗": "warning",
+        "乱吃乱喝": "danger",
+        "随地大小便": "danger",
+        "占座违规": "info",
+        "设备故障": "success",
+        "服务态度": "primary",
+        "其他": "default"
+      };
+      return typeMap[type] || "info";
+    },
+
     // 获取处理状态标签样式
     getStateTagType(state) {
       const stateMap = {
+        "待处理": "info",
         "处理中": "warning",
-        "投诉成功": "success",
-        "投诉失败": "danger"
+        "已结案": "success",
+        "已驳回": "danger"
       };
       return stateMap[state] || "info";
     },
 
     // 跳转到添加投诉页面
     toAddComplaint() {
-      // 跳转到投诉新增页（对应router.js中的/index/tousuAdd路由）
       this.$router.push('/index/tousuAdd');
     },
 
     // 搜索
     search() {
       this.pageIndex = 1;
-      // 模拟加载效果
       this.dataListLoading = true;
       setTimeout(() => {
         this.dataListLoading = false;
@@ -431,37 +362,23 @@ export default {
     sizeChangeHandle(val) {
       this.pageSize = val;
       this.pageIndex = 1;
-      // 后续对接接口
     },
 
     // 当前页改变
     currentChangeHandle(val) {
       this.pageIndex = val;
-      // 后续对接接口
     },
 
-    // 查看详情
-    toDetail(row) {
-      // 存储当前投诉记录到localStorage，供详情页读取
-      localStorage.setItem("currentTousuObj", JSON.stringify(row));
-      // 跳转到投诉详情页（对应router.js中的/index/tousuDetail路由）
-      this.$router.push('/index/tousuDetail');
-    },
-
-    // 取消投诉
+    // 取消投诉（删除对应记录）
     cancelComplaint(row) {
-      this.$confirm('确定要取消该投诉吗？', '提示', {
+      this.$confirm('确定要取消该投诉吗？取消后记录将被删除', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        // 模拟取消投诉逻辑
+        this.complaintList = this.complaintList.filter(item => item.tousudanhao !== row.tousudanhao);
+        this.total = this.complaintList.length;
         this.$message.success(`已取消投诉单号${row.tousudanhao}的投诉`);
-        // 更新列表数据（将状态改为已取消）
-        const targetIndex = this.complaintList.findIndex(item => item.tousudanhao === row.tousudanhao);
-        if (targetIndex > -1) {
-          this.complaintList[targetIndex].chulizhuangtai = "已取消";
-        }
       }).catch(() => {
         this.$message.info('已取消操作');
       });
@@ -483,22 +400,6 @@ export default {
       box-shadow: 0 4px 12px rgba(64, 158, 255, 0.4);
     }
   }
-}
-
-// 复用原页面样式
-.breadcrumb-preview .el-breadcrumb >>> .el-breadcrumb__separator {
-  margin: 0 9px;
-  color: #000;
-  font-weight: 500;
-}
-.breadcrumb-preview .el-breadcrumb >>> .el-breadcrumb__inner {
-  color: #000;
-  display: inline-block;
-  cursor: pointer; /* 首页面包屑添加鼠标指针 */
-}
-.breadcrumb-preview .el-breadcrumb >>> .el-breadcrumb__inner a {
-  color: #000;
-  text-decoration: none;
 }
 
 .custom-table {
@@ -541,13 +442,6 @@ export default {
     background: #93c7b3;
     color: white;
     font-weight: 500;
-  }
-
-  .text-ellipsis {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .remark-box {

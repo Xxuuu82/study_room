@@ -579,12 +579,30 @@ export default {
                 console.log('登录响应:', res.data);
                 if (res.data && res.data.code === 0) {
                   // 存储登录信息
-                  localStorage.setItem("Token", res.data.token);
+                  localStorage.setItem("Token", res.data.token || res.data.data?.token || '');
                   localStorage.setItem("UserTableName", this.loginForm.tableName);
                   localStorage.setItem("username", this.loginForm.username);
                   localStorage.setItem("adminName", this.loginForm.username);
                   localStorage.setItem("sessionTable", this.loginForm.tableName);
                   localStorage.setItem("role", this.role);
+
+                  // --- 新增：尝试从响应里提取学号并存入 localStorage（优先） ---
+                  let gotXuehao = null;
+                  // 常见位置：res.data.xuehao / res.data.data.xuehao / res.data.user.xuehao / res.data.userInfo.xuehao
+                  if (res.data.xuehao) gotXuehao = res.data.xuehao;
+                  else if (res.data.data && res.data.data.xuehao) gotXuehao = res.data.data.xuehao;
+                  else if (res.data.user && res.data.user.xuehao) gotXuehao = res.data.user.xuehao;
+                  else if (res.data.userInfo && res.data.userInfo.xuehao) gotXuehao = res.data.userInfo.xuehao;
+                  // 如果响应没有学号，但前端用户名就是学号（常见），则也写入 xuehao
+                  else if (/^\d{6,12}$/.test(String(this.loginForm.username))) gotXuehao = this.loginForm.username;
+
+                  if (gotXuehao) {
+                    localStorage.setItem('xuehao', String(gotXuehao));
+                    console.log('[DEBUG] 已将学号写入 localStorage.xuehao =', gotXuehao);
+                  } else {
+                    console.warn('[DEBUG] 登录响应中未找到学号字段，考虑后端返回学号或使用用户名作为学号存储');
+                  }
+                  // --- 新增结束 ---
 
                   this.$message({
                     message: "登录成功",
@@ -592,7 +610,6 @@ export default {
                     duration: 1500,
                   });
 
-                  // 登录成功后跳转
                   setTimeout(() => {
                     this.$router.push("/index/center");
                   }, 1000);
