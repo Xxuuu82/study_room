@@ -23,12 +23,12 @@ import store from './store';
 
 // -------------------- axios 全局配置（必须在使用 axios 前） --------------------
 axios.defaults.withCredentials = true; // 全局携带 cookie（重要）
-axios.defaults.baseURL = process.env.VUE_APP_API_BASE || 'http://localhost:8082/study_room';
+axios.defaults.baseURL = process.env.VUE_APP_API_BASE || 'http://localhost:8080/study_room';
 Vue.prototype.$axios = axios;
 
 // -------------------- VueResource（如果项目还在使用） --------------------
 Vue.use(VueResource);
-Vue.http.options.root = process.env.VUE_APP_API_BASE || 'http://localhost:8082/study_room';
+Vue.http.options.root = process.env.VUE_APP_API_BASE || 'http://localhost:8080/study_room';
 Vue.http.options.emulateJSON = true;
 
 // -------------------- 其它原有注册 --------------------
