@@ -171,19 +171,19 @@
         <div v-if="loginType==1" class="list-item" :style='{"width":"80%","margin":"0 auto 20px","alignItems":"center","flexWrap":"wrap","display":"flex"}'>
           <div class="lable" :style='{"width":"100%","margin":"0 0 10px 0","fontSize":"14px","color":"#333"}'>验证码</div>
           <div :style='{"display":"flex","width":"100%","alignItems":"center"}'>
-            <input 
-              :style='{"border":"0px solid #ddd","padding":"0 10px","boxShadow":"0px 4px 10px 0px rgba(0,0,0,0.1)","color":"#333","width":"60%","fontSize":"14px","height":"44px"}' 
-              placeholder="请输入验证码" 
+            <input
+              :style='{"border":"0px solid #ddd","padding":"0 10px","boxShadow":"0px 4px 10px 0px rgba(0,0,0,0.1)","color":"#333","width":"60%","fontSize":"14px","height":"44px"}'
+              placeholder="请输入验证码"
               v-model="rulesForm.code"
               @keyup.enter="login"
             >
             <!-- 验证码展示区域，点击可刷新 -->
-            <div 
-              :style='{"width":"35%","marginLeft":"5%","cursor":"pointer","display":"flex","justifyContent":"space-between"}' 
+            <div
+              :style='{"width":"35%","marginLeft":"5%","cursor":"pointer","display":"flex","justifyContent":"space-between"}'
               @click="getRandCode()"
             >
-              <span 
-                v-for="(item, index) in codes" 
+              <span
+                v-for="(item, index) in codes"
                 :key="index"
                 :style='{
                   "color": item.color,
@@ -322,13 +322,13 @@ export default {
     },
     getRandCode(len = 4) {
       let chars = [
-        "A", "B", "C", "D", "E", "F", "G", "H", "J", "K", 
-        "M", "N", "P", "Q", "R", "S", "T", "U", "V", "W", 
+        "A", "B", "C", "D", "E", "F", "G", "H", "J", "K",
+        "M", "N", "P", "Q", "R", "S", "T", "U", "V", "W",
         "X", "Y", "Z", "2", "3", "4", "5", "6", "7", "8", "9"
       ]; // 去除了容易混淆的字符
       let colors = ["#FF6B6B", "#4ECDC4", "#45B7D1", "#96CEB4", "#FFEEAD"];
       let sizes = ['18px', '20px', '22px'];
-      
+
       let codeStr = ''; // 记录正确的验证码
       this.codes = [];
       for (let i = 0; i < len; i++) {

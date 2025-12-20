@@ -38,7 +38,7 @@ Vue.http.options.emulateJSON = true
 import axios from 'axios'
 
 // 把 axios 的 baseURL 也设置好（供你在某些模块想用 axios 时使用）
-axios.defaults.baseURL = process.env.VUE_APP_API_BASE || 'http://localhost:8082/study_room'
+axios.defaults.baseURL = process.env.VUE_APP_API_BASE || 'http://localhost:8080/study_room'
 // 不要覆写 Vue.prototype.$http（vue-resource 会定义该属性并且用于 this.$http）
 // 把 axios 挂到 Vue.prototype.$axios，供需要用 axios 的代码使用
 Vue.prototype.$axios = axios;
@@ -47,7 +47,7 @@ Vue.prototype.$axios = axios;
 Vue.use(VueResource)
 
 // 设置 vue-resource 的 root（包含 context-path）
-Vue.http.options.root = process.env.VUE_APP_API_BASE || 'http://localhost:8082/study_room'
+Vue.http.options.root = process.env.VUE_APP_API_BASE || 'http://localhost:8080/study_room'
 Vue.http.options.emulateJSON = true
 
 

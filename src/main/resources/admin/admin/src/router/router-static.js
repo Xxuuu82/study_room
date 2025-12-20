@@ -17,15 +17,19 @@ import xuesheng_add from '@/views/modules/xuesheng/add-or-update'
 import zixishi_list from '@/views/modules/zixishi/list'
 import zixishi_add from '@/views/modules/zixishi/add-or-update'
 import qiandaoxinxi from '@/views/modules/qiandaoxinxi/list'
-//import qiantuixinxi from '@/views/modules/qiantuixinxi/list'
-import blacklist from '@/views/modules/blacklist/list'
+// 删掉重复的旧引入：import blacklist from '@/views/modules/blacklist/list'
 import message_shensu from '@/views/modules/message/shensu/list'
-import message_tousu from '@/views/modules/message/tousu/list'
+import complaint from '@/views/modules/complaint/index'
 import ranking from '@/views/modules/ranking/ranking'
 import chart from '@/views/modules/chart/chart'
 import config from '@/views/modules/config/list'
 import news from '@/views/modules/news/list'
-
+// 只保留你新建的blacklist.vue的引入（统一命名为blacklist，避免大小写冲突）
+import blacklist from '@/views/blacklist.vue';
+// 修正：导入weiguiRecord.vue，路径和blacklist一致（views根目录）
+import weiguiRecord from '@/views/weiguiRecord.vue';
+import shensu from '@/views/modules/shensu/shensu'
+import tubiaozhanshi from '@/views/modules/tubiaozhanshi/tubiaozhanshi'
 
 //2.配置路由   注意：名字
 const routes = [{
@@ -82,17 +86,24 @@ const routes = [{
     , {
     path: '/blacklist',
     name: '黑名单管理',
-    component: blacklist
+    component: blacklist, // 现在指向你新建的blacklist.vue文件
+    meta: { icon: '', title: 'blacklist' } // 补充meta，确保菜单匹配
+  }
+  , {
+    path: '/WeiguiRecord', // 新增违规记录管理路由
+    name: '违规记录管理',
+    component: weiguiRecord, // 修正：直接使用导入的组件，路径和blacklist一致
+    meta: { icon: 'cuIcon-list', title: 'WeiguiRecord' } // 补充icon，和menu匹配
   }
     , {
-    path: '/message_shensu',
+    path: '/shensu',
     name: '申诉处理',
-    component: message_shensu
+    component: shensu
   }
     , {
-    path: '/message_tousu',
+    path: '/complaint',
     name: '投诉处理',
-    component: message_tousu
+    component: complaint
   }
     , {
     path: '/ranking',
@@ -100,9 +111,9 @@ const routes = [{
     component: ranking
   }
     , {
-    path: '/chart',
+    path: '/tubiaozhanshi',
     name: '图表展示',
-    component: chart
+    component: tubiaozhanshi
   }
     , {
     path: '/config',
