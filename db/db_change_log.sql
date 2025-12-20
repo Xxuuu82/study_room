@@ -49,3 +49,5 @@ UPDATE weigui_record
 SET weiguiLeixing = '教室乱吃乱喝',
     weiguiLeixingName = '乱吃乱喝'
 WHERE xuehao = '236001205' AND weiguiShijian = '2025-12-20 15:30:20';
+
+DESCRIBE shensu;
