@@ -222,118 +222,37 @@ export default {
         chulizhuangtai: ''
       },
 
-      // 投诉记录列表（按图一格式调整数据结构）
-      complaintList: [
-        {
-          tousudanhao: "CP202512180003",
-          tousurenxuehao: "20230003",
-          zixishi: "2",
-          zuoweihao: "5",
-          tousuleixing: "大声喧哗",
-          tousuReason: "多次提醒仍持续喧哗，建议管理...",
-          chulizhuangtai: "已结案",
-          tousuTime: "2025-12-15 23:30"
-        },
-        {
-          tousudanhao: "CP202512180004",
-          tousurenxuehao: "20230004",
-          zixishi: "2",
-          zuoweihao: "9",
-          tousuleixing: "其他",
-          tousuReason: "怀疑有人占座，但未看到本人，只...",
-          chulizhuangtai: "已驳回",
-          tousuTime: "2025-12-13 23:30"
-        },
-        {
-          tousudanhao: "CP202512180005",
-          tousurenxuehao: "20230005",
-          zixishi: "2",
-          zuoweihao: "11",
-          tousuleixing: "大声喧哗",
-          tousuReason: "隔壁同学一直大声打电话影响学习",
-          chulizhuangtai: "待处理",
-          tousuTime: "2025-12-18 10:15"
-        },
-        {
-          tousudanhao: "CP202512180006",
-          tousurenxuehao: "20230006",
-          zixishi: "1",
-          zuoweihao: "3",
-          tousuleixing: "乱吃乱喝",
-          tousuReason: "座位上吃泡面气味很重，且有洒落",
-          chulizhuangtai: "处理中",
-          tousuTime: "2025-12-18 11:05"
-        },
-        {
-          tousudanhao: "CP202512180007",
-          tousurenxuehao: "20230007",
-          zixishi: "3",
-          zuoweihao: "20",
-          tousuleixing: "其他",
-          tousuReason: "疑似占座，桌上放书包但人不在很久",
-          chulizhuangtai: "已结案",
-          tousuTime: "2025-12-18 09:30"
-        },
-        {
-          tousudanhao: "CP202512180008",
-          tousurenxuehao: "20230008",
-          zixishi: "2",
-          zuoweihao: "8",
-          tousuleixing: "随地大小便",
-          tousuReason: "有人在自习室内做不文明行为（待...",
-          chulizhuangtai: "已驳回",
-          tousuTime: "2025-12-17 20:30"
-        },
-        {
-          tousudanhao: "CP202512180009",
-          tousurenxuehao: "20230009",
-          zixishi: "1",
-          zuoweihao: "15",
-          tousuleixing: "其他",
-          tousuReason: "座位附近有人频繁走动影响学习，...",
-          chulizhuangtai: "待处理",
-          tousuTime: "2025-12-18 13:00"
-        },
-        {
-          tousudanhao: "CP202512180010",
-          tousurenxuehao: "20230010",
-          zixishi: "3",
-          zuoweihao: "6",
-          tousuleixing: "大声喧哗",
-          tousuReason: "两人聊天声音很大，多次提醒无效",
-          chulizhuangtai: "处理中",
-          tousuTime: "2025-12-18 14:25"
-        }
-      ],
+      complaintList: [], // 数据由API拉取填充
 
       // 分页相关
       pageIndex: 1,
       pageSize: 10,
-      total: 8, // 模拟总数
+      total: 0,
       dataListLoading: false,
       layouts: ["total", "prev", "pager", "next", "sizes", "jumper"],
 
-      // 下拉选项
-      tousuleixingOptions: "大声喧哗,乱吃乱喝,随地大小便,占座违规,设备故障,服务态度,其他".split(","),
+      tousuleixingOptions: "大声喧哗,乱吃乱喝,随地大小便,其他".split(","),
       chulizhuangtaiOptions: "待处理,处理中,已结案,已驳回".split(",")
     };
   },
+  created() {
+    this.getComplaintList();
+  },
   methods: {
-    // 获取投诉类型标签样式
+    // 投诉类型 => 标签样式
     getTypeTagType(type) {
       const typeMap = {
         "大声喧哗": "warning",
         "乱吃乱喝": "danger",
         "随地大小便": "danger",
-        "占座违规": "info",
         "设备故障": "success",
         "服务态度": "primary",
-        "其他": "default"
+        "占座违规": "info",
+        "其他": "info"
       };
       return typeMap[type] || "info";
     },
-
-    // 获取处理状态标签样式
+    // 状态 => 标签样式
     getStateTagType(state) {
       const stateMap = {
         "待处理": "info",
@@ -343,33 +262,91 @@ export default {
       };
       return stateMap[state] || "info";
     },
-
-    // 跳转到添加投诉页面
+    // 跳转添加页
     toAddComplaint() {
       this.$router.push('/index/tousuAdd');
     },
-
-    // 搜索
+    // 拉取当前用户投诉数据
+    getComplaintList() {
+      const userId = localStorage.getItem("username");
+      if (!userId) {
+        this.$message.error("请先登录");
+        this.complaintList = [];
+        return;
+      }
+      this.dataListLoading = true;
+      this.$http.get('/study_room/complaint/student/list')
+          .then(res => {
+            if (res.data.code === 0) {
+              // 后端返回 complaint 对象数组，对应 complaint 表字段
+              // 映射字段到前端使用的格式
+              this.complaintList = (res.data.data || []).map(item => ({
+                tousudanhao: item.complaintNo || item.complaint_no,
+                tousurenxuehao: item.userId || item.user_id,
+                zixishi: item.roomId || item.room_id,
+                zuoweihao: item.seatId || item.seat_id,
+                tousuleixing: this.categoryDisplay(item.category),
+                tousuReason: item.detail || "",
+                chulizhuangtai: this.statusDisplay(item.status),
+                tousuTime: this.formatDateTime(item.createdAt || item.created_at)
+              }));
+              this.total = this.complaintList.length;
+            } else {
+              this.$message.error(res.data.msg || "获取投诉失败");
+              this.complaintList = [];
+            }
+            this.dataListLoading = false;
+          }).catch(() => {
+        this.dataListLoading = false;
+        this.$message.error("网络错误，获取投诉失败");
+        this.complaintList = [];
+      });
+    },
+    // 分类数字转文本
+    categoryDisplay(cat) {
+      switch(Number(cat)) {
+        case 1: return "乱吃乱喝";
+        case 2: return "大声喧哗";
+        case 3: return "随地大小便";
+        case 4: return "其他";
+        default: return "其他";
+      }
+    },
+    // 状态数字转文本
+    statusDisplay(status) {
+      switch(Number(status)) {
+        case 0: return "待处理";
+        case 1: return "处理中";
+        case 2: return "已结案";
+        case 3: return "已驳回";
+        default: return "待处理";
+      }
+    },
+    // 时间格式化
+    formatDateTime(dt) {
+      if (!dt) return "-";
+      let d = new Date(dt);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    },
+    // 搜索（可扩展：根据 searchForm 过滤 complaintList）
     search() {
+      // 可加过滤，目前简单直接显示所有
       this.pageIndex = 1;
       this.dataListLoading = true;
       setTimeout(() => {
         this.dataListLoading = false;
       }, 500);
     },
-
     // 分页大小改变
     sizeChangeHandle(val) {
       this.pageSize = val;
       this.pageIndex = 1;
     },
-
     // 当前页改变
     currentChangeHandle(val) {
       this.pageIndex = val;
     },
-
-    // 取消投诉（删除对应记录）
+    // 取消投诉（模拟删除前端数据，可后接接口）
     cancelComplaint(row) {
       this.$confirm('确定要取消该投诉吗？取消后记录将被删除', '提示', {
         confirmButtonText: '确定',
@@ -392,7 +369,6 @@ export default {
   box-sizing: border-box;
 }
 
-// 投诉入口header样式
 .complaint-header {
   .el-button {
     &:hover {
@@ -508,7 +484,6 @@ export default {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-// 响应式适配
 @media (max-width: 768px) {
   .el-table-column--label {
     min-width: 80px !important;
