@@ -147,6 +147,7 @@
       <!-- 提交/返回按钮 -->
       <el-form-item :style="{textAlign: 'left', marginBottom: '0'}">
         <el-button
+            :loading="submitting"
             type="primary"
             @click="onSubmit"
             :style="{
@@ -180,11 +181,14 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
       id: "",
       baseUrl: "",
+      submitting: false,
       // 只读字段配置
       ro: {
         xuehao: false,
@@ -194,13 +198,13 @@ export default {
       // 表单数据
       ruleForm: {
         tousudanhao: this.getUUID(), // 自动生成投诉单号（后端用）
-        xuehao: "", // 投诉人学号
+        xuehao: "", // 投诉人学号（数字字符串）
         zixishi: "", // 自习室（单选）
-        zuoweihao: "", // 座位号
+        zuoweihao: "", // 座位号（字符串或数字）
         tousuleixing: "", // 投诉类型（单选）
         tousuReason: "", // 投诉详情
         tousuTime: "", // 创建时间（初始为空）
-        chulizhuangtai: "处理中", // 默认处理状态
+        chulizhuangtai: "处理中", // 可选，但后端主导 status 字段
       },
       // 自习室选项（图片中的8个）
       zixishiOptions: ["宿舍楼自习室", "s2s", "北区机房", "北区2号楼", "多媒体教室", "北区三号楼", "图书馆", "大自习室"],
@@ -230,17 +234,14 @@ export default {
       },
     };
   },
-  computed: {},
   created() {
     let type = this.$route.query.type ? this.$route.query.type : "";
     this.init(type);
-    this.baseUrl = this.$config.baseUrl;
+    this.baseUrl = this.$config?.baseUrl || '';
   },
   methods: {
-    // 初始化方法
     init(type) {
       this.type = type;
-      // 如果是编辑模式，从路由参数获取数据（扩展用）
       if (type === "edit") {
         let editObj = JSON.parse(localStorage.getItem("editComplaintObj") || "{}");
         if (Object.keys(editObj).length > 0) {
@@ -262,44 +263,93 @@ export default {
         return;
       }
 
-      this.$http
-          .get(this.userTableName + "/session", { emulateJSON: true })
-          .then((res) => {
-            if (res.data.code === 0) {
-              let userInfo = res.data.data || {};
-              if (userInfo.xuehao) {
-                this.ruleForm.xuehao = userInfo.xuehao;
-                this.ro.xuehao = true; // 学号设为只读
+      if (this.$http) {
+        this.$http
+            .get(this.userTableName + "/session", { emulateJSON: true })
+            .then((res) => {
+              if (res.data && (res.data.code === 0 || res.data.success === true)) {
+                const userInfo = res.data.data || {};
+                if (userInfo.xuehao) {
+                  this.ruleForm.xuehao = userInfo.xuehao;
+                  this.ro.xuehao = true;
+                }
               }
-            }
-          })
-          .catch(err => {
-            console.error("获取用户信息失败：", err);
-            this.$message.warning("无法自动获取用户信息，请手动填写");
-          });
+            })
+            .catch(err => {
+              console.warn("获取用户信息失败：", err);
+              this.$message.warning("无法自动获取用户信息，请手动填写");
+            });
+      }
     },
-    // 提交/更新投诉
-    onSubmit() {
-      // 提交前自动填充当前系统时间作为创建时间
-      this.ruleForm.tousuTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
-      this.$refs["ruleForm"].validate((valid) => {
-        if (valid) {
-          // 构造提交数据
-          const submitData = {
-            ...this.ruleForm,
-            tousu_time: this.ruleForm.tousuTime,
-            tousu_reason: this.ruleForm.tousuReason,
+    // 生成唯一投诉单号
+    getUUID() {
+      return "TS" + new Date().getTime();
+    },
+
+    // 将表单值映射为后端 ComplaintEntity 可接收的字段并提交
+    async onSubmit() {
+      this.ruleForm.tousuTime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      this.$refs["ruleForm"].validate(async (valid) => {
+        if (!valid) return;
+        if (this.submitting) return;
+        this.submitting = true;
+
+        try {
+          // 映射说明：
+          // - complaintNo -> 投诉单号
+          // - userId -> 学号（尝试转为数字，如果无法转为数字则保留原字符串）
+          // - roomId -> 我用 zixishiOptions 的 index+1 作为 roomId（你可以替换为真实 id 映射）
+          // - seatId -> 尝试把座位号转为数字，否则 0
+          // - category -> 把投诉类型映射为 index+1
+          // - detail -> 投诉详情
+          const userIdNum = (() => {
+            const n = Number(this.ruleForm.xuehao);
+            return Number.isNaN(n) ? this.ruleForm.xuehao : n;
+          })();
+
+          const roomIndex = this.zixishiOptions.indexOf(this.ruleForm.zixishi);
+          const roomId = roomIndex >= 0 ? (roomIndex + 1) : 0;
+
+          const seatIdNum = (() => {
+            const n = Number(this.ruleForm.zuoweihao);
+            return Number.isNaN(n) ? 0 : n;
+          })();
+
+          const categoryIndex = this.tousuleixingOptions.indexOf(this.ruleForm.tousuleixing);
+          const category = categoryIndex >= 0 ? (categoryIndex + 1) : 0;
+
+          const payload = {
+            complaintNo: this.ruleForm.tousudanhao,
+            userId: userIdNum,
+            roomId: roomId,
+            seatId: seatIdNum,
+            category: category,
+            evidenceUrls: null, // 如果你有图片上传请传 URL 数组（或 JSON 字符串）
+            detail: this.ruleForm.tousuReason,
+            // status / isProcessed 后端默认会处理，这里不强制
           };
 
-          console.log("提交的投诉数据：", submitData);
+          console.log("提交的投诉数据：", payload);
 
-          // 模拟提交请求
-          setTimeout(() => {
+// 替换你现有的请求头构造部分（add.vue 中）
+          const headers = { 'Content-Type': 'application/json;charset=UTF-8' };
+          const token = localStorage.getItem('Token') || localStorage.getItem('token') || localStorage.getItem('Authorization');
+          if (token) {
+            headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+            headers['Token'] = token;
+          }
+
+          const resp = await axios.post('/complaint/save', payload, {
+            headers,
+            withCredentials: true
+          });
+          // 根据后端返回判断
+          if (resp && resp.data && resp.data.code === 0) {
             this.$message({
               message: this.type === 'edit' ? "投诉更新成功" : "投诉提交成功，等待管理员处理",
               type: "success",
-              duration: 2000,
+              duration: 1600,
               onClose: () => {
                 this.$router.push({
                   path: '/index/tousu',
@@ -307,14 +357,20 @@ export default {
                 });
               },
             });
-          }, 1000);
+          } else {
+            // 如果你的 R.ok 返回格式不同（比如没有 code），可以根据实际调整判断
+            const msg = (resp && resp.data && resp.data.msg) || '提交失败，请重试';
+            this.$message.error(msg);
+          }
+        } catch (err) {
+          console.error("提交投诉出错：", err);
+          this.$message.error("提交失败，网络或服务器错误");
+        } finally {
+          this.submitting = false;
         }
       });
     },
-    // 生成唯一投诉单号
-    getUUID() {
-      return "TS" + new Date().getTime();
-    },
+
     // 返回投诉列表
     back() {
       this.$router.push({

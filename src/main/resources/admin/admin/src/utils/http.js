@@ -6,7 +6,7 @@ const http = axios.create({
     timeout: 1000 * 86400,
     withCredentials: true,
     // 核心修改：补充后端IP+端口（localhost:8080），保留上下文路径/study_room
-    baseURL: 'http://localhost:8080/study_room',
+    baseURL: 'http://localhost:8082/study_room',
     //baseURL:''
     headers: {
         'Content-Type': 'application/json; charset=utf-8'

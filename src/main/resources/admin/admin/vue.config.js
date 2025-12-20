@@ -34,7 +34,7 @@ lintOnSave: false,
         https: false, // 是否开启https模式
         proxy: { // 请求代理服务器
             '/study_room': { //带上api前缀的
-                target: 'http://localhost:8080/study_room/', //代理目标地址
+                target: 'http://localhost:8082/study_room/', //代理目标地址
                 changeOrigin: true,
                 secure: false,
                 pathRewrite: { // 在发出请求后将/api替换为''空值，这样不影响接口请求

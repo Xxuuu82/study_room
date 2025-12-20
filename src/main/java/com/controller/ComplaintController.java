@@ -16,6 +16,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * ComplaintController - 增强 save 的容错性，确保 complaintNo / createdAt / updatedAt 的处理
+ */
 @RestController
 @RequestMapping("/complaint")
 public class ComplaintController {
@@ -44,11 +47,32 @@ public class ComplaintController {
     /** 后台保存（可选） */
     @RequestMapping("/save")
     public R save(@RequestBody ComplaintEntity complaint, HttpServletRequest request) {
-        // id AUTO_INCREMENT，不要手动 setId
-        complaint.setCreatedAt(new Date());
-        complaint.setUpdatedAt(new Date());
-        complaintService.insert(complaint);
-        return R.ok();
+        try {
+            // 调试输出：检查 session 中是否有登录用户标识（你之前的代码在别处用的是 "username"）
+            Object sessionUsername = request.getSession().getAttribute("username");
+            System.out.println("DEBUG /complaint/save session.username = " + sessionUsername);
+
+            // 输出头信息，检查前端是否传来了 Authorization / Token
+            String authHeader = request.getHeader("Authorization");
+            String tokenHeader = request.getHeader("Token");
+            System.out.println("DEBUG /complaint/save Authorization = " + authHeader);
+            System.out.println("DEBUG /complaint/save Token = " + tokenHeader);
+
+            // 如果没有 complaintNo 则自动生成
+            if (complaint.getComplaintNo() == null || complaint.getComplaintNo().trim().isEmpty()) {
+                complaint.setComplaintNo("TS" + System.currentTimeMillis());
+            }
+
+            complaint.setCreatedAt(new Date());
+            complaint.setUpdatedAt(new Date());
+
+            // 这里可以允许前端直接传 userId（注意类型转换）
+            complaintService.insert(complaint);
+            return R.ok();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.error("保存投诉异常：" + e.getMessage());
+        }
     }
 
     /** 后台修改（可选） */
@@ -113,26 +137,31 @@ public class ComplaintController {
     }
 
     /** 学生端查询自己投诉记录 */
-//    @IgnoreAuth // 如果你的系统登录后才可访问，去掉这个注解
     @GetMapping("/student/list")
-    public R studentComplaints(HttpServletRequest request) {
-        // 假设学号存在于 session 或 localStorage, 这里代码用 session
+    public R studentComplaints(HttpServletRequest request,
+                               @RequestParam(value = "user_id", required = false) String userIdParam) {
         String username = null;
         Object uObj = request.getSession().getAttribute("username");
         if (uObj != null) username = uObj.toString();
 
-        // 如无session，则前端传给后端（推荐GET参数或POST body），如：/student/list?user_id=20230003
+        // 如果 session 中没有，从请求参数或 Header 中尝试读
+        if ((username == null || username.isEmpty()) && userIdParam != null && !userIdParam.isEmpty()) {
+            username = userIdParam;
+        }
+
+        // 如果仍然没有，尝试从 Authorization token（如果你有 JWT）解析（伪代码，需你实现）
+        // if (username == null) { username = AuthUtil.getUsernameFromRequest(request); }
+
         if (username == null || username.isEmpty()) {
             return R.error("未登录，无法查询投诉记录");
         }
 
-        // user_id对应学号
         EntityWrapper<ComplaintEntity> ew = new EntityWrapper<>();
         ew.eq("user_id", username);
-
-        // 实际开发建议分页，如果需要可以加 .orderBy("created_at", false)
         List<ComplaintEntity> list = complaintService.selectList(ew);
         return R.ok().put("data", list);
     }
+
+
 
 }

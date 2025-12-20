@@ -4,7 +4,7 @@ module.exports = {
     port: 8081,
     proxy: {
       '/study_room': {
-        target: 'http://localhost:8080',  // 后端端口
+        target: 'http://localhost:8082',  // 后端端口
         changeOrigin: true
       }
     }
