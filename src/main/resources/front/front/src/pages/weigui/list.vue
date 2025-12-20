@@ -21,7 +21,7 @@
           </el-tag>
         </div>
         <div v-if="isInBlacklist" style="font-size: 14px; color: #e64340;">
-          解禁剩余时间：{{ banEndTime }}
+          解禁时间：{{ banEndTime }}
         </div>
       </div>
     </div>
@@ -154,7 +154,6 @@
         >
           <template #default="{ row }">
             <div style="display: flex; gap: 6px; justify-content: center; align-items: center; flex-wrap: wrap;">
-              <!-- 申诉按钮：未申诉显示可点击，已申诉显示变灰 -->
               <el-button
                   type="warning"
                   size="mini"
@@ -171,8 +170,7 @@
                     background: row.shensuStatus === '已申诉' ? '#f5f5f5' : '#E6A23C',
                     color: row.shensuStatus === '已申诉' ? '#999' : '#fff'
                   }"
-              >{{ row.shensuStatus === '已申诉' ? '已申诉' : '申诉' }}</el-button
-              >
+              >{{ row.shensuStatus === '已申诉' ? '已申诉' : '申诉' }}</el-button>
             </div>
           </template>
         </el-table-column>
@@ -212,97 +210,23 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      // 黑名单状态
       isInBlacklist: false,
       banEndTime: "",
-
-      // 搜索表单
-      searchForm: {
-        xuehao: '',
-        weiguileixing: ''
-      },
-
-      // 违规记录列表（按图一格式调整数据结构）
-      violationList: [
-        {
-          xuehao: "236003000",
-          xingming: "李四",
-          weiguileixing: "大声喧哗",
-          weiguiTime: "2025-12-14 00:00:00",
-          weiguiZixishi: "$2s",
-          weiguiXiangqing: "自习室大声喧哗",
-          shensuStatus: "未申诉",
-          shensuHandleStatus: "未处理"
-        },
-        {
-          xuehao: "236001000",
-          xingming: "周泽楷",
-          weiguileixing: "大声喧哗",
-          weiguiTime: "2025-12-18 00:04:30",
-          weiguiZixishi: "图书馆",
-          weiguiXiangqing: "大吵大闹，影响他人自习",
-          shensuStatus: "已申诉",
-          shensuHandleStatus: "处理中"
-        },
-        {
-          xuehao: "236003000",
-          xingming: "李四",
-          weiguileixing: "未签到",
-          weiguiTime: "2025-12-18 00:06:51",
-          weiguiZixishi: "图书馆",
-          weiguiXiangqing: "未进行签到",
-          shensuStatus: "未申诉",
-          shensuHandleStatus: "未处理"
-        },
-        {
-          xuehao: "236002000",
-          xingming: "赵皓天",
-          weiguileixing: "教室乱吃乱喝",
-          weiguiTime: "2025-12-16 00:00:00",
-          weiguiZixishi: "图书馆",
-          weiguiXiangqing: "教室违规吃东西",
-          shensuStatus: "已申诉",
-          shensuHandleStatus: "已处理"
-        },
-        {
-          xuehao: "236002000",
-          xingming: "赵皓天",
-          weiguileixing: "未签到",
-          weiguiTime: "2025-12-10 00:00:00",
-          weiguiZixishi: "图书馆",
-          weiguiXiangqing: "未按时签到",
-          shensuStatus: "未申诉",
-          shensuHandleStatus: "未处理"
-        },
-        {
-          xuehao: "236001000",
-          xingming: "周泽楷",
-          weiguileixing: "教室乱吃乱喝",
-          weiguiTime: "2025-12-18 00:15:05",
-          weiguiZixishi: "图书馆",
-          weiguiXiangqing: "乱吃乱喝",
-          shensuStatus: "未申诉",
-          shensuHandleStatus: "未处理"
-        }
-      ],
-
-      // 分页相关
+      searchForm: { xuehao: '', weiguileixing: '' },
+      violationList: [],
       pageIndex: 1,
       pageSize: 10,
-      total: 6, // 模拟总数
+      total: 0,
       dataListLoading: false,
       layouts: ["total", "prev", "pager", "next", "sizes", "jumper"],
-
-      // 下拉选项
       weiguileixingOptions: "大声喧哗,未签到,教室乱吃乱喝,迟到签到,未签退,多次取消,占座超时,违规占位".split(","),
     };
   },
   created() {
-    // 页面加载时检查当前登录学生的黑名单状态
     this.fetchBlacklistStatus();
+    this.fetchViolationList();
   },
   methods: {
-    // 获取违规类型标签样式
     getViolationTagType(type) {
       const typeMap = {
         "大声喧哗": "warning",
@@ -316,279 +240,246 @@ export default {
       };
       return typeMap[type] || "info";
     },
-
-    // 获取申诉处理状态标签样式
     getShensuHandleTagType(status) {
-      const statusMap = {
-        "未处理": "default",
-        "处理中": "warning",
-        "已处理": "success"
-      };
+      const statusMap = { "未处理": "default", "处理中": "warning", "已处理": "success" };
       return statusMap[status] || "default";
     },
 
-    // 搜索
     search() {
       this.pageIndex = 1;
-      // 这里可后续对接接口
-      this.dataListLoading = true;
-      setTimeout(() => {
-        this.dataListLoading = false;
-      }, 500);
+      this.fetchViolationList();
     },
-
-    // 分页大小改变
     sizeChangeHandle(val) {
       this.pageSize = val;
       this.pageIndex = 1;
-      // 后续对接接口
+      this.fetchViolationList();
     },
-
-    // 当前页改变
     currentChangeHandle(val) {
       this.pageIndex = val;
-      // 后续对接接口
+      this.fetchViolationList();
     },
-
-    // 跳转到申诉页面
     toShensu(row) {
-      // 将当前违规记录存入localStorage，供申诉页读取
       localStorage.setItem("currentWeiguiObj", JSON.stringify(row));
-      // 跳转到申诉页（对应router.js中的/index/weiguiShensu路由）
       this.$router.push('/index/weiguiShensu');
-      // 提示用户跳转成功
       this.$message.success(`正在跳转到【${row.xuehao}】的申诉页面`);
-      // 模拟申诉后状态更新
       row.shensuStatus = "已申诉";
     },
 
-    // ------------------- 黑名单相关 -------------------
-    // 更健壮的读取当前登录学号方法（会打印 localStorage keys 供调试）
     getCurrentXuehao() {
-      try {
-        console.log('[DEBUG] localStorage keys:', Object.keys(localStorage));
-      } catch (e) {
-        // 某些环境下访问 localStorage 可能出错
-      }
-
-      const tryKeys = ['currentUser', 'user', 'userInfo', 'userinfo', 'loginUser', 'xuehao', 'XUEHAO', 'userInfoRes', 'loginInfo', 'username', 'adminName'];
+      try { console.log('[DEBUG] localStorage keys:', Object.keys(localStorage)); } catch (e) {}
+      const tryKeys = ['currentUser','user','userInfo','userinfo','loginUser','xuehao','XUEHAO','userInfoRes','loginInfo','username','adminName'];
       for (const k of tryKeys) {
         const v = localStorage.getItem(k);
         if (!v) continue;
-        console.log(`[DEBUG] localStorage.${k} =`, v);
-        // 如果是 JSON，解析后递归查找
         try {
           const parsed = JSON.parse(v);
-          // 如果 parsed 是字符串或数字，直接判断并返回
           if (typeof parsed === 'string' || typeof parsed === 'number') {
             const s = String(parsed).trim();
-            if (/^\d{6,12}$/.test(s)) {
-              console.log('[DEBUG] 从 parsed 原始值中识别到学号:', s);
-              return s;
-            }
+            if (/^\d{6,12}$/.test(s)) return s;
           }
           const findX = (obj) => {
             if (!obj || typeof obj !== 'object') return null;
             const candidates = ['xuehao','xueHao','studentId','username','id','userId'];
-            for (const c of candidates) {
-              if (obj[c]) return obj[c];
-            }
-            // 递归搜索
+            for (const c of candidates) if (obj[c]) return obj[c];
             for (const key of Object.keys(obj)) {
-              try {
-                const res = findX(obj[key]);
-                if (res) return res;
-              } catch(e) {}
+              try { const res = findX(obj[key]); if (res) return res; } catch(e){}
             }
             return null;
           };
           const found = findX(parsed);
-          if (found) {
-            console.log('[DEBUG] 从 JSON 中解析到学号:', found);
-            return String(found);
-          }
+          if (found) return String(found);
         } catch (e) {
-          // 如果不是 JSON，则直接返回字符串（可能就是学号）
           const s = v.trim();
-          if (/^\d{6,12}$/.test(s)) {
-            console.log('[DEBUG] 从字符串中识别到学号:', s);
-            return s;
-          }
+          if (/^\d{6,12}$/.test(s)) return s;
         }
       }
-
-      // 也尝试直接取单独存储的 xuehao
       const direct = localStorage.getItem('xuehao') || localStorage.getItem('XUEHAO');
       if (direct && /^\d{6,12}$/.test(String(direct).trim())) return String(direct).trim();
-
-      // 尝试解析 token payload
       const token = localStorage.getItem('Token') || localStorage.getItem('token') || localStorage.getItem('Authorization');
       if (token) {
         try {
-          const raw = token.split(' ')[1] || token; // 处理 "Bearer xxx" 情况
+          const raw = token.split(' ')[1] || token;
           const payload = raw.split('.')[1];
           if (payload) {
             const json = JSON.parse(atob(payload.replace(/-/g,'+').replace(/_/g,'/')));
             const candidates = json.xuehao || json.username || json.studentId || json.userId;
-            if (candidates) {
-              console.log('[DEBUG] 从 token payload 中解析到学号:', candidates);
-              return String(candidates);
-            }
+            if (candidates) return String(candidates);
           }
-        } catch (e) {
-          // ignore
-        }
+        } catch(e){}
       }
-
-      console.warn('未能从 localStorage 中识别出当前用户学号，请确认登录后将学号存入 localStorage（key: currentUser/user/userInfo/xuehao 等）');
+      console.warn('未能从 localStorage 中识别出当前用户学号');
       return null;
     },
 
-    // 向后端请求黑名单列表（按学号查询），并设置 isInBlacklist / banEndTime
-    async fetchBlacklistStatus() {
+    getAuthHeaders() {
+      const token = localStorage.getItem('Token') || localStorage.getItem('token') || localStorage.getItem('Authorization') || '';
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        headers['Token'] = token;
+      }
+      return headers;
+    },
+
+    // 格式化后端可能返回的各种时间类型（数组/数字/字符串/Date）
+    formatAnyTime(val) {
+      if (!val && val !== 0) return '';
+      if (Array.isArray(val)) {
+        const arr = val.map(v => String(v).padStart(2, '0'));
+        if (arr.length >= 6) return `${arr[0]}-${arr[1]}-${arr[2]} ${arr[3]}:${arr[4]}:${arr[5]}`;
+        return arr.join('-');
+      }
+      if (typeof val === 'number') {
+        if (String(val).length === 10) return new Date(val * 1000).toISOString().replace('T',' ').slice(0,19);
+        return new Date(val).toISOString().replace('T',' ').slice(0,19);
+      }
+      if (val instanceof Object && !(val instanceof Date)) {
+        try {
+          const asStr = String(val);
+          if (asStr && asStr.indexOf('[') === 0) return asStr;
+          return asStr;
+        } catch (e) {}
+      }
+      try {
+        const s = String(val).trim();
+        if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(s)) return s.replace('T',' ').slice(0,19);
+        return s;
+      } catch (e) {
+        return String(val);
+      }
+    },
+
+    // 从后端加载当前学生的违规列表（只显示当前登录学号的记录）
+    async fetchViolationList() {
       const xuehao = this.getCurrentXuehao();
-      console.log('[DEBUG] 使用学号查询黑名单：', xuehao);
+      console.log('[DEBUG] fetchViolationList 使用学号：', xuehao);
       if (!xuehao) {
-        // 没有学号则不继续
-        this.isInBlacklist = false;
-        this.banEndTime = "";
+        this.violationList = [];
+        this.total = 0;
         return;
       }
 
+      this.dataListLoading = true;
       try {
-        // 取 token（login.vue 登录时已把 token 存入 localStorage 的 'Token'）
-        const token = localStorage.getItem('Token') || localStorage.getItem('token') || localStorage.getItem('Authorization') || '';
-        const headers = {};
-        if (token) {
-          headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-          // 兼容部分后端使用自定义 Token 头
-          headers['Token'] = token;
-        }
-
-        // 调用后端接口（Controller 映射为 /api/heimingdan/list）
-        // 带上 headers（token），并开启 withCredentials 以兼容基于 cookie 的会话（若后端用 token，可忽略 withCredentials）
-        const resp = await axios.get('/api/heimingdan/list', {
+        const resp = await axios.get('/api/weigui/list', {
           params: {
+            page: this.pageIndex,
+            size: this.pageSize,
             xuehao: xuehao,
-            page: 1,
-            size: 10
+            weiguiLeixing: this.searchForm.weiguileixing || undefined
           },
-          headers,
+          headers: this.getAuthHeaders(),
           withCredentials: true
         });
 
-        console.log('[DEBUG] /api/heimingdan/list 响应：', resp && resp.data);
+        console.log('[DEBUG] /api/weigui/list 响应：', resp && resp.data);
 
         const data = resp && resp.data;
-        if (!data || data.code !== 0) {
-          console.warn('获取黑名单接口返回异常：', data);
-          this.isInBlacklist = false;
-          this.banEndTime = "";
-          return;
-        }
+        const records = Array.isArray(data.data) ? data.data : (data.data && data.data.records) || [];
+        this.total = data.total || (data.data && data.data.total) || records.length || 0;
 
+        const mapped = records.map(r => {
+          const getField = (...names) => {
+            for (const n of names) {
+              if (r[n] !== undefined && r[n] !== null) return r[n];
+            }
+            return null;
+          };
+          const rawType = getField('weiguileixingName', 'weiguiLeixing', 'weiguileixing', 'weiguileixingName') || '';
+          const rawTime = getField('weiguiShijian', 'weigui_shijian', 'addtime', 'addTime');
+          return {
+            id: getField('id'),
+            xuehao: getField('xuehao') || xuehao,
+            xingming: getField('xingming') || '',
+            weiguileixing: rawType,
+            weiguiTime: this.formatAnyTime(rawTime),
+            weiguiZixishi: getField('zixishiMingcheng', 'zixishi_mingcheng') || '',
+            weiguiXiangqing: getField('weiguiBeizhu', 'weigui_beizhu', 'otherWeiguiDesc') || '',
+            shensuStatus: getField('shensuStatus') || '未申诉',
+            shensuHandleStatus: getField('shensuHandleStatus') || '未处理'
+          };
+        });
+
+        this.violationList = mapped;
+      } catch (err) {
+        console.error('fetchViolationList 出错：', err);
+        this.violationList = [];
+        this.total = 0;
+      } finally {
+        this.dataListLoading = false;
+      }
+    },
+
+    // 黑名单：只展示“解禁时间”（不做实时倒计时）
+    async fetchBlacklistStatus() {
+      const xuehao = this.getCurrentXuehao();
+      if (!xuehao) { this.isInBlacklist = false; this.banEndTime = ""; return; }
+      try {
+        const resp = await axios.get('/api/heimingdan/list', {
+          params: { xuehao, page: 1, size: 10 },
+          headers: this.getAuthHeaders(),
+          withCredentials: true
+        });
+        const data = resp && resp.data;
+        if (!data || data.code !== 0) { this.isInBlacklist = false; this.banEndTime = ""; return; }
         const records = (data.data && data.data.records) || [];
-        console.log('[DEBUG] records 长度：', records.length);
-        if (!records.length) {
-          this.isInBlacklist = false;
-          this.banEndTime = "";
-          return;
-        }
+        if (!records.length) { this.isInBlacklist = false; this.banEndTime = ""; return; }
 
-        // 打印示例帮助调试
-        console.log('[DEBUG] records 示例（前3条）：', records.slice(0, 3));
-
-        // 找到尚未到期的黑名单记录（支持多种返回字段格式）
         const now = Date.now();
-        let activeRecord = null;
+        let active = null;
         for (const r of records) {
-          // 尝试找到可能的结束时间字段（多写几个候选）
-          const endStrCandidates = [
-            r.heimingdan_end_time, r.heimingdanEndTime, r.end_time, r.endTime, r.heimingdan_endtime,
-            r.heimingdanEndTime, r.heimingdan_end, r.heiming_end_time, r.end
-          ];
-          const endStr = endStrCandidates.find(v => v !== undefined && v !== null && String(v).trim() !== '');
-          console.log('[DEBUG] 当前记录：', r, ' 选到 endStr:', endStr);
-
-          // 如果无结束时间字段，认为长期封禁
-          if (!endStr) {
-            console.log('[DEBUG] 该记录无 endStr，认为为长期黑名单：', r);
-            activeRecord = { record: r, endDate: null };
-            break;
-          }
-
-          // 解析时间（支持数字时间戳和多种字符串格式）
+          const endStr = r.heimingdanEndTime || r.heimingdan_end_time || r.endTime || r.end_time || r.heimingdan_end;
+          if (!endStr) { active = { record: r, endDate: null }; break; }
           const endDate = this.parseDateStr(endStr);
-          console.log('[DEBUG] 解析 endStr -> endDate:', endStr, '=>', endDate);
-          if (!endDate || isNaN(endDate.getTime())) {
-            console.warn('[DEBUG] 无法解析该 endStr，继续下一个记录：', endStr);
-            continue;
-          }
-
-          if (endDate.getTime() > now) {
-            activeRecord = { record: r, endDate };
-            console.log('[DEBUG] 找到有效未到期的黑名单记录：', r);
-            break;
-          } else {
-            console.log('[DEBUG] 该记录已过期：', endDate, ' now:', new Date(now));
-          }
+          if (!endDate) continue;
+          if (endDate.getTime() > now) { active = { record: r, endDate }; break; }
         }
 
-        if (activeRecord) {
+        if (active) {
           this.isInBlacklist = true;
-          // 展示剩余时间（也包含精确解禁时间以便识别）
-          if (!activeRecord.endDate) this.banEndTime = '长期封禁';
-          else this.banEndTime = this.formatRemainingTime(activeRecord.endDate);
+          if (!active.endDate) {
+            this.banEndTime = '长期封禁';
+          } else {
+            this.banEndTime = this.formatEndTime(active.endDate);
+          }
         } else {
           this.isInBlacklist = false;
           this.banEndTime = "";
         }
-      } catch (err) {
-        console.error('fetchBlacklistStatus 出错：', err);
+      } catch (e) {
+        console.error(e);
         this.isInBlacklist = false;
         this.banEndTime = "";
       }
     },
 
-    // 将数据库的时间字符串解析成 Date 对象
-    // 支持数字时间戳（毫秒）、"yyyy-MM-dd HH:mm:ss"、"yyyy/MM/dd HH:mm:ss"、ISO 等
     parseDateStr(str) {
       if (!str && str !== 0) return null;
-      // 如果已经是 Date
       if (str instanceof Date) return str;
-      // 如果是数字类型（时间戳毫秒）
-      if (typeof str === 'number') {
-        return new Date(str);
-      }
-      // 去掉两端空格
-      let s = String(str).trim();
-
-      // 如果是纯数字（长度 10 或 13），当作时间戳处理（10s -> *1000）
-      if (/^\d{10}$/.test(s)) {
-        return new Date(Number(s) * 1000);
-      }
-      if (/^\d{13}$/.test(s)) {
-        return new Date(Number(s));
-      }
-
-      // 把空格分隔的日期时间改为 ISO 格式 (T) 以便在各浏览器中解析一致
-      // 例如 "2025-12-22 09:00:00" -> "2025-12-22T09:00:00"
-      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) {
-        s = s.replace(' ', 'T');
-      }
-      if (/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) {
-        s = s.replace(' ', 'T').replace(/\//g, '-');
-      }
-
-      // 尝试直接用 Date 解析
-      const d = new Date(s);
-      if (isNaN(d.getTime())) {
+      if (typeof str === 'number') return new Date(str);
+      if (Array.isArray(str)) {
+        const arr = str.map(n => Number(n));
+        if (arr.length >= 6) return new Date(arr[0], arr[1] - 1, arr[2], arr[3], arr[4], arr[5]);
         return null;
       }
+      let s = String(str).trim();
+      if (/^\d{10}$/.test(s)) return new Date(Number(s) * 1000);
+      if (/^\d{13}$/.test(s)) return new Date(Number(s));
+      if (/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) s = s.replace(' ', 'T');
+      if (/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}$/.test(s)) s = s.replace(' ', 'T').replace(/\//g, '-');
+      const d = new Date(s);
+      if (isNaN(d.getTime())) return null;
       return d;
     },
 
-    // 将剩余时间格式化为 "Xd Yh Zm（解禁时间: yyyy-mm-dd hh:mm:ss）"
+    // 将结束时间格式化为 "yyyy-mm-dd hh:mm:ss"
+    formatEndTime(endDate) {
+      const d = endDate instanceof Date ? endDate : new Date(endDate);
+      if (isNaN(d.getTime())) return '';
+      const pad = (n) => (n < 10 ? '0' + n : '' + n);
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    },
+
     formatRemainingTime(endDate) {
       const now = Date.now();
       let diff = endDate.getTime() - now;
@@ -598,11 +489,10 @@ export default {
       const hours = Math.floor(diff / (3600 * 1000));
       diff %= 3600 * 1000;
       const minutes = Math.floor(diff / (60 * 1000));
-      const pad = (n) => (n < 10 ? '0' + n : '' + n);
+      const pad = n => (n < 10 ? '0' + n : '' + n);
       const fmtEnd = `${endDate.getFullYear()}-${pad(endDate.getMonth() + 1)}-${pad(endDate.getDate())} ${pad(endDate.getHours())}:${pad(endDate.getMinutes())}:${pad(endDate.getSeconds())}`;
       return `${days}天${hours}小时${minutes}分钟（解禁时间: ${fmtEnd}）`;
     }
-    // ------------------- 黑名单相关 结束 -------------------
   }
 };
 </script>

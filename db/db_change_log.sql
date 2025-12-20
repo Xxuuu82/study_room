@@ -15,3 +15,37 @@ ALTER TABLE yuyuexinxi ADD UNIQUE INDEX idx_yuyuedanhao (yuyuedanhao);
 UPDATE heimingdan
 SET xuehao = '236001205', xingming = 'xushiyu'
 WHERE id = 4;
+
+DESCRIBE weigui_record;
+
+INSERT INTO weigui_record (
+    weiguiDanhao,
+    xuehao,
+    xingming,
+    zixishiMingcheng,
+    zuoWei,
+    weiguiShijian,
+    weiguileixingName,
+    weiguiBeizhu,
+    isValid
+) VALUES (
+             CONCAT('WG', DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')), -- 改用CONCAT拼接字符串
+             '236001205',
+             'xsy',
+             '图书馆',
+             5,
+             '2025-12-20 15:30:20',
+             '教室乱吃乱喝',
+             '乱吃乱喝',
+             1
+         );
+
+DELETE FROM weigui_record
+WHERE weiguiDanhao = 'WG20251220145741';
+
+INSERT INTO weigui_record ( weiguiDanhao, xuehao, xingming, zixishiMingcheng, zuoWei, weiguiShijian, weiguiLeixing, weiguiBeizhu, isValid ) VALUES ( CONCAT('WG', DATE_FORMAT(NOW(), '%Y%m%d%H%i%s')), '236001205', 'xsy', '图书馆', 5, '2025-12-20 15:30:20', 'chifan', '乱吃乱喝', 1 );
+
+UPDATE weigui_record
+SET weiguiLeixing = '教室乱吃乱喝',
+    weiguiLeixingName = '乱吃乱喝'
+WHERE xuehao = '236001205' AND weiguiShijian = '2025-12-20 15:30:20';
